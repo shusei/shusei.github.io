@@ -1,0 +1,24 @@
+You are refactoring a front-end anthropometry calculator.
+
+Goal: add Japan/Korea adult local-norm datasets so the UI can label shoulder-to-height ratios by percentile.
+
+Context:
+- The site reads a manifest at `assets/data/datasets.json`, then loads per-dataset JSON files in `assets/data/anthropometry/`.
+- Percentiles required: p10, p25, p50, p75, p90 for key `metrics.shoulderHeightRatio`.
+- Each dataset file already contains sources and a `computedFrom` block describing how the ratio percentiles were derived.
+
+Tasks:
+1) Wire the new datasets into the existing selector without renaming keys (`shoulderHeightRatio`).
+2) In the percentile rendering, prefer dataset p10..p90. If missing, fall back to p50-only display with a note (“此指標僅提供中位參考”).
+3) Where a dataset includes `diagnostic`, ignore it in the UI but expose it in developer console for QA if `window.DEBUG` is true.
+4) Update any locale labels to show “在地常模（JP/KR）” accordingly.
+5) Keep metric math unchanged; do NOT divide univariate percentiles—use the dataset-provided ratio percentiles.
+
+Sanity tests:
+- Selecting JP/KR changes the percentile markers but leaves user-entered numbers untouched.
+- Switching between male/female updates labels and ranges.
+- No console errors when datasets have extra fields (`diagnostic`).
+
+Deliverables:
+- Code diffs for manifest loading and selector options.
+- Minimal UI copy updates.

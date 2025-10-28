@@ -1,19 +1,34 @@
 {
   "datasets": [
     {
-      "id": "neutral-sample",
-      "name": "示例：中性樣本（占位）",
-      "file": "assets/data/anthropometry/neutral.sample.json"
+      "id": "jp-male-reference",
+      "name": "日本成人男性（在地常模）",
+      "file": "assets/data/anthropometry/jp-male-reference.json"
     },
     {
-      "id": "female-sample",
-      "name": "示例：女性向樣本（占位）",
-      "file": "assets/data/anthropometry/female.sample.json"
+      "id": "jp-female-reference",
+      "name": "日本成人女性（在地常模）",
+      "file": "assets/data/anthropometry/jp-female-reference.json"
     },
     {
-      "id": "male-sample",
-      "name": "示例：男性向樣本（占位）",
-      "file": "assets/data/anthropometry/male.sample.json"
+      "id": "kr-male-reference",
+      "name": "韓國成人男性（在地常模）",
+      "file": "assets/data/anthropometry/kr-male-reference.json"
+    },
+    {
+      "id": "kr-female-reference",
+      "name": "韓國成人女性（在地常模）",
+      "file": "assets/data/anthropometry/kr-female-reference.json"
+    },
+    {
+      "id": "us-male-reference",
+      "name": "美國成人男性（在地常模）",
+      "file": "assets/data/anthropometry/us-male-reference.json"
+    },
+    {
+      "id": "us-female-reference",
+      "name": "美國成人女性（在地常模）",
+      "file": "assets/data/anthropometry/us-female-reference.json"
     }
   ]
 }

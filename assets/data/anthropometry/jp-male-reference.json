@@ -1,0 +1,56 @@
+{
+  "name": "日本成人男性（在地常模）",
+  "id": "jp-male-reference",
+  "locale": "JP",
+  "gender": "male",
+  "source": [
+    {
+      "title": "ISO/TR 7250-2:2024 — Basic human body measurements for technological design — Part 2",
+      "url": "https://www.iso.org/obp/ui/",
+      "note": "National anthropometric summaries; used as the primary standard reference."
+    },
+    {
+      "title": "Continental AG (2024) Ergonomics Requirement Specification — Anthropometric Data (P5/P50/P95)",
+      "url": "https://cdn.continental.com/fileadmin/user_upload/demo_content/images/anthropometric_data_en_combined.pdf",
+      "note": "Country-level P5/P50/P95 for stature and biacromial breadth used to derive ratio percentiles."
+    }
+  ],
+  "metrics": {
+    "shoulderHeightRatio": {
+      "unit": "ratio",
+      "p10": 0.222919,
+      "p25": 0.229266,
+      "p50": 0.23643,
+      "p75": 0.243772,
+      "p90": 0.250445,
+      "diagnostic": {
+        "p05": 0.219196,
+        "p10": 0.222919,
+        "p25": 0.229266,
+        "p50": 0.23643,
+        "p75": 0.243772,
+        "p90": 0.250445,
+        "p95": 0.254529
+      },
+      "computedFrom": {
+        "height_mm": {
+          "p5": 1597,
+          "p50": 1696,
+          "p95": 1795
+        },
+        "biacromial_mm": {
+          "p5": 374,
+          "p50": 401,
+          "p95": 431
+        },
+        "assumptions": {
+          "distribution": "Normal approximation per variable via (p5,p50,p95) → (mu, sigma)",
+          "correlation_rho": 0.35,
+          "samples": 250000,
+          "method": "Monte Carlo via correlated normals; ratio = biacromial / height"
+        }
+      },
+      "notes": "Derived by simulating correlated stature and biacromial breadth using country-specific P5/P50/P95. Correlation reflects positive covariation of height and shoulder breadth. The ratio percentiles (p10,p25,p50,p75,p90) are intended for labeling only; use 'diagnostic' if auditing."
+    }
+  }
+}
