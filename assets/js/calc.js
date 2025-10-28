@@ -244,6 +244,9 @@ function renderResults(tbody, results, dataset, reference) {
     const labelCell = createEl('th', { text: metric.label, attrs: { scope: 'row' } });
     const valueCell = createEl('td');
     const noteCell = createEl('td');
+    noteCell.textContent = '';
+    const noteSegments = [];
+    let percentileBadge = null;
 
     const value = results[metric.key];
     if (Number.isFinite(value)) {
@@ -253,27 +256,36 @@ function renderResults(tbody, results, dataset, reference) {
     }
 
     if (metric.key === 'whr') {
-      noteCell.textContent = whrReferenceNotes[reference] ?? whrReferenceNotes.neutral;
+      noteSegments.push(whrReferenceNotes[reference] ?? whrReferenceNotes.neutral);
     } else if (metric.key === 'bodyfat' && Number.isFinite(value)) {
-      noteCell.textContent = '手動輸入數值，僅於瀏覽器顯示。';
+      noteSegments.push('手動輸入數值，僅於瀏覽器顯示。');
     }
 
     if (dataset && metric.percentileKey) {
       const metricData = dataset.metrics?.[metric.percentileKey];
       const { label, state, fallback } = getPercentile(metricData, value);
       if (label) {
-        const badge = formatBadge(label, state);
-        noteCell.appendChild(badge);
-        if (metric.key === 'whtR' && dataset.metrics?.whtR?.cut) {
-          noteCell.appendChild(document.createTextNode(' 臨界值 ' + dataset.metrics.whtR.cut));
-        }
-        if (fallback) {
-          noteCell.appendChild(document.createTextNode(' （此指標僅提供中位參考）'));
-        }
+        percentileBadge = formatBadge(label, state);
+      }
+      if (metric.key === 'whtR' && dataset.metrics?.whtR?.cut) {
+        noteSegments.push(`臨界值 ${dataset.metrics.whtR.cut}`);
+      }
+      if (fallback) {
+        noteSegments.push('（此指標僅提供中位參考）');
       }
       if (metric.key === 'thighHeight') {
         context.thighPercent = { label, state };
       }
+    }
+
+    if (percentileBadge) {
+      noteCell.appendChild(percentileBadge);
+    }
+    if (noteSegments.length > 0) {
+      if (percentileBadge) {
+        noteCell.appendChild(document.createTextNode(' '));
+      }
+      noteCell.appendChild(document.createTextNode(noteSegments.join(' ')));
     }
 
     row.append(labelCell, valueCell, noteCell);
