@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>美麗人生 — MTF 知識入口（個人整理）</title>
-  <meta name="description" content="以台灣經驗為底、由個人自學彙整的跨女（MTF）轉換實務筆記。僅供參考，可能不完整或已過時。隱私優先、不蒐集個資。" />
+  <title>美麗人生 — 個人研究筆記</title>
+  <meta name="description" content="個人彙整的實務與研究筆記。內容中立、僅供參考，非醫囑；隱私優先、不蒐集個資。">
   <meta name="referrer" content="no-referrer" />
   <meta name="color-scheme" content="light dark" />
   <meta name="format-detection" content="telephone=no,email=no,address=no" />
@@ -153,6 +153,7 @@
         <a href="#shape">身形與線條</a>
         <a href="#vpa">作品</a>
         <a href="#privacy">免責與隱私</a>
+        <button id="stealthToggle" class="chip" type="button" title="低調模式（Shift+Esc）">低調模式：開</button>
       </nav>
     </div>
   </header>
@@ -161,7 +162,7 @@
     <section class="hero container" id="top">
       <div class="blob a" aria-hidden="true"></div>
       <div class="blob b" aria-hidden="true"></div>
-      <h1>美麗人生｜跨女轉型的實務輪廓</h1>
+      <h1>美麗人生｜實務輪廓（個人整理）</h1>
       <p>這是一頁式入口，<strong>不放個資、無追蹤</strong>。內容是我在網路上查到的資料、結合自身經驗做的<strong>個人整理</strong>，可能不完整、也可能有錯或過時；僅供討論與自我規劃參考。</p>
       <div class="note" role="note" aria-label="重要免責">
         <strong>重要聲明：</strong> 本站不是醫療建議；<u>所有醫療相關決策請與合格醫師討論</u>。不同地區的規範、費用與流程差異很大，請以實際就醫與官方資訊為準。
@@ -422,41 +423,48 @@
       else document.addEventListener('DOMContentLoaded', onReady);
     })();
 
-    // 2025 View Transitions API for in-page anchor nav
+    // View Transitions for in-page nav
     (function(){
       const supportsVT = 'startViewTransition' in document;
       const root = document.documentElement;
       function goto(hash){
         const target = document.querySelector(hash);
         if (!target) return;
-        const prev = root.style.scrollBehavior;
-        root.style.scrollBehavior = 'auto';
-        history.pushState(null, '', hash);
-        target.scrollIntoView({block:'start'});
+        const prev = root.style.scrollBehavior; root.style.scrollBehavior='auto';
+        history.pushState(null, '', hash); target.scrollIntoView({block:'start'});
         root.style.scrollBehavior = prev || '';
       }
       document.addEventListener('click', e => {
-        const a = e.target.closest('a[href^="#"]');
-        if (!a) return;
-        const hash = a.getAttribute('href');
-        if (!hash || hash === '#') return;
-        e.preventDefault();
-        if (supportsVT) {
-          document.startViewTransition(() => goto(hash));
-        } else {
-          goto(hash);
-        }
+        const a = e.target.closest('a[href^="#"]'); if (!a) return;
+        const hash = a.getAttribute('href'); if (!hash || hash === '#') return;
+        e.preventDefault(); supportsVT ? document.startViewTransition(() => goto(hash)) : goto(hash);
       });
     })();
 
-    // Speculation Rules: gently hint prefetch (safe default)
-    try{ if(!window.__specRuleInjected){
-      const el = document.createElement('script');
-      el.type = 'speculationrules';
-      el.textContent = JSON.stringify({prefetch:[{source:'list',urls:['https://github.com/shusei/vpa']}]});
-      document.head.appendChild(el);
-      window.__specRuleInjected = true;
-    }}catch(err){}
+    // Speculation Rules prefetch
+    try{ if(!window.__specRuleInjected){ const el=document.createElement('script'); el.type='speculationrules'; el.textContent=JSON.stringify({prefetch:[{source:'list',urls:['https://github.com/shusei/vpa','https://shusei.github.io/vpa']}]}); document.head.appendChild(el); window.__specRuleInjected=true; } }catch(err){}
+
+    // === 低調模式（Stealth Mode）===
+    (function(){
+      const titleNormal = '美麗人生 — 個人研究筆記';
+      const titleStealth = '研究筆記 — 個人整理';
+      const dict = [
+        [/跨女/g,'研究主題'],[/MTF/gi,'研究主題'],[/性別/g,'類別'],[/女性化/g,'風格A'],[/男性化/g,'風格B'],
+        [/荷爾蒙治療|HRT/gi,'H‑路徑'],[/顏面女性化|FFS/gi,'F‑路徑'],[/性別重置手術|SRS/gi,'S‑路徑'],
+        [/聲音呈現|語音|共鳴/gi,'音訊指標'],[/醫療/gi,'專業流程']
+      ];
+      const main = document.querySelector('main');
+      let originalHTML = '';
+      function apply(){ if (!originalHTML) originalHTML = main.innerHTML; let html = originalHTML; dict.forEach(([re,rep]) => html = html.replace(re, rep)); main.innerHTML = html; document.title = titleStealth; toggleBtn.textContent='低調模式：開'; document.documentElement.dataset.stealth='1'; }
+      function clear(){ if (originalHTML){ main.innerHTML = originalHTML; } document.title = titleNormal; toggleBtn.textContent='低調模式：關'; delete document.documentElement.dataset.stealth; }
+      function setState(on){ on ? apply() : clear(); localStorage.setItem('stealth', on?'1':'0'); }
+      const toggleBtn = document.getElementById('stealthToggle');
+      const urlHasSafe = /[?#](?:.*[&?])?(?:safe|stealth)=0/i.test(location.href);
+      const initOn = !urlHasSafe && localStorage.getItem('stealth') !== '0';
+      setTimeout(()=> setState(initOn), 0);
+      toggleBtn?.addEventListener('click', ()=> setState(!(document.documentElement.dataset.stealth==='1')));
+      window.addEventListener('keydown', (e)=>{ if (e.shiftKey && e.key==='Escape'){ setState(!(document.documentElement.dataset.stealth==='1')); }});
+    })();
   </script>
 </body>
 </html>
