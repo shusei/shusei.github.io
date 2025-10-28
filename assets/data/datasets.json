@@ -2,32 +2,32 @@
   "datasets": [
     {
       "id": "jp-male-reference",
-      "name": "日本成人男性（在地常模）",
+      "name": "日本成人男性（在地常模／JP）",
       "file": "assets/data/anthropometry/jp-male-reference.json"
     },
     {
       "id": "jp-female-reference",
-      "name": "日本成人女性（在地常模）",
+      "name": "日本成人女性（在地常模／JP）",
       "file": "assets/data/anthropometry/jp-female-reference.json"
     },
     {
       "id": "kr-male-reference",
-      "name": "韓國成人男性（在地常模）",
+      "name": "韓國成人男性（在地常模／KR）",
       "file": "assets/data/anthropometry/kr-male-reference.json"
     },
     {
       "id": "kr-female-reference",
-      "name": "韓國成人女性（在地常模）",
+      "name": "韓國成人女性（在地常模／KR）",
       "file": "assets/data/anthropometry/kr-female-reference.json"
     },
     {
       "id": "us-male-reference",
-      "name": "美國成人男性（在地常模）",
+      "name": "美國成人男性（在地常模／US）",
       "file": "assets/data/anthropometry/us-male-reference.json"
     },
     {
       "id": "us-female-reference",
-      "name": "美國成人女性（在地常模）",
+      "name": "美國成人女性（在地常模／US）",
       "file": "assets/data/anthropometry/us-female-reference.json"
     }
   ]

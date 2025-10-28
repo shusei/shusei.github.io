@@ -220,12 +220,15 @@ function renderResults(tbody, results, dataset, reference) {
 
     if (dataset && metric.percentileKey) {
       const metricData = dataset.metrics?.[metric.percentileKey];
-      const { label, state } = getPercentile(metricData, value);
+      const { label, state, fallback } = getPercentile(metricData, value);
       if (label) {
         const badge = formatBadge(label, state);
         noteCell.appendChild(badge);
         if (metric.key === 'whtR' && dataset.metrics?.whtR?.cut) {
           noteCell.appendChild(document.createTextNode(' 臨界值 ' + dataset.metrics.whtR.cut));
+        }
+        if (fallback) {
+          noteCell.appendChild(document.createTextNode(' （此指標僅提供中位參考）'));
         }
       }
       if (metric.key === 'thighHeight') {
