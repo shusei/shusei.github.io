@@ -1,0 +1,13 @@
+{
+  "name": "示例：男性向樣本(占位)",
+  "locale": "zh-Hant",
+  "source": "TODO: 引用來源填寫於此",
+  "metrics": {
+    "shoulderHeightRatio": { "p10": null, "p25": null, "p50": null, "p75": null, "p90": null },
+    "thighHeightRatio":    { "p10": null, "p25": null, "p50": null, "p75": null, "p90": null },
+    "calfHeightRatio":     { "p10": null, "p25": null, "p50": null, "p75": null, "p90": null },
+    "whtR":                { "p50": null, "cut": 0.5 },
+    "whrFemale":           { "cut": 0.85 },
+    "whrMale":             { "cut": 0.9 }
+  }
+}

@@ -1,701 +1,324 @@
 <!doctype html>
-<html lang="zh-Hant" data-mode="auto">
+<html lang="zh-Hant" data-stealth="on">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>美麗人生 — 個人研究筆記</title>
-  <meta name="description" content="個人彙整的實務與研究筆記。內容中立、僅供參考，非醫囑；隱私優先、不蒐集個資。" />
-  <meta name="referrer" content="no-referrer" />
-  <meta name="color-scheme" content="light dark" />
-  <meta name="format-detection" content="telephone=no,email=no,address=no" />
-  <meta name="robots" content="index,follow" />
-
-  <style>
-    /* ===== Design tokens ===== */
-    :root{
-      --bg:#0b0f1a; --fg:#e6e8ee; --muted:#9aa4b2; --card:#0f172a; --border:#1e293b;
-      --brand:#b26dff; --brand-2:#5ee1ff; --ok:#34d399; --warn:#fbbf24; --danger:#f87171;
-      --radius:16px;
-    }
-    @media (prefers-color-scheme: light){
-      :root{ --bg:#ffffff; --fg:#0f172a; --muted:#475569; --card:#f8fafc; --border:#e2e8f0; --brand:#7c3aed; --brand-2:#2563eb; }
-    }
-    html,body{height:100%}
-    body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,Segoe UI,Roboto,Noto Sans,"PingFang TC","Microsoft JhengHei",Arial,sans-serif;overflow-x:hidden}
-    .container{max-width:1120px;margin:0 auto;padding:0 20px}
-    a{color:var(--brand-2);text-decoration:none}
-    a:hover{text-decoration:underline}
-    .kbd{font:12px ui-monospace,Menlo,Consolas,monospace;background:color-mix(in oklab, var(--fg) 8%, transparent);border:1px solid var(--border);padding:2px 6px;border-radius:8px}
-    .muted{color:var(--muted)}
-    .chip{display:inline-block;padding:.25rem .6rem;border:1px solid var(--border);border-radius:999px;font-size:12px;color:var(--muted);margin-left:8px}
-
-    /* 2025 goodies */
-    html{scroll-behavior:smooth}
-    @starting-style { body.loaded .intro{opacity:1;transform:none} }
-    .cards{container-type:inline-size}
-    @container (min-width: 640px){ .card{grid-column:span 6} }
-    @container (min-width: 960px){ .card{grid-column:span 4} }
-    section{content-visibility:auto;contain-intrinsic-size:600px 1px}
-
-    /* ===== Site header ===== */
-    header.site{position:sticky;top:0;z-index:30;backdrop-filter:saturate(1.15) blur(8px);
-      background:color-mix(in oklab, var(--bg) 84%, transparent);border-bottom:1px solid var(--border)}
-    .site .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0}
-    .brand{display:flex;align-items:center;gap:10px;font-weight:700}
-    .brand .logo{width:26px;height:26px;border-radius:8px;background:conic-gradient(from 0deg at 50% 50%, var(--brand), var(--brand-2), var(--brand) 360deg)}
-    nav a{margin-left:14px;color:var(--muted)}
-
-    /* ===== Intro splash ===== */
-    .intro{position:fixed;inset:0;z-index:50;display:grid;place-items:center;pointer-events:none}
-    .intro .glow{position:absolute;inset:-20%;filter:blur(40px);opacity:.9;background:
-      radial-gradient(60% 60% at 50% 40%, color-mix(in oklab, var(--brand) 70%, transparent), transparent 70%),
-      radial-gradient(50% 50% at 70% 60%, color-mix(in oklab, var(--brand-2) 70%, transparent), transparent 70%),
-      radial-gradient(40% 40% at 30% 65%, color-mix(in oklab, #ff8fb1 70%, transparent), transparent 70%)
-    }
-    .intro h1{font-size:clamp(28px,6vw,56px);line-height:1.05;margin:0;text-align:center;
-      background:linear-gradient(135deg,var(--brand),#ff8fb1,var(--brand-2));-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.4px}
-    .intro .tag{margin-top:8px;color:var(--muted)}
-    @keyframes introZoom{from{transform:scale(1);opacity:1}to{transform:scale(1.08);opacity:0}}
-    @keyframes introRise{from{transform:translateY(6px);opacity:0}to{transform:translateY(0);opacity:1}}
-    body.loaded .intro{animation:introZoom .9s cubic-bezier(.22,.61,.36,1) .6s both}
-    body.loaded .intro h1{animation:introRise .7s cubic-bezier(.22,.61,.36,1) .1s both}
-
-    /* ===== Hero with blobs ===== */
-    .hero{position:relative;padding:88px 0 48px;border-bottom:1px dashed var(--border);overflow:hidden}
-    .blob{position:absolute;border-radius:999px;filter:blur(42px);opacity:.35;mix-blend-mode:screen}
-    .blob.a{width:520px;height:520px;left:-120px;top:-120px;background:radial-gradient(circle at 30% 30%, var(--brand), transparent 60%)}
-    .blob.b{width:480px;height:480px;right:-160px;bottom:-200px;background:radial-gradient(circle at 70% 70%, var(--brand-2), transparent 60%)}
-    @keyframes floatA{0%{transform:translateY(0)}50%{transform:translateY(18px)}100%{transform:translateY(0)}}
-    @keyframes floatB{0%{transform:translateY(0)}50%{transform:translateY(-14px)}100%{transform:translateY(0)}}
-    .blob.a{animation:floatA 12s ease-in-out infinite}
-    .blob.b{animation:floatB 14s ease-in-out infinite}
-    .hero h1{font-size:clamp(28px,5.5vw,54px);margin:0 0 10px;letter-spacing:.3px}
-    .hero p{max-width:64ch;color:var(--muted);margin:0 0 18px}
-    .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}
-    .btn{appearance:none;border:1px solid var(--border);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:14px;font-weight:700}
-    .btn.secondary{background:transparent;color:var(--fg)}
-    .btn:focus{outline:none;box-shadow:0 0 0 3px color-mix(in oklab, var(--brand) 30%, transparent)}
-
-    /* ===== Sections, cards ===== */
-    section{padding:48px 0}
-    h2{font-size:clamp(22px,3.6vw,32px);margin:0 0 10px}
-    .cards{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;margin-top:18px}
-    .card{grid-column:span 12;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;opacity:.001;transform:translateY(8px)}
-    @keyframes fadeUp{from{opacity:.001;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-    @supports (animation-timeline: view()){
-      .card{animation-name:fadeUp;animation-duration:1s;animation-timing-function:cubic-bezier(.22,.61,.36,1);animation-fill-mode:both;animation-timeline:view();animation-range:entry 20% cover 30%}
-    }
-    .note{background:var(--card);border:1px solid var(--border);padding:14px;border-radius:12px}
-    .foot{padding:24px 0;border-top:1px solid var(--border);font-size:14px;color:var(--muted)}
-    .sr-only{position:absolute;clip:rect(0 0 0 0);clip-path:inset(50%);width:1px;height:1px;margin:-1px;overflow:hidden;border:0;padding:0}
-
-    /* Details / 摺疊卡 */
-    details{border:1px solid var(--border);border-radius:12px;background:var(--card);padding:14px 16px;margin:12px 0}
-    details[open]{outline:1px solid color-mix(in oklab, var(--brand) 35%, transparent)}
-    details > summary{list-style:none;cursor:pointer;font-weight:700}
-    details > summary::-webkit-details-marker{display:none}
-    details .subgrid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px;margin-top:10px}
-    details .item{grid-column:span 12}
-    @media (min-width:960px){details .item{grid-column:span 6}}
-
-    /* Native CSS nesting demo */
-    .card{
-      & h3{margin:0 0 6px;font-size:18px}
-      & ul{margin:8px 0 0 16px;padding:0}
-      & li{margin:4px 0}
-    }
-
-    /* Motion accessibility */
-    @media (prefers-reduced-motion: reduce){ *{animation:none !important;transition:none !important} }
-  </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="index,follow">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; script-src 'self'">
+  <title>研究備忘錄</title>
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/motion.css">
 </head>
-<body>
-  <!-- Intro -->
-  <div class="intro" aria-hidden="true">
-    <div class="glow"></div>
-    <div style="position:relative;z-index:1;text-align:center">
-      <h1>美麗人生</h1>
-      <div class="tag">個人彙整 / 零追蹤</div>
+<body class="is-stealth">
+  <a class="skip-link" href="#main">略過導覽</a>
+  <div class="intro" data-intro>
+    <div class="blob blob-a"></div>
+    <div class="blob blob-b"></div>
+    <div class="intro-inner">
+      <p class="intro-tag">2025</p>
+      <h1>美麗人生 · 研究節錄</h1>
+      <p class="intro-note">個人整理、非醫囑；資訊可能出錯或過時；以官方與醫療為準。</p>
     </div>
   </div>
-
-  <a class="sr-only" href="#overview">跳到主內容</a>
-  <header class="site" role="banner">
-    <div class="container wrap">
-      <div class="brand" aria-label="美麗人生">
-        <span class="logo" aria-hidden="true"></span><span>美麗人生</span>
-        <span class="chip">個人整理 · 非醫囑</span>
+  <header class="site-header" data-nav>
+    <div class="brand">
+      <span aria-hidden="true" class="brand-icon"></span>
+      <div>
+        <p class="brand-title">美麗人生</p>
+        <p class="brand-sub">2025 備忘錄</p>
       </div>
-      <nav aria-label="主選單">
-        <a href="#overview">概覽</a>
-        <a href="#calc">計算機</a>
-        <a href="#pillars">主題</a>
-        <a href="#shape">身形與線條</a>
-        <a href="#style">穿搭（大碼）</a>
-        <a href="#hosiery">絲襪</a>
-        <a href="#heels">高跟鞋</a>
-        <a href="#vpa">作品</a>
-        <a href="#hairremoval">除毛</a>
-        <a href="#privacy">免責與隱私</a>
-        <button id="stealthToggle" class="chip" type="button" title="低調模式（Shift+Esc）">低調模式：開</button>
-      </nav>
+    </div>
+    <nav aria-label="主導覽" class="nav-links">
+      <ul>
+        <li><a href="#overview">概覽</a></li>
+        <li><a href="#calculator">計算機</a></li>
+        <li><a href="#map">主題地圖</a></li>
+        <li><a href="#shape">身形與線條</a></li>
+        <li><a href="#style">穿搭</a></li>
+        <li><a href="#hosiery">絲襪</a></li>
+        <li><a href="#heels">高跟鞋</a></li>
+        <li><a href="#vpa">VPA 作品</a></li>
+        <li><a href="#hair">除毛</a></li>
+        <li><a href="#privacy">免責與隱私</a></li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <button type="button" class="stealth-toggle" data-stealth-toggle aria-pressed="true" aria-label="切換低調模式">低調模式</button>
     </div>
   </header>
-
-  <main>
-    <!-- Hero -->
-    <section class="hero container" id="top">
-      <div class="blob a" aria-hidden="true"></div>
-      <div class="blob b" aria-hidden="true"></div>
-      <h1>美麗人生｜實務輪廓（個人整理）</h1>
-      <p>這是一頁式入口，<strong>不放個資、無追蹤</strong>。內容是我在網路上查到的資料、結合自身經驗做的<strong>個人整理</strong>，可能不完整、也可能有錯或過時；僅供討論與自我規劃參考。</p>
-      <div class="note" role="note" aria-label="重要免責">
-        <strong>重要聲明：</strong> 本站不是醫療建議；<u>所有醫療相關決策請與合格醫師討論</u>。不同地區的規範、費用與流程差異很大，請以官方/醫療資訊為準。
-      </div>
-      <div class="cta" style="margin-top:14px">
-        <a class="btn" href="#overview">開始</a>
-        <a class="btn secondary" href="#vpa">最近作品</a>
-      </div>
-    </section>
-
-    <!-- Overview -->
-    <section id="overview">
-      <div class="container">
-        <h2>專案概覽</h2>
-        <p class="muted">研究主軸：<span class="kbd">時序規劃</span>、<span class="kbd">成本區間</span>、<span class="kbd">風險與恢復期</span>、<span class="kbd">職場過渡</span>。之後會逐步公開更完整的長文與檢查表，並持續校對新資訊。</p>
+  <main id="main" tabindex="-1">
+    <section id="overview" class="section" data-section>
+      <header>
+        <h2>概覽</h2>
+        <p class="disclaimer">個人整理、非醫囑；資訊可能出錯或過時；以官方與醫療為準。</p>
+      </header>
+      <div class="card-grid">
+        <article class="card">
+          <h3>計畫脈絡</h3>
+          <p>以公開資料與自我觀察整理的研究筆記。分區紀錄 <span data-stealth="研究主題" data-plain="跨女">研究主題</span> 在穿搭、體態、工具與風險提示之間的思路。</p>
+        </article>
+        <article class="card">
+          <h3>低調預設</h3>
+          <p>本頁默認啟用「低調模式」，會將敏感詞替換為中性標籤，並使用一般化頁面標題。可透過 Shift + Esc 或導覽列按鈕切換。</p>
+        </article>
+        <article class="card">
+          <h3>研究節奏</h3>
+          <p>聚焦 2025 年需要再驗證的假設：<span data-stealth="H-路徑" data-plain="HRT">H-路徑</span>、<span data-stealth="F-路徑" data-plain="FFS">F-路徑</span>、<span data-stealth="S-路徑" data-plain="SRS">S-路徑</span> 等，採用中性描述避免誤解。</p>
+        </article>
       </div>
     </section>
 
-    <!-- Calculator -->
-    <section id="calc">
-      <div class="container">
-        <h2>比例與風險提示工具（計算機）</h2>
-        <p class="muted">輸入你手上的數據，按下「計算」後會列出各項指標。沒填到的項目就留白，不會亂猜。數據僅供自我規劃參考，不做任何醫療與法律判斷。</p>
-
-        <details open>
-          <summary>輸入（可先填幾個）</summary>
-          <div class="subgrid">
-            <div class="item">
-              <form id="calcForm" onsubmit="return false" style="display:grid;grid-template-columns:repeat(12,1fr);gap:12px">
-                <label class="item" style="grid-column:span 4">身高（cm）<input id="h" type="number" min="100" max="230" inputmode="decimal" style="width:100%"></label>
-                <label class="item" style="grid-column:span 4">體重（kg）<input id="w" type="number" min="25" max="200" inputmode="decimal" style="width:100%"></label>
-                <label class="item" style="grid-column:span 4">體脂（%）<input id="bf" type="number" min="3" max="60" inputmode="decimal" style="width:100%"></label>
-                <label class="item" style="grid-column:span 4">腰圍（cm）<input id="waist" type="number" min="40" max="160" inputmode="decimal" style="width:100%"></label>
-                <label class="item" style="grid-column:span 4">臀圍（cm）<input id="hip" type="number" min="60" max="160" inputmode="decimal" style="width:100%"></label>
-                <label class="item" style="grid-column:span 4">胸圍（cm）<input id="bust" type="number" min="60" max="160" inputmode="decimal" style="width:100%"></label>
-                <label class="item" style="grid-column:span 4">大腿圍（cm）<input id="thigh" type="number" min="30" max="90" inputmode="decimal" style="width:100%"></label>
-                <label class="item" style="grid-column:span 4">小腿圍（cm）<input id="calf" type="number" min="25" max="60" inputmode="decimal" style="width:100%"></label>
-                <label class="item" style="grid-column:span 4">肩寬（cm）<input id="shoulder" type="number" min="30" max="60" inputmode="decimal" style="width:100%"></label>
-                <label class="item" style="grid-column:span 4">參考口徑
-                  <select id="ref" style="width:100%">
-                    <option value="neutral" selected>中立（僅健康指標）</option>
-                    <option value="fem">女性向參考（WHR 等）</option>
-                    <option value="masc">男性向參考（WHR 等）</option>
-                  </select>
-                </label>
-                <div class="item" style="grid-column:span 12;display:flex;gap:10px;align-items:center">
-                  <button id="btnCalc" class="btn" type="button">計算</button>
-                  <span class="muted">肩寬量法：<span class="kbd">左右肩峰（acromion）最外點</span>的直線距離；可請旁人協助或用衣服平量法折衷。</span>
-                </div>
-              </form>
-            </div>
+    <section id="calculator" class="section" data-section>
+      <header>
+        <h2>比例與風險提示工具</h2>
+        <p>輸入身體尺碼（公分、公斤、百分比），取得中性指標參考。不足資料者保持空白，不自行推估。</p>
+      </header>
+      <div class="calculator" data-calculator>
+        <form class="calc-form" aria-describedby="calc-note">
+          <div class="form-grid">
+            <label>身高 cm<input type="number" inputmode="decimal" name="height" autocomplete="off"></label>
+            <label>體重 kg<input type="number" inputmode="decimal" name="weight" autocomplete="off"></label>
+            <label>腰圍 cm<input type="number" inputmode="decimal" name="waist" autocomplete="off"></label>
+            <label>臀圍 cm<input type="number" inputmode="decimal" name="hip" autocomplete="off"></label>
+            <label>胸圍 cm<input type="number" inputmode="decimal" name="bust" autocomplete="off"></label>
+            <label>肩寬 cm<input type="number" inputmode="decimal" name="shoulder" autocomplete="off"></label>
+            <label>大腿圍 cm<input type="number" inputmode="decimal" name="thigh" autocomplete="off"></label>
+            <label>小腿圍 cm<input type="number" inputmode="decimal" name="calf" autocomplete="off"></label>
+            <label>體脂 %<input type="number" inputmode="decimal" name="bodyfat" autocomplete="off"></label>
           </div>
-        </details>
-
-        <details open>
-          <summary>結果（自動帶入）</summary>
-          <div class="subgrid">
-            <div class="item">
-              <table style="width:100%;border-collapse:collapse;border:1px solid var(--border);font-size:14px">
-                <thead>
-                  <tr>
-                    <th style="border:1px solid var(--border);padding:6px;text-align:left">指標</th>
-                    <th style="border:1px solid var(--border);padding:6px;text-align:left">公式</th>
-                    <th style="border:1px solid var(--border);padding:6px;text-align:left">你的值</th>
-                    <th style="border:1px solid var(--border);padding:6px;text-align:left">參考/說明</th>
-                  </tr>
-                </thead>
-                <tbody id="outBody">
-                  <tr><td style="border:1px solid var(--border);padding:6px">BMI</td><td style="border:1px solid var(--border);padding:6px">w / h²</td><td id="o_bmi" style="border:1px solid var(--border);padding:6px"></td><td style="border:1px solid var(--border);padding:6px">一般參考 18.5–24.9；粗略估計</td></tr>
-                  <tr><td style="border:1px solid var(--border);padding:6px">腰高比 WHtR</td><td style="border:1px solid var(--border);padding:6px">腰/身高</td><td id="o_wht" style="border:1px solid var(--border);padding:6px"></td><td style="border:1px solid var(--border);padding:6px"><0.5 通常較佳（成年）</td></tr>
-                  <tr><td style="border:1px solid var(--border);padding:6px">腰臀比 WHR</td><td style="border:1px solid var(--border);padding:6px">腰/臀</td><td id="o_whr" style="border:1px solid var(--border);padding:6px"></td><td id="o_whr_ref" style="border:1px solid var(--border);padding:6px"></td></tr>
-                  <tr><td style="border:1px solid var(--border);padding:6px">大腿/身高</td><td style="border:1px solid var(--border);padding:6px">大腿/身高</td><td id="o_thh" style="border:1px solid var(--border);padding:6px"></td><td style="border:1px solid var(--border);padding:6px">比例顯示（百分位需資料集）</td></tr>
-                  <tr><td style="border:1px solid var(--border);padding:6px">小腿/身高</td><td style="border:1px solid var(--border);padding:6px">小腿/身高</td><td id="o_cah" style="border:1px solid var(--border);padding:6px"></td><td style="border:1px solid var(--border);padding:6px">比例顯示（百分位需資料集）</td></tr>
-                  <tr><td style="border:1px solid var(--border);padding:6px">肩寬/身高</td><td style="border:1px solid var(--border);padding:6px">肩/身高</td><td id="o_shh" style="border:1px solid var(--border);padding:6px"></td><td id="o_shh_ref" style="border:1px solid var(--border);padding:6px">可與一般人群參考帶比較（資料集待補）</td></tr>
-                  <tr><td style="border:1px solid var(--border);padding:6px">肩/臀比 SHR</td><td style="border:1px solid var(--border);padding:6px">肩/臀</td><td id="o_shr" style="border:1px solid var(--border);padding:6px"></td><td style="border:1px solid var(--border);padding:6px">觀察輪廓（倒三角 vs. 平衡）</td></tr>
-                  <tr><td style="border:1px solid var(--border);padding:6px">胸/腰比 BWR</td><td style="border:1px solid var(--border);padding:6px">胸/腰</td><td id="o_bwr" style="border:1px solid var(--border);padding:6px"></td><td style="border:1px solid var(--border);padding:6px">版型搭配參考</td></tr>
-                  <tr><td style="border:1px solid var(--border);padding:6px">胸/身高</td><td style="border:1px solid var(--border);padding:6px">胸/身高</td><td id="o_buh" style="border:1px solid var(--border);padding:6px"></td><td style="border:1px solid var(--border);padding:6px">比例觀察</td></tr>
-                  <tr><td style="border:1px solid var(--border);padding:6px">體脂率</td><td style="border:1px solid var(--border);padding:6px">輸入值</td><td id="o_bf" style="border:1px solid var(--border);padding:6px"></td><td id="o_bf_ref" style="border:1px solid var(--border);padding:6px">常見健康帶因年齡/性別而異</td></tr>
-                </tbody>
-              </table>
-              <p class="muted" style="margin-top:8px">「平面/伸展台」區間差異大，且不代表健康或必要條件。未來可加「資料集」選單切換地區/年代。</p>
-            </div>
+          <div class="control-row">
+            <label class="select-group">參考口徑
+              <select name="reference">
+                <option value="neutral">中性</option>
+                <option value="female">女性向</option>
+                <option value="male">男性向</option>
+              </select>
+            </label>
+            <label class="select-group">資料集
+              <select name="dataset" aria-controls="calc-results">
+                <option value="off">Off</option>
+              </select>
+            </label>
+            <label class="select-group">足踝/高跟新手
+              <select name="heelLevel">
+                <option value="none">—</option>
+                <option value="beginner">初學者</option>
+                <option value="aware">適應中</option>
+              </select>
+            </label>
+            <button type="button" class="btn-primary" data-calc-trigger>計算</button>
           </div>
-        </details>
-      </div>
-    </section>
-
-    <!-- Pillars (摘要版) -->
-    <section id="pillars">
-      <div class="container">
-        <h2>主題地圖（概念摘要）</h2>
-        <div class="cards" role="list">
-          <article class="card" role="listitem">
-            <h3>H-路徑（醫療類）</h3>
-            <ul>
-              <li>起點：健康評估與個人目標；藥物與劑量一切以醫囑為準。</li>
-              <li>追蹤：定期回診與抽血、情緒與睡眠觀察。</li>
-              <li>差異：各地規範不同，網路心得僅作對照。</li>
-            </ul>
-          </article>
-          <article class="card" role="listitem">
-            <h3>顏面與外觀</h3>
-            <ul>
-              <li>原則：自然感與安全性優先；先評估骨相，再考慮軟組織/牙顎。</li>
-              <li>風險：費用、恢復期與期望差距需預留緩衝。</li>
-            </ul>
-          </article>
-          <article class="card" role="listitem">
-            <h3>性別肯認醫療</h3>
-            <ul>
-              <li>術式與流程差異大；本文僅名詞導覽與評估面向。</li>
-              <li>文件：份數/格式依地區規範。</li>
-            </ul>
-          </article>
-          <article class="card" role="listitem">
-            <h3>髮線・髮況與造型</h3>
-            <ul>
-              <li>策略：醫學介入 + 造型管理雙軌並行。</li>
-              <li>過渡：髮型與假髮都是工具；以比例與保養為先。</li>
-            </ul>
-          </article>
-          <article class="card" role="listitem">
-            <h3>聲音與表達</h3>
-            <ul>
-              <li>重點：共鳴與語氣節奏，不只音高；避免用嗓受傷。</li>
-              <li>工具：下方 VPA 供量測趨勢，無即時變聲。</li>
-            </ul>
-          </article>
-          <article class="card" role="listitem">
-            <h3>皮膚保養與笑容</h3>
-            <ul>
-              <li>原則：白天防護、晚上修復；活性分流。</li>
-              <li>笑容：肌肉記憶 + 影像回饋；以自然好感為目標。</li>
-            </ul>
-          </article>
-          <article class="card" role="listitem">
-            <h3>法規與職場過渡</h3>
-            <ul>
-              <li>文件與流程以官方/公司規範為準；尊重隱私。</li>
-              <li>溝通：先與 HR/直屬同步，滾動式調整。</li>
-            </ul>
-          </article>
-          <article class="card" role="listitem">
-            <h3>財務與時程</h3>
-            <ul>
-              <li>分段：先必要後可選；建立緩衝金。</li>
-              <li>成本：注意隱形成本（請假、照護）。</li>
-            </ul>
-          </article>
+          <p id="calc-note" class="calc-note">結果僅供自我追蹤。無自動儲存，僅在瀏覽器上即時展示。</p>
+        </form>
+        <div class="calc-output">
+          <table id="calc-results">
+            <caption>比例指標</caption>
+            <thead>
+              <tr>
+                <th scope="col">指標</th>
+                <th scope="col">數值</th>
+                <th scope="col">備註</th>
+              </tr>
+            </thead>
+            <tbody aria-live="polite"></tbody>
+          </table>
+          <aside class="suggestion" data-suggestion aria-live="polite"></aside>
         </div>
       </div>
     </section>
 
-    <!-- 身形與線條 -->
-    <section id="shape">
-      <div class="container">
-        <h2>身形與線條｜腰・腿・倒三角上身</h2>
-        <p class="muted">以下為個人彙整的實務筆記與通用原理，僅供自我訓練參考。每個人骨架與生活作息不同，不保證同效；有特殊狀況請先諮詢專業。</p>
-
-        <details open>
-          <summary>總則：先決條件與常見迷思</summary>
-          <div class="subgrid"><div class="item">
-            <ul>
-              <li><strong>局部燃脂是迷思</strong>：腰腿線條受整體體脂％影響；訓練決定肌肉形狀與張力。</li>
-              <li><strong>先看三指標</strong>：體脂％、<span class="kbd">WHtR</span>、<span class="kbd">WHR</span>。</li>
-              <li><strong>進度以週</strong>：每週-0.3～0.7 kg 或腰圍 -0.5～1.5 cm。</li>
-              <li><strong>飲食與訓練 7:3</strong>：赤字 10–20%；蛋白 1.6–2.2 g/kg/d；纖維 ≥25 g/d；睡眠 7–8h。</li>
-            </ul>
-          </div></div>
-        </details>
-
-        <details>
-          <summary>瘦腰｜核心呼吸＋抗旋轉＋日常</summary>
-          <div class="subgrid"><div class="item">
-            <h3 class="muted">訓練重點</h3>
-            <ul>
-              <li>橫腹肌啟動：深吐→肋骨內收→肚臍微收，10–20 秒，3–5 組/日。</li>
-              <li>抗旋轉：Pallof Press、Dead Bug、Bird Dog，8–12 下 ×3–4 組，週 2–3 次。</li>
-              <li>姿勢：壁滑、90/90 呼吸；有氧：坡走 20–40 分，週 3–5 次。</li>
-            </ul>
-          </div></div>
-        </details>
-
-        <details>
-          <summary>瘦腿｜髂臀主導＋步態與足踝</summary>
-          <div class="subgrid"><div class="item">
-            <h3 class="muted">訓練方向</h3>
-            <ul>
-              <li>後鏈：RDL、臀推、側走彈力帶；每動作 8–12 下 ×3–4 組，週 2–3 次。</li>
-              <li>減少股四頭優勢：縮短步幅弓步、增加髖鉸鍊比例。</li>
-              <li>有氧：傾斜走/階梯機優先於高衝擊跑步。</li>
-            </ul>
-          </div></div>
-        </details>
-
-        <details>
-          <summary>倒三角上身｜平衡比例三路徑</summary>
-          <div class="subgrid"><div class="item">
-            <ol>
-              <li>下半身加寬：臀中/臀大、退階、RDL、臀推。</li>
-              <li>上背降容：下斜方/前鋸肌穩定；少做高量側平舉。</li>
-              <li>穿搭：上身 V/方領、落肩；下身 A 字裙/高腰直筒。</li>
-            </ol>
-          </div></div>
-        </details>
-
-        <details>
-          <summary>四週示範微週期</summary>
-          <div class="subgrid"><div class="item">
-            <table style="width:100%;border-collapse:collapse;border:1px solid var(--border)"><tbody>
-              <tr><td style="border:1px solid var(--border);padding:6px">週一</td><td style="border:1px solid var(--border);padding:6px">下半身 A：RDL、臀推、側向帶走、傾斜走 20’</td></tr>
-              <tr><td style="border:1px solid var(--border);padding:6px">週二</td><td style="border:1px solid var(--border);padding:6px">核心 & 抗旋轉：Pallof、Dead Bug、90/90 呼吸、坡走 30’</td></tr>
-              <tr><td style="border:1px solid var(--border);padding:6px">週三</td><td style="border:1px solid var(--border);padding:6px">上背穩定：划船（低角度）、Y-T-W、牆天使、步態矯正</td></tr>
-              <tr><td style="border:1px solid var(--border);padding:6px">週四</td><td style="border:1px solid var(--border);padding:6px">下半身 B：退階、分腿蹲（短步幅）、臀外旋、階梯機 15’</td></tr>
-              <tr><td style="border:1px solid var(--border);padding:6px">週五</td><td style="border:1px solid var(--border);padding:6px">有氧長走：坡 6–8% 40’ + TVA 呼吸 10’</td></tr>
-              <tr><td style="border:1px solid var(--border);padding:6px">週末</td><td style="border:1px solid var(--border);padding:6px">休息或輕量瑜伽/拉伸；泡棉滾筒下肢 8–10 分</td></tr>
-            </tbody></table>
-          </div></div>
-        </details>
-
-        <details>
-          <summary>飲食與補充（中立口徑）</summary>
-          <div class="subgrid"><div class="item">
-            <ul>
-              <li>熱量：每日 10–20% 赤字；力量掉太多改 5–10%。</li>
-              <li>蛋白：1.6–2.2 g/kg/d，分 3–4 餐。</li>
-              <li>植物性飲食：注意 B12、D、碘、鈣來源。</li>
-            </ul>
-          </div></div>
-        </details>
-
-        <div class="note">提醒：以上為個人整理；涉及疾患、藥物或術後恢復，請遵循醫囑。</div>
+    <section id="map" class="section" data-section>
+      <header>
+        <h2>主題地圖</h2>
+        <p>以議題為中心的研究走向，標示仍待補充的文獻與實測。低調模式將詞彙以中性稱呼呈現。</p>
+      </header>
+      <div class="topic-map">
+        <article class="card">
+          <h3>照護路徑</h3>
+          <ul>
+            <li><span data-stealth="H-路徑" data-plain="HRT">H-路徑</span> 時程、用藥互動</li>
+            <li><span data-stealth="F-路徑" data-plain="FFS">F-路徑</span> 評估指標</li>
+            <li><span data-stealth="S-路徑" data-plain="SRS">S-路徑</span> 風險與術後照護</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>身心策略</h3>
+          <ul>
+            <li>長期慢性病共病紀錄</li>
+            <li>心理支持與社會資源</li>
+            <li>合法文書與職場應對</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>生活化工具</h3>
+          <ul>
+            <li>日常習慣追蹤</li>
+            <li>穿搭與情境模擬</li>
+            <li>體感量測與平衡訓練</li>
+          </ul>
+        </article>
       </div>
     </section>
 
-    <!-- 穿搭（大碼） -->
-    <section id="style">
-      <div class="container">
-        <h2>穿搭（大碼友善）｜比例、版型與材質</h2>
-        <p class="muted">通用法則，著重比例與材質垂墜。請以實際試穿為準。</p>
-        <details open>
-          <summary>版型優先順序</summary>
-          <div class="subgrid"><div class="item">
-            <ul>
-              <li>上身：落肩/軟肩、V/方領、垂墜面料。</li>
-              <li>腰線：高腰或帝國腰線；細皮帶 1–2 cm。</li>
-              <li>下身：A 字裙、直筒/靴型、高腰寬褲。</li>
-              <li>外套：H 形長版、薄墊肩。</li>
-            </ul>
-          </div></div>
-        </details>
-        <details>
-          <summary>色彩與圖案</summary>
-          <div class="subgrid"><div class="item">
-            <ul>
-              <li>色重心放下半身；上深下亮或上素下花。</li>
-              <li>縱向元素：直條、窄門襟、長項鍊。</li>
-              <li>大圖案慎用；選中小型重複圖案。</li>
-            </ul>
-          </div></div>
-        </details>
-        <details>
-          <summary>內著與尺寸</summary>
-          <div class="subgrid"><div class="item">
-            <ul>
-              <li>胸衣：下胸/上胸先量；背帶貼身不上滑。</li>
-              <li>塑身衣：僅作版型輔助，不長時間高壓。</li>
-              <li>褲頭：高腰 + 足夠檔深，避免擠腰線。</li>
-            </ul>
-          </div></div>
-        </details>
+    <section id="shape" class="section" data-section>
+      <header>
+        <h2>身形與線條</h2>
+        <p>腰部、腿部與倒三角上身的觀察。以視覺化比率與實驗記錄調整策略。</p>
+      </header>
+      <div class="card-grid">
+        <article class="card" id="瘦腰">
+          <h3>瘦腰</h3>
+          <p>圍繞 <abbr title="Waist-to-Height Ratio">WHtR</abbr> 的緩慢調整，搭配呼吸節奏與核心穩定訓練。</p>
+        </article>
+        <article class="card" id="倒三角上身">
+          <h3>倒三角上身</h3>
+          <p>肩寬與上胸肌耐力為關鍵；透過 <span data-stealth="風格A" data-plain="女性化">風格A</span> 訓練記錄，避免過度刺激。</p>
+        </article>
+        <article class="card" id="瘦腿">
+          <h3>瘦腿</h3>
+          <p>大腿與小腿圍的走勢對應階段性有氧策略，與鞋款支撐度交叉檢視。</p>
+        </article>
       </div>
     </section>
 
-    <!-- 絲襪 -->
-    <section id="hosiery">
-      <div class="container">
-        <h2>絲襪／褲襪｜尺寸、Denier 與穿法</h2>
-        <p class="muted">多看尺寸表與材質彈性；長腿選 Tall/Long 或 Plus/Queen。</p>
-        <details open>
-          <summary>怎麼選尺寸？</summary>
-          <div class="subgrid"><div class="item">
-            <ul>
-              <li>看「身高×臀圍」；介於兩碼往大一碼。</li>
-              <li>Denier：20–40D 透膚、60–80D 中厚、100D+ 保暖。</li>
-              <li>細節：加大褲檔、加強褲腰、加固腳尖。</li>
-            </ul>
-          </div></div>
-        </details>
-        <details>
-          <summary>穿法與保養</summary>
-          <div class="subgrid"><div class="item">
-            <ol>
-              <li>戴薄手套，先腳尖→腳跟定位→再往上拉。</li>
-              <li>每 10–15 公分點拉；膝與檔撫平。</li>
-              <li>冷水手洗或洗衣袋輕柔；陰乾。</li>
-            </ol>
-          </div></div>
-        </details>
+    <section id="style" class="section" data-section>
+      <header>
+        <h2>穿搭（大碼友善）</h2>
+        <p>整理 <span data-stealth="風格A" data-plain="女性化">風格A</span> 與 <span data-stealth="風格B" data-plain="男性化">風格B</span> 之間的中性穿搭提案。強調上深下亮、A 字裙、層次與腰封搭配。</p>
+      </header>
+      <div class="card-grid">
+        <article class="card" id="飲食">
+          <h3>飲食節奏</h3>
+          <p>高纖維、足量蛋白與足夠水分，搭配睡眠紀律維持基礎代謝率。</p>
+        </article>
+        <article class="card">
+          <h3>有氧策略</h3>
+          <p>以快走與低衝擊跳繩為主，配合體脂變化調整頻率。搭配肌群熱身避免受傷。</p>
+        </article>
+        <article class="card" id="穿搭（上深下亮 / A 字裙）">
+          <h3>穿搭（上深下亮 / A 字裙）</h3>
+          <p>使用上半身深色遮蔽肩線，下半身亮色或圖紋轉移視覺重心；A 字裙保持流動感。</p>
+        </article>
       </div>
     </section>
 
-    <!-- 高跟鞋 -->
-    <section id="heels">
-      <div class="container">
-        <h2>高跟鞋｜選購與訓練路線</h2>
-        <p class="muted">從穩定度開始，再談高度與型態。足型各異，以實穿為準。</p>
-        <details open>
-          <summary>怎麼選第一雙？</summary>
-          <div class="subgrid"><div class="item">
-            <ul>
-              <li>鞋楦/寬度：寬腳選 W/EW 或方/圓頭。</li>
-              <li>高度/坡度：4–5 cm 粗跟/踝靴入門→6–7 cm→8–9 cm。</li>
-              <li>支撐：後跟杯穩、中底有 shank、前掌微彎。</li>
-              <li>試穿：下午走 10–15 分檢查壓點。</li>
-            </ul>
-          </div></div>
-        </details>
-        <details>
-          <summary>步態與訓練（四週）</summary>
-          <div class="subgrid"><div class="item">
-            <ol>
-              <li>週1：室內 10–15 分 ×2/日，跟先著地→前掌；步幅短、膝微彎。</li>
-              <li>週2：直線/轉身；站姿「三點受力」。</li>
-              <li>週3：6–7 cm；練階梯/斜坡。</li>
-              <li>週4：8–9 cm 短時外出；若壓點，回退高度。</li>
-            </ol>
-            <ul>
-              <li>輔助：提踵離心、胫骨前肌、踝環向。</li>
-              <li>照護：趾關節與跟腱拉伸、足底滾球；水泡用水膠敷料。</li>
-            </ul>
-          </div></div>
-        </details>
+    <section id="hosiery" class="section" data-section>
+      <header>
+        <h2>絲襪</h2>
+        <p>紀錄不同厚度、壓力與尺寸對腿型的影響。注意穿著時間與皮膚狀態。</p>
+      </header>
+      <div class="card-grid">
+        <article class="card" id="絲襪尺寸">
+          <h3>尺寸選擇</h3>
+          <p>依據大腿圍與身高的百分位估算合適尺寸。數據不足時，以彈性材質並預留活動空間。</p>
+        </article>
+        <article class="card">
+          <h3>材料比較</h3>
+          <p>尼龍與彈性纖維配比決定透膚度與韌性；試穿後紀錄延展性，避免勾紗。</p>
+        </article>
       </div>
     </section>
 
-    <!-- VPA -->
-    <section id="vpa">
-      <div class="container">
-        <h2>最近作品｜Voice Presentation Analyzer（VPA）</h2>
-        <p class="muted">VPA 是一款 <strong>100% 瀏覽器端推論</strong> 的聲音呈現分析工具：可在頁面內錄音或上傳 mp3 / m4a / mp4 / mov / wav，推估模型感知到的 feminine / masculine 傾向，並提供即時監測與分析完成後的統計摘要。</p>
-        <div class="cta" style="margin:10px 0 6px">
-          <a class="btn" href="https://shusei.github.io/vpa" target="_blank" rel="noopener noreferrer">線上 Demo</a>
-          <a class="btn secondary" href="https://github.com/shusei/vpa" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
-        </div>
-        <ul>
-          <li><strong>流程：</strong>錄音／上傳二合一；上傳影片自動抽音軌；分析時即時顯示 Pitch / Volume / Noise 等走勢。</li>
-          <li><strong>統計卡：</strong>完成後輸出 Pitch、Volume、Environment、Formant &amp; Resonance、Speech Rate 指標與簡評。</li>
-          <li><strong>離線與快取：</strong>首次下載模型後快取於 IndexedDB；支援子路徑部署。</li>
-          <li><strong>多語系：</strong>繁體中文／简体中文／English，可記住偏好。</li>
-        </ul>
-        <div class="note">來源與免責：以上摘要節錄自作者在 GitHub 的 README。模型輸出為「呈現傾向」，不等同於性別認同、醫療或法律結論；資料與環境差異皆可能影響結果。</div>
+    <section id="heels" class="section" data-section>
+      <header>
+        <h2>高跟鞋</h2>
+        <p>針對足踝與平衡的訓練。初學者以 3 公分內鞋跟起步，逐漸延長站立時間。</p>
+      </header>
+      <div class="card-grid">
+        <article class="card" id="高跟鞋四週訓練">
+          <h3>高跟鞋四週訓練</h3>
+          <ol>
+            <li>第 1 週：足底肌群啟動、牆面支撐站立。</li>
+            <li>第 2 週：短距離步行，觀察足踝穩定度。</li>
+            <li>第 3 週：加入緩慢轉身與重心移位。</li>
+            <li>第 4 週：全程穿著於安全場域內練習。</li>
+          </ol>
+        </article>
+        <article class="card">
+          <h3>保養與安全</h3>
+          <p>鞋墊與後跟保護貼可減少摩擦；練習前後進行小腿伸展與冰敷。</p>
+        </article>
       </div>
     </section>
 
-    <!-- 除毛 -->
-    <section id="hairremoval">
-      <div class="container">
-        <h2>除毛攻略｜方法比較與時程規劃</h2>
-        <p class="muted">選擇依毛色/膚色、痛感容忍、預算與時間決定。以下為一般性整理，實際仍以專業評估為準。</p>
-        <details open>
-          <summary>方法比較（概略）</summary>
-          <div class="subgrid"><div class="item">
-            <table style="width:100%;border-collapse:collapse;border:1px solid var(--border);font-size:14px">
-              <thead><tr>
-                <th style="border:1px solid var(--border);padding:6px;text-align:left">方法</th>
-                <th style="border:1px solid var(--border);padding:6px;text-align:left">維持</th>
-                <th style="border:1px solid var(--border);padding:6px;text-align:left">痛感</th>
-                <th style="border:1px solid var(--border);padding:6px;text-align:left">對淺/白毛</th>
-                <th style="border:1px solid var(--border);padding:6px;text-align:left">備註</th>
-              </tr></thead>
-              <tbody>
-                <tr><td style="border:1px solid var(--border);padding:6px">刮除</td><td style="border:1px solid var(--border);padding:6px">1–3 日</td><td style="border:1px solid var(--border);padding:6px">低</td><td style="border:1px solid var(--border);padding:6px">可</td><td style="border:1px solid var(--border);padding:6px">便宜快速；需潤滑與衛生</td></tr>
-                <tr><td style="border:1px solid var(--border);padding:6px">脫毛膏</td><td style="border:1px solid var(--border);padding:6px">3–7 日</td><td style="border:1px solid var(--border);padding:6px">低–中</td><td style="border:1px solid var(--border);padding:6px">可</td><td style="border:1px solid var(--border);padding:6px">先做膚測</td></tr>
-                <tr><td style="border:1px solid var(--border);padding:6px">蜜蠟</td><td style="border:1px solid var(--border);padding:6px">3–6 週</td><td style="border:1px solid var(--border);padding:6px">中–高</td><td style="border:1px solid var(--border);padding:6px">可</td><td style="border:1px solid var(--border);padding:6px">毛長≥0.5 cm；可能內嵌毛</td></tr>
-                <tr><td style="border:1px solid var(--border);padding:6px">家用 IPL</td><td style="border:1px solid var(--border);padding:6px">數月</td><td style="border:1px solid var(--border);padding:6px">低–中</td><td style="border:1px solid var(--border);padding:6px">對淺毛差</td><td style="border:1px solid var(--border);padding:6px">4–8 週一次；注意膚色/曬傷</td></tr>
-                <tr><td style="border:1px solid var(--border);padding:6px">診所雷射</td><td style="border:1px solid var(--border);padding:6px">長期減量</td><td style="border:1px solid var(--border);padding:6px">中</td><td style="border:1px solid var(--border);padding:6px">對白毛差</td><td style="border:1px solid var(--border);padding:6px">間隔 4–8 週；醫師評估</td></tr>
-                <tr><td style="border:1px solid var(--border);padding:6px">電針</td><td style="border:1px solid var(--border);padding:6px">逐毛根除</td><td style="border:1px solid var(--border);padding:6px">高</td><td style="border:1px solid var(--border);padding:6px">可</td><td style="border:1px solid var(--border);padding:6px">耗時；需術後照護</td></tr>
-              </tbody>
-            </table>
-          </div></div>
-        </details>
-        <details>
-          <summary>基本時程與照護</summary>
-          <div class="subgrid"><div class="item">
-            <ul>
-              <li>術前：避免日曬、停酸 3–7 天、前一晚剃毛。</li>
-              <li>術後：48 小時內避高熱；物理防曬；紅腫可冰敷。</li>
-              <li>敏感區：腋下、比基尼線、臉部更保守；如有皮膚病史先諮詢。</li>
-            </ul>
-          </div></div>
-        </details>
-        <div class="note">附註：若醫療單位要求特定部位永久除毛，常見為雷射＋電針並行；<u>具體份量與範圍以醫療單位說明為準</u>。</div>
+    <section id="vpa" class="section" data-section>
+      <header>
+        <h2>VPA 作品</h2>
+        <p>小型視覺化輔助工具（Visual Personal Assistants），協助整理研究素材。</p>
+      </header>
+      <div class="card-grid">
+        <article class="card">
+          <h3>VPA-01：節奏儀表</h3>
+          <p>以週為單位的訓練與恢復節奏，提供提醒與緩衝建議。</p>
+          <div class="btn-row">
+            <a class="btn-outline" href="https://example.com/demo" rel="noopener noreferrer" target="_blank">Demo</a>
+            <a class="btn-outline" href="https://example.com/repo" rel="noopener noreferrer" target="_blank">Repo</a>
+          </div>
+        </article>
+        <article class="card">
+          <h3>VPA-02：衣著協調</h3>
+          <p>協助比對色彩、材質與比例的搭配建議，支援低調模式提示。</p>
+          <div class="btn-row">
+            <a class="btn-outline" href="https://example.com/demo2" rel="noopener noreferrer" target="_blank">Demo</a>
+            <a class="btn-outline" href="https://example.com/repo2" rel="noopener noreferrer" target="_blank">Repo</a>
+          </div>
+        </article>
       </div>
     </section>
 
-    <!-- Privacy -->
-    <section id="privacy">
-      <div class="container">
+    <section id="hair" class="section" data-section>
+      <header>
+        <h2>除毛</h2>
+        <p>記錄各部位除毛方式：物理刮除、熱蠟、脈衝光。關注敏感肌與發紅反應。</p>
+      </header>
+      <div class="card-grid">
+        <article class="card">
+          <h3>居家方案</h3>
+          <p>短期以電動剃刀搭配保濕凝膠，避免刮傷。中期評估家用脈衝光設備。</p>
+        </article>
+        <article class="card">
+          <h3>專業療程</h3>
+          <p>蒐集中性診所資訊，評估價格、間隔與疼痛等級。低調模式不顯示敏感術語。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="privacy" class="section" data-section>
+      <header>
         <h2>免責與隱私</h2>
-        <div class="cards">
-          <div class="card">
-            <h3>來源與正確性</h3>
-            <ul>
-              <li>本頁為<strong>個人</strong>彙整的網路資料與經驗筆記，可能不完整、也可能出錯。</li>
-              <li>如與官方/醫療資訊衝突，<u>以官方/醫療為準</u>。</li>
-            </ul>
-          </div>
-          <div class="card">
-            <h3>隱私立場</h3>
-            <ul>
-              <li>不使用 Cookie，不嵌入第三方追蹤。</li>
-              <li>外部連結均附 <code>rel="noopener noreferrer"</code>。</li>
-            </ul>
-          </div>
-          <div class="card">
-            <h3>更新與修正</h3>
-            <ul>
-              <li>頁面會不定期更新；若你發現錯誤，歡迎提出修正建議。</li>
-              <li>最後更新：<time datetime="2025-10-28T09:00:00+08:00">2025-10-28（UTC+8）</time></li>
-            </ul>
-          </div>
-        </div>
+      </header>
+      <div class="card-grid">
+        <article class="card">
+          <h3>免責</h3>
+          <p>全部內容僅為個人整理，並不構成醫療或專業建議。請優先參考政府公告與臨床專業。</p>
+        </article>
+        <article class="card">
+          <h3>隱私與資料</h3>
+          <p>網站不收集個資、不設追蹤。不使用 Cookie。所有資料處理於瀏覽器端完成。</p>
+        </article>
       </div>
     </section>
   </main>
-
-  <footer class="foot">
-    <div class="container">© 美麗人生 — 個人整理，僅供參考</div>
+  <footer class="site-footer">
+    <p>© 2025 美麗人生 · 個人研究紀錄。無廣告，無追蹤。</p>
   </footer>
 
-  <script>
-    /* Page-ready: dismiss splash */
-    (function(){
-      const onReady = () => document.body.classList.add('loaded');
-      if (document.readyState === 'complete' || document.readyState === 'interactive') onReady();
-      else document.addEventListener('DOMContentLoaded', onReady);
-    })();
-
-    /* View Transitions for in-page nav */
-    (function(){
-      const supportsVT = 'startViewTransition' in document;
-      const root = document.documentElement;
-      function goto(hash){
-        const target = document.querySelector(hash);
-        if (!target) return;
-        const prev = root.style.scrollBehavior; root.style.scrollBehavior='auto';
-        history.pushState(null, '', hash);
-        target.scrollIntoView({block:'start'});
-        root.style.scrollBehavior = prev || '';
-      }
-      document.addEventListener('click', e => {
-        const a = e.target.closest('a[href^="#"]'); if (!a) return;
-        const hash = a.getAttribute('href'); if (!hash || hash === '#') return;
-        e.preventDefault(); supportsVT ? document.startViewTransition(() => goto(hash)) : goto(hash);
-      });
-    })();
-
-    /* Speculation Rules prefetch (gentle) */
-    try{
-      if(!window.__specRuleInjected){
-        const el=document.createElement('script'); el.type='speculationrules';
-        el.textContent = JSON.stringify({prefetch:[{source:'list',urls:['https://github.com/shusei/vpa','https://shusei.github.io/vpa']}]});
-        document.head.appendChild(el); window.__specRuleInjected=true;
-      }
-    }catch(err){}
-
-    /* 低調模式（Stealth Mode） */
-    (function(){
-      const titleNormal = '美麗人生 — 個人研究筆記';
-      const titleStealth = '研究筆記 — 個人整理';
-      const dict = [
-        [/跨女/g,'研究主題'],[/MTF/gi,'研究主題'],[/性別/g,'類別'],[/女性化/g,'風格A'],[/男性化/g,'風格B'],
-        [/荷爾蒙治療|HRT/gi,'H-路徑'],[/顏面女性化|FFS/gi,'F-路徑'],[/性別重置手術|SRS/gi,'S-路徑'],
-        [/聲音呈現|語音|共鳴/gi,'音訊指標'],[/醫療/gi,'專業流程']
-      ];
-      const main = document.querySelector('main');
-      let originalHTML = '';
-      function apply(){
-        if (!originalHTML) originalHTML = main.innerHTML;
-        let html = originalHTML; dict.forEach(([re,rep]) => html = html.replace(re, rep));
-        main.innerHTML = html; document.title = titleStealth; toggleBtn.textContent='低調模式：開';
-        document.documentElement.dataset.stealth='1';
-      }
-      function clear(){
-        if (originalHTML){ main.innerHTML = originalHTML; }
-        document.title = titleNormal; toggleBtn.textContent='低調模式：關'; delete document.documentElement.dataset.stealth;
-      }
-      function setState(on){ on ? apply() : clear(); localStorage.setItem('stealth', on?'1':'0'); }
-      const toggleBtn = document.getElementById('stealthToggle');
-      const urlHasSafe = /[?#](?:.*[&?])?(?:safe|stealth)=0/i.test(location.href);
-      const initOn = !urlHasSafe && localStorage.getItem('stealth') !== '0';
-      setTimeout(()=> setState(initOn), 0);
-      toggleBtn?.addEventListener('click', ()=> setState(!(document.documentElement.dataset.stealth==='1')));
-      window.addEventListener('keydown', (e)=>{ if (e.shiftKey && e.key==='Escape'){ setState(!(document.documentElement.dataset.stealth==='1')); }});
-    })();
-
-    /* 計算機邏輯 */
-    (function(){
-      const $ = id => document.getElementById(id);
-      const n = id => { const v = parseFloat(($(id)?.value||'').trim()); return Number.isFinite(v)? v: NaN; };
-      const fix = (x, d=2) => Number.isFinite(x)? x.toFixed(d): '';
-      const cm2m = x => Number.isFinite(x)? x/100: NaN;
-      const safeDiv = (a,b)=> (Number.isFinite(a)&&Number.isFinite(b)&&b!==0)? a/b: NaN;
-      const set = (id,val)=> { const el=$(id); if(el) el.textContent = (val===''? '': val); };
-
-      function compute(){
-        const h = n('h'), w = n('w'), bf = n('bf');
-        const waist = n('waist'), hip = n('hip'), bust = n('bust');
-        const thigh = n('thigh'), calf = n('calf'), shoulder = n('shoulder');
-        const ref = ($('#ref')?.value)||'neutral';
-        const hm = cm2m(h);
-
-        const bmi = safeDiv(w, hm? hm*hm: NaN);
-        const wht = safeDiv(waist, h);
-        const whr = safeDiv(waist, hip);
-        const thh = safeDiv(thigh, h);
-        const cah = safeDiv(calf, h);
-        const shh = safeDiv(shoulder, h);
-        const shr = safeDiv(shoulder, hip);
-        const bwr = safeDiv(bust, waist);
-        const buh = safeDiv(bust, h);
-
-        set('o_bmi', fix(bmi));
-        set('o_wht', fix(wht));
-        set('o_whr', fix(whr));
-        set('o_thh', fix(thh));
-        set('o_cah', fix(cah));
-        set('o_shh', fix(shh));
-        set('o_shr', fix(shr));
-        set('o_bwr', fix(bwr));
-        set('o_buh', fix(buh));
-        set('o_bf', Number.isFinite(bf)? `${fix(bf,1)}%`: '');
-
-        const whrRef = (ref==='fem')? '常見研究：女性向 < 0.85（僅供參考）'
-                     : (ref==='masc')? '常見研究：男性向 < 0.90（僅供參考）'
-                     : '依所選口徑顯示（可切換上方選單）';
-        set('o_whr_ref', whrRef);
-
-        const shNote = Number.isFinite(shh)? `你的肩/身高比 ≈ ${fix(shh)}。之後可切換資料集比對一般人群百分位。` : '';
-        set('o_shh_ref', shNote || '可與一般人群參考帶比較（資料集待補）');
-
-        let bfRef = '輸入越精準（如 InBody/DEXA），越能對照訓練與飲食策略。';
-        if (Number.isFinite(bf)){ bfRef += ' 常見健康帶因年齡/性別而異，請以個別追蹤為準。'; }
-        set('o_bf_ref', bfRef);
-      }
-      document.getElementById('btnCalc')?.addEventListener('click', compute);
-    })();
+  <script type="speculationrules">
+    {
+      "prefetch": [
+        { "source": "list", "urls": ["https://example.com/demo", "https://example.com/repo", "https://example.com/demo2", "https://example.com/repo2"] }
+      ]
+    }
   </script>
+  <script type="module" src="assets/js/dom.js"></script>
+  <script type="module" src="assets/js/datasets.js"></script>
+  <script type="module" src="assets/js/i18n.js"></script>
+  <script type="module" src="assets/js/calc.js"></script>
+  <script type="module" src="assets/js/app.js"></script>
 </body>
 </html>

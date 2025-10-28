@@ -1,0 +1,19 @@
+{
+  "datasets": [
+    {
+      "id": "neutral-sample",
+      "name": "示例：中性樣本（占位）",
+      "file": "assets/data/anthropometry/neutral.sample.json"
+    },
+    {
+      "id": "female-sample",
+      "name": "示例：女性向樣本（占位）",
+      "file": "assets/data/anthropometry/female.sample.json"
+    },
+    {
+      "id": "male-sample",
+      "name": "示例：男性向樣本（占位）",
+      "file": "assets/data/anthropometry/male.sample.json"
+    }
+  ]
+}
