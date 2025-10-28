@@ -42,7 +42,7 @@
         <li><a href="#style">穿搭</a></li>
         <li><a href="#hosiery">絲襪</a></li>
         <li><a href="#heels">高跟鞋</a></li>
-        <li><a href="#vpa">VPA 作品</a></li>
+        <li><a href="#vpa">VPA 聲音分析</a></li>
         <li><a href="#hair">除毛</a></li>
         <li><a href="#privacy">免責與隱私</a></li>
       </ul>
@@ -248,24 +248,20 @@
 
     <section id="vpa" class="section" data-section>
       <header>
-        <h2>VPA 作品</h2>
-        <p>小型視覺化輔助工具（Visual Personal Assistants），協助整理研究素材。</p>
+        <h2>Voice Presentation Analyzer</h2>
+        <p>100% 瀏覽器端推論的聲音呈現分析工具，從錄音或上傳音訊中推估模型感知到的 feminine／masculine 傾向。</p>
       </header>
       <div class="card-grid">
         <article class="card">
-          <h3>VPA-01：節奏儀表</h3>
-          <p>以週為單位的訓練與恢復節奏，提供提醒與緩衝建議。</p>
+          <h3>核心特色</h3>
+          <ul>
+            <li>完全本地推論，首次載入後模型快取於 IndexedDB，可離線使用。</li>
+            <li>錄音／上傳二合一流程，支援 mp3、m4a、mp4、mov、wav 等常見格式。</li>
+            <li>即時顯示傾向儀表、Pitch Stream 與 Formant／Resonance 面板，完成後提供統計卡與摘要。</li>
+            <li>支援繁中／簡中／英文介面與主題切換，記住上一個偏好設定。</li>
+          </ul>
           <div class="btn-row">
-            <a class="btn-outline" href="https://example.com/demo" rel="noopener noreferrer" target="_blank">Demo</a>
-            <a class="btn-outline" href="https://example.com/repo" rel="noopener noreferrer" target="_blank">Repo</a>
-          </div>
-        </article>
-        <article class="card">
-          <h3>VPA-02：衣著協調</h3>
-          <p>協助比對色彩、材質與比例的搭配建議，支援低調模式提示。</p>
-          <div class="btn-row">
-            <a class="btn-outline" href="https://example.com/demo2" rel="noopener noreferrer" target="_blank">Demo</a>
-            <a class="btn-outline" href="https://example.com/repo2" rel="noopener noreferrer" target="_blank">Repo</a>
+            <a class="btn-outline" href="https://shusei.github.io/vpa" rel="noopener noreferrer" target="_blank">Demo</a>
           </div>
         </article>
       </div>
@@ -311,7 +307,7 @@
   <script type="speculationrules">
     {
       "prefetch": [
-        { "source": "list", "urls": ["https://example.com/demo", "https://example.com/repo", "https://example.com/demo2", "https://example.com/repo2"] }
+        { "source": "list", "urls": ["https://shusei.github.io/vpa"] }
       ]
     }
   </script>
