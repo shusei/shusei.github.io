@@ -1,0 +1,54 @@
+@keyframes blobFloat {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  33% { transform: translate3d(40px, -20px, 0) scale(1.1); }
+  66% { transform: translate3d(-30px, 30px, 0) scale(0.95); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+body.loaded .intro {
+  opacity: 0;
+  visibility: hidden;
+}
+
+body.loaded main {
+  animation: fadeUp 0.8s var(--transition-medium) both;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.section {
+  animation: sectionFade 0.8s ease both;
+  animation-timeline: view();
+  animation-range: entry 20% cover 40%;
+}
+
+@keyframes sectionFade {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro,
+  body.loaded main,
+  .section {
+    animation: none !important;
+  }
+  .blob {
+    animation: none !important;
+  }
+}
