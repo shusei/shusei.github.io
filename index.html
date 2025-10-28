@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="light dark">
   <meta name="referrer" content="no-referrer">
   <meta name="robots" content="index,follow">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; script-src 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; script-src 'self' 'sha256-RCLd1l8I4x7t91UJQJiQ9dpaU1YhoYVSjTTOQXEuIkQ='">
   <title>研究備忘錄</title>
   <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/css/base.css">
@@ -114,6 +114,7 @@
             <button type="button" class="btn-primary" data-calc-trigger>計算</button>
           </div>
           <p id="calc-note" class="calc-note">結果僅供自我追蹤。無自動儲存，僅在瀏覽器上即時展示。</p>
+          <p class="calc-note" data-dataset-info aria-live="polite" hidden></p>
         </form>
         <div class="calc-output">
           <table id="calc-results">

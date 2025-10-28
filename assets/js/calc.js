@@ -179,6 +179,46 @@ const suggestionRules = [
   }
 ];
 
+function describePercentiles(metricData) {
+  if (!metricData) return { summary: null, fallback: false };
+  const keys = ['p10', 'p25', 'p50', 'p75', 'p90'];
+  const available = keys.filter((key) => typeof metricData[key] === 'number');
+  if (available.length === 0) return { summary: null, fallback: false };
+  const summary = available
+    .map((key) => `${key.toUpperCase()} ${metricData[key].toFixed(3)}`)
+    .join(' · ');
+  const fallback = available.length === 1 && available[0] === 'p50';
+  return { summary, fallback };
+}
+
+function renderDatasetInfo(element, dataset) {
+  if (!element) return;
+  if (!dataset) {
+    element.textContent = '';
+    element.hidden = true;
+    return;
+  }
+  const name = dataset.name || dataset.id || '—';
+  const metricData = dataset.metrics?.shoulderHeightRatio;
+  if (!metricData) {
+    element.textContent = `資料集：${name} ｜ 尚未提供肩/身高百分位資料`;
+    element.hidden = false;
+    return;
+  }
+  const { summary, fallback } = describePercentiles(metricData);
+  if (!summary) {
+    element.textContent = `資料集：${name} ｜ 尚未提供肩/身高百分位資料`;
+    element.hidden = false;
+    return;
+  }
+  let message = `資料集：${name} ｜ 肩/身高百分位 ${summary}`;
+  if (fallback) {
+    message += ' （此資料集僅提供中位數參考）';
+  }
+  element.textContent = message;
+  element.hidden = false;
+}
+
 function collectFormValues(form) {
   const values = {};
   qsa('input, select', form).forEach((field) => {
@@ -204,6 +244,9 @@ function renderResults(tbody, results, dataset, reference) {
     const labelCell = createEl('th', { text: metric.label, attrs: { scope: 'row' } });
     const valueCell = createEl('td');
     const noteCell = createEl('td');
+    noteCell.textContent = '';
+    const noteSegments = [];
+    let percentileBadge = null;
 
     const value = results[metric.key];
     if (Number.isFinite(value)) {
@@ -213,24 +256,36 @@ function renderResults(tbody, results, dataset, reference) {
     }
 
     if (metric.key === 'whr') {
-      noteCell.textContent = whrReferenceNotes[reference] ?? whrReferenceNotes.neutral;
+      noteSegments.push(whrReferenceNotes[reference] ?? whrReferenceNotes.neutral);
     } else if (metric.key === 'bodyfat' && Number.isFinite(value)) {
-      noteCell.textContent = '手動輸入數值，僅於瀏覽器顯示。';
+      noteSegments.push('手動輸入數值，僅於瀏覽器顯示。');
     }
 
     if (dataset && metric.percentileKey) {
       const metricData = dataset.metrics?.[metric.percentileKey];
-      const { label, state } = getPercentile(metricData, value);
+      const { label, state, fallback } = getPercentile(metricData, value);
       if (label) {
-        const badge = formatBadge(label, state);
-        noteCell.appendChild(badge);
-        if (metric.key === 'whtR' && dataset.metrics?.whtR?.cut) {
-          noteCell.appendChild(document.createTextNode(' 臨界值 ' + dataset.metrics.whtR.cut));
-        }
+        percentileBadge = formatBadge(label, state);
+      }
+      if (metric.key === 'whtR' && dataset.metrics?.whtR?.cut) {
+        noteSegments.push(`臨界值 ${dataset.metrics.whtR.cut}`);
+      }
+      if (fallback) {
+        noteSegments.push('（此指標僅提供中位參考）');
       }
       if (metric.key === 'thighHeight') {
         context.thighPercent = { label, state };
       }
+    }
+
+    if (percentileBadge) {
+      noteCell.appendChild(percentileBadge);
+    }
+    if (noteSegments.length > 0) {
+      if (percentileBadge) {
+        noteCell.appendChild(document.createTextNode(' '));
+      }
+      noteCell.appendChild(document.createTextNode(noteSegments.join(' ')));
     }
 
     row.append(labelCell, valueCell, noteCell);
@@ -278,6 +333,7 @@ function attachCalculator() {
   const datasetSelect = qs('select[name="dataset"]', form);
   const referenceSelect = qs('select[name="reference"]', form);
   const trigger = qs('[data-calc-trigger]', form);
+  const datasetInfo = qs('[data-dataset-info]', calculator);
 
   populateDatasets(datasetSelect);
 
@@ -285,6 +341,7 @@ function attachCalculator() {
     const formValues = collectFormValues(form);
     const results = computeMetrics(formValues);
     const dataset = await loadDataset(formValues.dataset);
+    renderDatasetInfo(datasetInfo, dataset);
     const context = renderResults(tbody, results, dataset, formValues.reference || 'neutral');
     renderSuggestion(suggestionBox, results, context, formValues);
     tbody.dispatchEvent(new CustomEvent('results-updated', { bubbles: false }));
