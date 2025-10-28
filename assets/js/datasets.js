@@ -34,6 +34,14 @@ export async function loadDataset(key) {
     const response = await fetch(entry.file, { cache: 'no-store' });
     if (!response.ok) throw new Error('dataset load failed');
     const data = await response.json();
+    if (typeof window !== 'undefined' && window.DEBUG && data?.metrics) {
+      Object.entries(data.metrics).forEach(([metricKey, metricValue]) => {
+        if (metricValue?.diagnostic) {
+          const identifier = data.id ?? entry.id ?? key;
+          console.info(`[Dataset QA] ${identifier}:${metricKey}`, metricValue.diagnostic);
+        }
+      });
+    }
     datasetCache.set(key, data);
     return data;
   } catch (error) {
@@ -44,10 +52,10 @@ export async function loadDataset(key) {
 
 export function getPercentile(metricData, value) {
   const numeric = safeNumber(value);
-  if (!Number.isFinite(numeric) || !metricData) return { label: '—', state: null };
+  if (!Number.isFinite(numeric) || !metricData) return { label: '—', state: null, fallback: false };
   const available = percentileLabels.filter(({ key }) => typeof metricData[key] === 'number');
-  if (available.length === 0) return { label: '—', state: null };
-  const sorted = available.sort((a, b) => metricData[a.key] - metricData[b.key]);
+  if (available.length === 0) return { label: '—', state: null, fallback: false };
+  const sorted = [...available].sort((a, b) => metricData[a.key] - metricData[b.key]);
   let label = sorted[0].label;
   for (const step of sorted) {
     if (numeric >= metricData[step.key]) {
@@ -58,7 +66,8 @@ export function getPercentile(metricData, value) {
   if (metricData.cut && numeric >= metricData.cut) {
     state = 'alert';
   }
-  return { label, state };
+  const fallback = sorted.length === 1 && sorted[0].key === 'p50';
+  return { label, state, fallback };
 }
 
 export function getWhrCut(dataset, reference) {
