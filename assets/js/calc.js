@@ -144,6 +144,14 @@ const metrics = [
   }
 ];
 
+const datasetInfoHighlights = [
+  { key: 'shoulderHeightRatio', label: '肩/身高' },
+  { key: 'whtR', label: '腰高比' },
+  { key: 'whr', label: '腰臀比' },
+  { key: 'bmi', label: 'BMI' },
+  { key: 'thighHeightRatio', label: '大腿/身高' }
+];
+
 const referenceNotes = {
   neutral: '參考口徑：中性資料，建議維持彈性範圍。',
   female: '參考口徑：女性向資料，僅供趨勢對照。',
@@ -329,32 +337,56 @@ function renderDatasetInfo(element, dataset, populationEntry, populationData) {
         message += ' ｜ 尚未提供肩/身高百分位資料';
       }
     }
-    segments.push(message);
+    segments.push({ text: message });
   }
   if (dataset) {
     const name = dataset.name || dataset.id || '—';
-    const metricData = dataset.metrics?.shoulderHeightRatio;
-    if (!metricData) {
-      segments.push(`資料集：${name} ｜ 尚未提供肩/身高百分位資料`);
-    } else {
+    const highlights = datasetInfoHighlights.map(({ key, label }) => {
+      const metricData = dataset.metrics?.[key];
+      if (!metricData) {
+        return { label: `${label}（無）`, status: 'missing' };
+      }
       const { summary, fallback } = describePercentiles(metricData);
       if (!summary) {
-        segments.push(`資料集：${name} ｜ 尚未提供肩/身高百分位資料`);
-      } else {
-        let message = `資料集：${name} ｜ 肩/身高百分位 ${summary}`;
-        if (fallback) {
-          message += ' （此資料集僅提供中位數參考）';
-        }
-        segments.push(message);
+        return { label: `${label}（無）`, status: 'missing' };
       }
-    }
+      if (fallback) {
+        return { label: `${label}（僅中位）`, status: 'fallback' };
+      }
+      return { label, status: 'available' };
+    });
+    segments.push({ text: `資料集：${name}`, highlights });
+  } else {
+    segments.push({ text: '資料集：未選擇或載入失敗（僅顯示一般人群 PR）' });
   }
   if (segments.length === 0) {
     element.textContent = '';
     element.hidden = true;
     return;
   }
-  element.textContent = segments.join(' ｜ ');
+  const fragment = document.createDocumentFragment();
+  segments.forEach((segment, index) => {
+    if (index > 0) {
+      fragment.appendChild(document.createTextNode(' ｜ '));
+    }
+    const segmentEl = createEl('span', { className: 'dataset-info-segment' });
+    segmentEl.appendChild(document.createTextNode(segment.text));
+    if (Array.isArray(segment.highlights) && segment.highlights.length > 0) {
+      segmentEl.appendChild(document.createTextNode('：'));
+      const listEl = createEl('span', { className: 'dataset-info-metrics' });
+      segment.highlights.forEach(({ label, status }) => {
+        const className = ['dataset-info-chip', status ? `is-${status}` : null]
+          .filter(Boolean)
+          .join(' ');
+        const chip = createEl('span', { className, text: label });
+        listEl.appendChild(chip);
+      });
+      segmentEl.appendChild(document.createTextNode(' '));
+      segmentEl.appendChild(listEl);
+    }
+    fragment.appendChild(segmentEl);
+  });
+  element.replaceChildren(fragment);
   element.hidden = false;
 }
 
@@ -569,13 +601,18 @@ function renderResults(tbody, results, dataset, reference, populationDataset, mo
       }
     }
 
-    if (dataset && metric.percentileKey) {
-      const metricData = dataset.metrics?.[metric.percentileKey];
-      const { label, state, fallback } = getPercentile(metricData, value);
+    const datasetMetricKey = metric.percentileKey;
+    const datasetMetricData = datasetMetricKey ? dataset?.metrics?.[datasetMetricKey] : null;
+    if (datasetMetricKey && (!dataset || !datasetMetricData)) {
+      addNoteSegment(noteSegments, '資料集未提供');
+    }
+
+    if (datasetMetricData) {
+      const { label, state, fallback } = getPercentile(datasetMetricData, value);
       if (label) {
         percentileBadge = formatBadge(label, state);
       }
-      if (metric.key === 'whtR' && dataset.metrics?.whtR?.cut) {
+      if (metric.key === 'whtR' && dataset?.metrics?.whtR?.cut) {
         addNoteSegment(noteSegments, `臨界值 ${dataset.metrics.whtR.cut}`);
       }
       if (fallback) {
