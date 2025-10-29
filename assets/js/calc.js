@@ -608,7 +608,7 @@ function renderResults(tbody, results, dataset, reference, populationDataset, mo
 
     const datasetMetricKey = metric.percentileKey;
     const datasetMetricData = datasetMetricKey ? dataset?.metrics?.[datasetMetricKey] : null;
-    if (datasetMetricKey && (!dataset || !datasetMetricData)) {
+    if (dataset && datasetMetricKey && !datasetMetricData) {
       addNoteSegment(noteSegments, '資料集未提供');
     }
 
