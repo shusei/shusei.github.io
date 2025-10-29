@@ -3,7 +3,35 @@
   "locale": "zh-Hant",
   "source": "TODO: 引用來源填寫於此",
   "metrics": {
+    "bmi": {
+      "p10": null,
+      "p25": null,
+      "p50": null,
+      "p75": null,
+      "p90": null
+    },
     "shoulderHeightRatio": {
+      "p10": null,
+      "p25": null,
+      "p50": null,
+      "p75": null,
+      "p90": null
+    },
+    "shoulderHipRatio": {
+      "p10": null,
+      "p25": null,
+      "p50": null,
+      "p75": null,
+      "p90": null
+    },
+    "bustWaistRatio": {
+      "p10": null,
+      "p25": null,
+      "p50": null,
+      "p75": null,
+      "p90": null
+    },
+    "bustHeightRatio": {
       "p10": null,
       "p25": null,
       "p50": null,
@@ -35,6 +63,14 @@
     },
     "whrMale": {
       "cut": 0.9,
+      "betterDirection": "lower"
+    },
+    "bodyFatPct": {
+      "p10": null,
+      "p25": null,
+      "p50": null,
+      "p75": null,
+      "p90": null,
       "betterDirection": "lower"
     }
   }
