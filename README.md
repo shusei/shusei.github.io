@@ -8,7 +8,7 @@ https://shusei.github.io
 
 - **單頁應用**：所有內容於 `index.html`，搭配原生 View Transitions、CSS Container Queries、CSS Nesting 與 content-visibility。
 - **低調模式**：自動替換敏感字詞，提供按鈕與 Shift+Esc 快捷鍵，可記憶使用者偏好。
-- **比例與風險提示工具**：本地計算 BMI、WHtR、WHR 等指標，支援本地資料集百分位標籤與建議卡片。
+- **比例與風險提示工具**：本地計算 BMI、WHtR、WHR 等指標，支援本地資料集百分位標籤與建議卡片；需從介面中的「資料集」下拉選單挑選常模後，才會顯示百分位徽章與可用指標清單。
 - **隱私保護**：不含追蹤碼、不使用 Cookie、不與第三方分享資料。
 
 ## 目錄結構
