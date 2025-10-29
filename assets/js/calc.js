@@ -1,7 +1,17 @@
 import { qs, qsa, createEl, safeNumber, formatRatio, formatBadge } from './dom.js';
 import { loadDatasetManifest, loadDataset, getPercentile } from './datasets.js';
+import {
+  loadPopulationList,
+  loadPopulationData,
+  getPR as getPopulationPR,
+  loadModelList,
+  loadModelData,
+  getModelRange as resolveModelRange
+} from './datasets.adapter.js';
 
 const STORAGE_KEY = 'calc:formValues';
+const POPULATION_STORAGE_KEY = 'calc:populationDatasetId';
+const MODEL_STORAGE_KEY = 'calc:modelDatasetId';
 
 const metrics = [
   {
@@ -193,31 +203,132 @@ function describePercentiles(metricData) {
   return { summary, fallback };
 }
 
-function renderDatasetInfo(element, dataset) {
+function describePopulationPercentiles(metric) {
+  if (!metric || !Array.isArray(metric.quantiles) || metric.quantiles.length === 0) {
+    return { summary: null, fallback: false };
+  }
+  const preferred = new Map();
+  metric.quantiles.forEach((entry) => {
+    if (!Number.isFinite(entry.percentile) || !Number.isFinite(entry.value)) return;
+    const rounded = Math.round(entry.percentile);
+    if (preferred.has(rounded)) return;
+    if ([10, 25, 50, 75, 90].includes(rounded)) {
+      preferred.set(rounded, entry.value);
+    }
+  });
+  let summaryParts = [];
+  if (preferred.size > 0) {
+    summaryParts = [...preferred.entries()]
+      .sort((a, b) => a[0] - b[0])
+      .map(([percentile, value]) => `P${percentile} ${value.toFixed(3)}`);
+    const fallback = summaryParts.length === 1 && summaryParts[0].startsWith('P50');
+    return { summary: summaryParts.join(' · '), fallback };
+  }
+  const first = metric.quantiles.find(
+    (entry) => Number.isFinite(entry.percentile) && Number.isFinite(entry.value)
+  );
+  if (!first) return { summary: null, fallback: false };
+  const label = `P${Math.round(first.percentile)} ${first.value.toFixed(3)}`;
+  return { summary: label, fallback: Math.round(first.percentile) === 50 };
+}
+
+function addNoteSegment(segments, text) {
+  if (!text) return;
+  if (!segments.includes(text)) {
+    segments.push(text);
+  }
+}
+
+function formatRangeValue(value, formatter) {
+  if (!Number.isFinite(value)) return null;
+  if (typeof formatter === 'function') {
+    const formatted = formatter(value);
+    if (formatted !== null && formatted !== undefined && formatted !== '') {
+      return formatted;
+    }
+  }
+  return Number.isInteger(value) ? value.toString() : value.toFixed(3);
+}
+
+function formatModelRange(range, formatter) {
+  if (!range) return '—';
+  const loText = formatRangeValue(range.lo, formatter);
+  const hiText = formatRangeValue(range.hi, formatter);
+  if (loText && hiText) return `${loText}–${hiText}`;
+  if (loText) return `≥${loText}`;
+  if (hiText) return `≤${hiText}`;
+  const q1Text = formatRangeValue(range.q1, formatter);
+  const q3Text = formatRangeValue(range.q3, formatter);
+  if (q1Text && q3Text) return `${q1Text}–${q3Text}`;
+  if (q1Text) return `Q1 ${q1Text}`;
+  if (q3Text) return `Q3 ${q3Text}`;
+  return '—';
+}
+
+function formatPrDisplay(value) {
+  if (!Number.isFinite(value)) return '—';
+  const bounded = Math.max(0, Math.min(100, value));
+  return `${Math.round(bounded)} PR`;
+}
+
+function evaluateModelDeviation(value, range, label) {
+  if (!range || !Number.isFinite(value)) return null;
+  const below = Number.isFinite(range.lo) && value < range.lo;
+  const above = Number.isFinite(range.hi) && value > range.hi;
+  if (!below && !above) return null;
+  if (Number.isFinite(range.avg) && range.avg !== 0) {
+    const delta = ((value - range.avg) / range.avg) * 100;
+    if (Number.isFinite(delta)) {
+      const direction = delta >= 0 ? '高於' : '低於';
+      return `${label}平均${direction} ${Math.abs(delta).toFixed(1)}%`;
+    }
+  }
+  return `${label}範圍外`;
+}
+
+function renderDatasetInfo(element, dataset, populationEntry, populationData) {
   if (!element) return;
-  if (!dataset) {
+  const segments = [];
+  if (populationEntry) {
+    let message = `一般人群 PR 基準：${populationEntry.name}`;
+    if (populationData) {
+      const metric = populationData.metrics?.shoulderHeightRatio;
+      const { summary, fallback } = describePopulationPercentiles(metric);
+      if (summary) {
+        message += ` ｜ 肩/身高百分位 ${summary}`;
+        if (fallback) {
+          message += ' （僅提供中位參考）';
+        }
+      } else {
+        message += ' ｜ 尚未提供肩/身高百分位資料';
+      }
+    }
+    segments.push(message);
+  }
+  if (dataset) {
+    const name = dataset.name || dataset.id || '—';
+    const metricData = dataset.metrics?.shoulderHeightRatio;
+    if (!metricData) {
+      segments.push(`資料集：${name} ｜ 尚未提供肩/身高百分位資料`);
+    } else {
+      const { summary, fallback } = describePercentiles(metricData);
+      if (!summary) {
+        segments.push(`資料集：${name} ｜ 尚未提供肩/身高百分位資料`);
+      } else {
+        let message = `資料集：${name} ｜ 肩/身高百分位 ${summary}`;
+        if (fallback) {
+          message += ' （此資料集僅提供中位數參考）';
+        }
+        segments.push(message);
+      }
+    }
+  }
+  if (segments.length === 0) {
     element.textContent = '';
     element.hidden = true;
     return;
   }
-  const name = dataset.name || dataset.id || '—';
-  const metricData = dataset.metrics?.shoulderHeightRatio;
-  if (!metricData) {
-    element.textContent = `資料集：${name} ｜ 尚未提供肩/身高百分位資料`;
-    element.hidden = false;
-    return;
-  }
-  const { summary, fallback } = describePercentiles(metricData);
-  if (!summary) {
-    element.textContent = `資料集：${name} ｜ 尚未提供肩/身高百分位資料`;
-    element.hidden = false;
-    return;
-  }
-  let message = `資料集：${name} ｜ 肩/身高百分位 ${summary}`;
-  if (fallback) {
-    message += ' （此資料集僅提供中位數參考）';
-  }
-  element.textContent = message;
+  element.textContent = segments.join(' ｜ ');
   element.hidden = false;
 }
 
@@ -298,13 +409,16 @@ function computeMetrics(values) {
   return result;
 }
 
-function renderResults(tbody, results, dataset, reference) {
+function renderResults(tbody, results, dataset, reference, populationDataset, modelDataset) {
   tbody.innerHTML = '';
   const context = {};
   metrics.forEach((metric) => {
     const row = createEl('tr');
     const labelCell = createEl('th', { text: metric.label, attrs: { scope: 'row' } });
     const valueCell = createEl('td');
+    const prCell = createEl('td', { text: '—' });
+    const flatCell = createEl('td', { text: '—' });
+    const runwayCell = createEl('td', { text: '—' });
     const noteCell = createEl('td');
     noteCell.textContent = '';
     const noteSegments = [];
@@ -317,10 +431,85 @@ function renderResults(tbody, results, dataset, reference) {
       valueCell.textContent = '';
     }
 
+    const populationMetricKey = metric.percentileKey ?? metric.key;
+    const populationMetric = populationDataset?.metrics?.[populationMetricKey];
+    if (Number.isFinite(value) && populationMetric) {
+      const prValue = getPopulationPR(populationMetric, value);
+      prCell.textContent = formatPrDisplay(prValue);
+      if (Number.isFinite(prValue)) {
+        if (prValue >= 85) {
+          addNoteSegment(noteSegments, 'PR ≥85：指標落在人群較高段，建議持續追蹤相關風險。');
+        }
+        if (prValue <= 15) {
+          addNoteSegment(noteSegments, 'PR ≤15：指標落在人群較低段，建議與專業人員討論可能的健康影響。');
+        }
+      }
+    }
+
+    const modelMetricKey = metric.percentileKey ?? metric.key;
+    const flatRange = modelDataset ? resolveModelRange(modelDataset, 'flat', modelMetricKey) : null;
+    const runwayRange = modelDataset ? resolveModelRange(modelDataset, 'runway', modelMetricKey) : null;
+    flatCell.textContent = formatModelRange(flatRange, metric.formatter);
+    runwayCell.textContent = formatModelRange(runwayRange, metric.formatter);
+
     if (metric.key === 'whr') {
-      noteSegments.push(whrReferenceNotes[reference] ?? whrReferenceNotes.neutral);
+      addNoteSegment(noteSegments, whrReferenceNotes[reference] ?? whrReferenceNotes.neutral);
     } else if (metric.key === 'bodyfat' && Number.isFinite(value)) {
-      noteSegments.push('手動輸入數值，僅於瀏覽器顯示。');
+      addNoteSegment(noteSegments, '手動輸入數值，僅於瀏覽器顯示。');
+    }
+
+    if (metric.key === 'whtR') {
+      const cutValue = Number.isFinite(populationDataset?.whtRCut)
+        ? populationDataset.whtRCut
+        : Number.isFinite(populationDataset?.metrics?.whtR?.cut)
+        ? populationDataset.metrics.whtR.cut
+        : null;
+      if (Number.isFinite(cutValue)) {
+        addNoteSegment(noteSegments, `臨界值 ${formatRatio(cutValue, 2)}`);
+      }
+    }
+
+    if (metric.key === 'whr') {
+      const whrCut =
+        reference === 'female'
+          ? populationDataset?.whrFemaleCut ?? populationDataset?.metrics?.whrFemale?.cut ?? null
+          : reference === 'male'
+            ? populationDataset?.whrMaleCut ?? populationDataset?.metrics?.whrMale?.cut ?? null
+            : populationDataset?.metrics?.whr?.cut ?? null;
+      if (Number.isFinite(whrCut)) {
+        addNoteSegment(noteSegments, `臨界值 ${formatRatio(whrCut, 2)}`);
+      }
+    }
+
+    if (metric.key === 'shoulderHeight' && Number.isFinite(value)) {
+      const medians = populationDataset?.shoulderMedians;
+      const shoulderNotes = [];
+      if (medians && Number.isFinite(medians.cisMale) && medians.cisMale !== 0) {
+        const delta = Math.abs(((value - medians.cisMale) / medians.cisMale) * 100);
+        if (Number.isFinite(delta)) {
+          shoulderNotes.push(`相對 cis-male 中位數 ±${delta.toFixed(1)}%`);
+        }
+      }
+      if (medians && Number.isFinite(medians.cisFemale) && medians.cisFemale !== 0) {
+        const delta = Math.abs(((value - medians.cisFemale) / medians.cisFemale) * 100);
+        if (Number.isFinite(delta)) {
+          shoulderNotes.push(`相對 cis-female 中位數 ±${delta.toFixed(1)}%`);
+        }
+      }
+      if (shoulderNotes.length > 0) {
+        addNoteSegment(noteSegments, shoulderNotes.join('；'));
+      }
+    }
+
+    if (Number.isFinite(value)) {
+      const modelNotes = [];
+      const flatDeviation = evaluateModelDeviation(value, flatRange, '平面模特');
+      if (flatDeviation) modelNotes.push(flatDeviation);
+      const runwayDeviation = evaluateModelDeviation(value, runwayRange, '伸展台模特');
+      if (runwayDeviation) modelNotes.push(runwayDeviation);
+      if (modelNotes.length > 0) {
+        addNoteSegment(noteSegments, modelNotes.join('；'));
+      }
     }
 
     if (dataset && metric.percentileKey) {
@@ -330,10 +519,10 @@ function renderResults(tbody, results, dataset, reference) {
         percentileBadge = formatBadge(label, state);
       }
       if (metric.key === 'whtR' && dataset.metrics?.whtR?.cut) {
-        noteSegments.push(`臨界值 ${dataset.metrics.whtR.cut}`);
+        addNoteSegment(noteSegments, `臨界值 ${dataset.metrics.whtR.cut}`);
       }
       if (fallback) {
-        noteSegments.push('（此指標僅提供中位參考）');
+        addNoteSegment(noteSegments, '（此指標僅提供中位參考）');
       }
       if (metric.key === 'thighHeight') {
         context.thighPercent = { label, state };
@@ -344,16 +533,204 @@ function renderResults(tbody, results, dataset, reference) {
       noteCell.appendChild(percentileBadge);
     }
     if (noteSegments.length > 0) {
-      if (percentileBadge) {
+      if (noteCell.childNodes.length > 0) {
         noteCell.appendChild(document.createTextNode(' '));
       }
       noteCell.appendChild(document.createTextNode(noteSegments.join(' ')));
     }
 
-    row.append(labelCell, valueCell, noteCell);
+    row.append(labelCell, valueCell, prCell, flatCell, runwayCell, noteCell);
     tbody.appendChild(row);
   });
   return context;
+}
+
+function summarizeSources(candidate) {
+  if (!candidate) return [];
+  if (typeof candidate === 'string') {
+    const trimmed = candidate.trim();
+    return trimmed ? [trimmed] : [];
+  }
+  if (Array.isArray(candidate)) {
+    return candidate
+      .map((item) => {
+        if (!item) return null;
+        if (typeof item === 'string') return item.trim();
+        if (typeof item === 'object') {
+          const title = item.title ?? item.name ?? item.label ?? item.source;
+          return typeof title === 'string' ? title.trim() : null;
+        }
+        return null;
+      })
+      .filter((title) => title && title.length > 0);
+  }
+  if (typeof candidate === 'object') {
+    const title = candidate.title ?? candidate.name ?? candidate.label ?? candidate.source;
+    if (typeof title === 'string') {
+      const trimmed = title.trim();
+      return trimmed ? [trimmed] : [];
+    }
+  }
+  return [];
+}
+
+function formatSampleSize(sampleSize) {
+  if (sampleSize === null || sampleSize === undefined) return null;
+  if (typeof sampleSize === 'number' && Number.isFinite(sampleSize)) {
+    return `n=${sampleSize}`;
+  }
+  if (typeof sampleSize === 'string') {
+    const trimmed = sampleSize.trim();
+    if (!trimmed) return null;
+    if (/^n\s*=\s*/i.test(trimmed)) {
+      return trimmed.replace(/\s+/g, ' ');
+    }
+    return `n=${trimmed}`;
+  }
+  return null;
+}
+
+function extractModelMeta(modelEntry, modelData) {
+  const result = {
+    name: modelEntry?.name ?? modelData?.name ?? modelEntry?.id ?? null,
+    sources: [],
+    year: null,
+    sampleSize: null
+  };
+  if (modelData && typeof modelData === 'object') {
+    const containers = [modelData, modelData.metadata, modelData.meta, modelData.info, modelData.details];
+    const sourceCandidate = modelData.source ?? modelData.sources ?? modelData.references ?? modelData.citations;
+    result.sources = summarizeSources(sourceCandidate);
+    for (const container of containers) {
+      if (!container || typeof container !== 'object') continue;
+      if (!result.year) {
+        const yearValue = container.year ?? container.dataYear ?? container.releaseYear ?? container.publicationYear;
+        if (typeof yearValue === 'number' && Number.isFinite(yearValue)) {
+          result.year = yearValue;
+        } else if (typeof yearValue === 'string' && yearValue.trim()) {
+          const match = yearValue.match(/\d{4}/);
+          result.year = match ? match[0] : yearValue.trim();
+        }
+      }
+      if (!result.sampleSize) {
+        const sampleValue =
+          container.n ??
+          container.N ??
+          container.sampleSize ??
+          container.sample_size ??
+          container.sample ??
+          container.samples ??
+          container.count;
+        if (typeof sampleValue === 'number' && Number.isFinite(sampleValue)) {
+          result.sampleSize = sampleValue;
+        } else if (typeof sampleValue === 'string' && sampleValue.trim()) {
+          const numeric = sampleValue.replace(/[^\d.]/g, '');
+          if (numeric) {
+            const parsed = Number.parseFloat(numeric);
+            if (Number.isFinite(parsed)) {
+              result.sampleSize = parsed;
+            } else {
+              result.sampleSize = sampleValue.trim();
+            }
+          } else {
+            result.sampleSize = sampleValue.trim();
+          }
+        }
+      }
+    }
+  }
+  if (!result.sources.length && modelEntry?.source) {
+    result.sources = summarizeSources(modelEntry.source);
+  }
+  return result;
+}
+
+function renderFootnotes(container, populationEntry, populationData, modelEntry, modelData) {
+  if (!container) return;
+  const segments = [];
+  if (populationEntry) {
+    const pieces = [];
+    const populationName = populationEntry.name || populationData?.name || populationEntry.id;
+    if (populationName) pieces.push(populationName);
+    const meta = populationData?.meta;
+    if (populationData && meta) {
+      if (Array.isArray(meta.sources) && meta.sources.length > 0) {
+        pieces.push(`來源：${meta.sources.join('、')}`);
+      }
+      if (meta.year) {
+        pieces.push(`年份：${meta.year}`);
+      }
+      const sampleText = formatSampleSize(meta.sampleSize);
+      if (sampleText) {
+        pieces.push(`樣本：${sampleText}`);
+      }
+    } else if (populationData == null) {
+      pieces.push('資料讀取失敗');
+    }
+    if (pieces.length > 0) {
+      segments.push(`一般人群：${pieces.join('，')}`);
+    }
+  }
+
+  if (modelEntry && modelEntry.id && modelEntry.id !== 'off') {
+    const meta = extractModelMeta(modelEntry, modelData || null);
+    const pieces = [];
+    if (meta.name) {
+      pieces.push(meta.name);
+    }
+    if (meta.sources.length > 0) {
+      pieces.push(`來源：${meta.sources.join('、')}`);
+    }
+    if (meta.year) {
+      pieces.push(`年份：${meta.year}`);
+    }
+    const sampleText = formatSampleSize(meta.sampleSize);
+    if (sampleText) {
+      pieces.push(`樣本：${sampleText}`);
+    }
+    if (modelData == null) {
+      pieces.push('資料讀取失敗');
+    }
+    if (pieces.length > 0) {
+      segments.push(`模特資料：${pieces.join('，')}`);
+    }
+  }
+
+  if (segments.length === 0) {
+    container.textContent = '';
+    container.hidden = true;
+    return;
+  }
+  container.textContent = segments.join(' ｜ ');
+  container.hidden = false;
+}
+
+function readSelection(key) {
+  if (typeof localStorage === 'undefined') return null;
+  try {
+    return localStorage.getItem(key);
+  } catch (error) {
+    console.warn('Failed to read selector preference', key, error);
+    return null;
+  }
+}
+
+function writeSelection(key, value) {
+  if (typeof localStorage === 'undefined') return;
+  try {
+    localStorage.setItem(key, value);
+  } catch (error) {
+    console.warn('Failed to persist selector preference', key, error);
+  }
+}
+
+function clearSelection(key) {
+  if (typeof localStorage === 'undefined') return;
+  try {
+    localStorage.removeItem(key);
+  } catch (error) {
+    console.warn('Failed to clear selector preference', key, error);
+  }
 }
 
 function renderSuggestion(container, results, context, formValues) {
@@ -392,25 +769,117 @@ function attachCalculator() {
   const form = qs('form', calculator);
   const tbody = qs('tbody', calculator);
   const suggestionBox = qs('[data-suggestion]', calculator);
+  const populationSelect = qs('[data-population-select]', calculator);
+  const modelSelect = qs('[data-model-select]', calculator);
   const datasetSelect = qs('select[name="dataset"]', form);
   const referenceSelect = qs('select[name="reference"]', form);
   const trigger = qs('[data-calc-trigger]', form);
   const datasetInfo = qs('[data-dataset-info]', calculator);
+  const footnote = qs('[data-footnote]', calculator);
   const saveButton = qs('[data-save-values]', form);
   const loadButton = qs('[data-load-values]', form);
   const storageInfo = qs('[data-storage-info]', calculator);
 
   const showStorageMessage = (message, state) => updateStorageMessage(storageInfo, message, state);
 
+  let populationListEntries = [];
+  let modelListEntries = [];
+
+  const initializePopulationSelect = async () => {
+    if (!populationSelect) return;
+    populationSelect.innerHTML = '';
+    populationSelect.disabled = true;
+    const list = await loadPopulationList();
+    populationListEntries = list;
+    if (!list.length) {
+      const option = document.createElement('option');
+      option.value = '';
+      option.textContent = '無資料';
+      populationSelect.appendChild(option);
+      populationSelect.disabled = true;
+      clearSelection(POPULATION_STORAGE_KEY);
+      return;
+    }
+    list.forEach((entry) => {
+      const option = document.createElement('option');
+      option.value = entry.id;
+      option.textContent = entry.name;
+      populationSelect.appendChild(option);
+    });
+    const storedId = readSelection(POPULATION_STORAGE_KEY);
+    const fallbackId = list[0].id;
+    if (storedId && list.some((entry) => entry.id === storedId)) {
+      populationSelect.value = storedId;
+    } else {
+      populationSelect.value = fallbackId;
+      writeSelection(POPULATION_STORAGE_KEY, fallbackId);
+    }
+    populationSelect.disabled = false;
+  };
+
+  const initializeModelSelect = async () => {
+    if (!modelSelect) return;
+    modelSelect.innerHTML = '';
+    modelSelect.disabled = true;
+    const list = await loadModelList();
+    modelListEntries = list;
+    if (!list.length) {
+      const option = document.createElement('option');
+      option.value = '';
+      option.textContent = '無資料';
+      modelSelect.appendChild(option);
+      clearSelection(MODEL_STORAGE_KEY);
+      return;
+    }
+    const offOption = document.createElement('option');
+    offOption.value = 'off';
+    offOption.textContent = '—';
+    modelSelect.appendChild(offOption);
+    list.forEach((entry) => {
+      const option = document.createElement('option');
+      option.value = entry.id;
+      option.textContent = entry.name;
+      modelSelect.appendChild(option);
+    });
+    const storedId = readSelection(MODEL_STORAGE_KEY);
+    if (storedId === 'off' || storedId === null) {
+      modelSelect.value = 'off';
+      writeSelection(MODEL_STORAGE_KEY, 'off');
+    } else if (list.some((entry) => entry.id === storedId)) {
+      modelSelect.value = storedId;
+    } else {
+      modelSelect.value = 'off';
+      writeSelection(MODEL_STORAGE_KEY, 'off');
+    }
+    modelSelect.disabled = false;
+  };
+
   populateDatasets(datasetSelect);
+  initializePopulationSelect();
+  initializeModelSelect();
 
   trigger.addEventListener('click', async () => {
     const formValues = collectFormValues(form);
     const results = computeMetrics(formValues);
-    const dataset = await loadDataset(formValues.dataset);
-    renderDatasetInfo(datasetInfo, dataset);
-    const context = renderResults(tbody, results, dataset, formValues.reference || 'neutral');
+    const populationId = populationSelect?.value ?? '';
+    const populationEntry = populationListEntries.find((item) => item.id === populationId) ?? null;
+    const modelId = modelSelect?.value ?? 'off';
+    const modelEntry = modelId && modelId !== 'off' ? modelListEntries.find((item) => item.id === modelId) ?? null : null;
+    const datasetPromise = loadDataset(formValues.dataset);
+    const populationPromise = populationEntry ? loadPopulationData(populationEntry.file) : Promise.resolve(null);
+    const modelPromise = modelEntry ? loadModelData(modelEntry.file) : Promise.resolve(null);
+    const [dataset, populationData, modelData] = await Promise.all([datasetPromise, populationPromise, modelPromise]);
+    renderDatasetInfo(datasetInfo, dataset, populationEntry, populationData);
+    const context = renderResults(
+      tbody,
+      results,
+      dataset,
+      formValues.reference || 'neutral',
+      populationData,
+      modelData
+    );
     renderSuggestion(suggestionBox, results, context, formValues);
+    renderFootnotes(footnote, populationEntry, populationData, modelEntry, modelData);
     tbody.dispatchEvent(new CustomEvent('results-updated', { bubbles: false }));
   });
 
@@ -426,6 +895,24 @@ function attachCalculator() {
   datasetSelect.addEventListener('change', () => {
     trigger.click();
   });
+
+  if (populationSelect) {
+    populationSelect.addEventListener('change', () => {
+      if (!populationSelect.disabled) {
+        writeSelection(POPULATION_STORAGE_KEY, populationSelect.value);
+        trigger.click();
+      }
+    });
+  }
+
+  if (modelSelect) {
+    modelSelect.addEventListener('change', () => {
+      if (!modelSelect.disabled) {
+        writeSelection(MODEL_STORAGE_KEY, modelSelect.value);
+        trigger.click();
+      }
+    });
+  }
 
   if (saveButton) {
     saveButton.addEventListener('click', () => {
