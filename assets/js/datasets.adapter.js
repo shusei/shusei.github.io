@@ -14,8 +14,8 @@ const modelDataCache = new Map();
 const percentilePattern = /^p(\d{1,3})(?:_(\d{1,3}))?$/i;
 
 const typeAliases = {
-  flat: ['flat', 'print', 'catalog', 'catalogue', 'commercial', 'editorial-flat', '平面'],
-  runway: ['runway', 'catwalk', 'editorial', 'show', '伸展台']
+  flat: ['flat', 'print', 'catalog', 'catalogue', 'commercial', 'editorial-flat', 'plane', 'plane-model', '平面', '平面模特', '平面模特兒'],
+  runway: ['runway', 'catwalk', 'editorial', 'show', 'runway-model', '伸展台', '伸展台模特']
 };
 
 const rangeKeyAliases = {
@@ -316,7 +316,12 @@ export async function loadModelList() {
         const file = item.file ?? item.path ?? null;
         if (!id || !file) return null;
         const name = item.name ?? item.title ?? id;
-        return { id, name, file };
+        const description = item.description ?? item.summary ?? null;
+        const source = item.source ?? item.sources ?? null;
+        const year = item.year ?? item.dataYear ?? item.releaseYear ?? null;
+        const sampleSize =
+          item.sampleSize ?? item.samples ?? item.sample_size ?? item.n ?? item.N ?? null;
+        return { id, name, file, description, source, year, sampleSize };
       })
       .filter(Boolean);
   } catch (error) {

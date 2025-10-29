@@ -1,0 +1,35 @@
+{
+  "id": "model-reference-asia-2024",
+  "name": "2024 亞洲平面/伸展台模特比例參考",
+  "description": "依據 2024 亞洲時裝週與商業拍攝資料整理的身形比例範圍。",
+  "metadata": {
+    "year": 2024,
+    "sampleSize": 58,
+    "sources": [
+      "2024 台北時裝週造型統計",
+      "2024 亞洲精品平面拍攝匯整"
+    ]
+  },
+  "metrics": {
+    "thighHeightRatio": {
+      "plane": { "lo": 0.265, "hi": 0.305, "avg": 0.285 },
+      "runway": { "lo": 0.240, "hi": 0.275, "avg": 0.257 }
+    },
+    "calfHeightRatio": {
+      "plane": { "lo": 0.175, "hi": 0.205, "avg": 0.190 },
+      "runway": { "lo": 0.165, "hi": 0.195, "avg": 0.180 }
+    },
+    "shoulderHeightRatio": {
+      "plane": { "lo": 0.315, "hi": 0.345, "avg": 0.330 },
+      "runway": { "lo": 0.305, "hi": 0.335, "avg": 0.320 }
+    },
+    "whtR": {
+      "plane": { "lo": 0.355, "hi": 0.420, "avg": 0.388 },
+      "runway": { "lo": 0.335, "hi": 0.400, "avg": 0.368 }
+    },
+    "whr": {
+      "plane": { "lo": 0.700, "hi": 0.780, "avg": 0.740 },
+      "runway": { "lo": 0.680, "hi": 0.760, "avg": 0.720 }
+    }
+  }
+}
