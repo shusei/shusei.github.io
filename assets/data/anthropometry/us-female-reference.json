@@ -13,6 +13,11 @@
       "title": "Continental AG (2024) Ergonomics Requirement Specification — Anthropometric Data (P5/P50/P95)",
       "url": "https://cdn.continental.com/fileadmin/user_upload/demo_content/images/anthropometric_data_en_combined.pdf",
       "note": "Country-level P5/P50/P95 for stature and biacromial breadth used to derive ratio percentiles."
+    },
+    {
+      "title": "Fryar CD, Kruszon-Moran D, Gu Q, Ogden CL. Anthropometric Reference Data for Children and Adults: United States, 2015–2018. Vital and Health Statistics. 2021;3(46)",
+      "url": "https://stacks.cdc.gov/view/cdc/104773",
+      "note": "NHANES 2015–2018 waist, hip, thigh, calf circumferences (P5/P50/P95) for adults aged ≥20 years."
     }
   ],
   "metrics": {
@@ -51,6 +56,155 @@
         }
       },
       "notes": "Derived by simulating correlated stature and biacromial breadth using country-specific P5/P50/P95. Correlation reflects positive covariation of height and shoulder breadth. The ratio percentiles (p10,p25,p50,p75,p90) are intended for labeling only; use 'diagnostic' if auditing."
+    },
+    "whtR": {
+      "unit": "ratio",
+      "p10": 0.447484,
+      "p25": 0.512402,
+      "p50": 0.582895,
+      "p75": 0.653461,
+      "p90": 0.716871,
+      "cut": 0.5,
+      "quantiles": [
+        { "percentile": 10, "value": 0.447484 },
+        { "percentile": 25, "value": 0.512402 },
+        { "percentile": 50, "value": 0.582895 },
+        { "percentile": 75, "value": 0.653461 },
+        { "percentile": 90, "value": 0.716871 }
+      ],
+      "computedFrom": {
+        "height_mm": { "p5": 1512, "p50": 1621, "p95": 1749 },
+        "waist_mm": { "p5": 685, "p50": 944, "p95": 1260 },
+        "assumptions": {
+          "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
+          "correlation_rho": 0.25,
+          "samples": 150000,
+          "method": "Monte Carlo; ratio = waist / height"
+        }
+      },
+      "notes": "Waist-to-height ratio derived from NHANES 2015–2018 adult female circumferences with modest positive correlation between stature and waist size."
+    },
+    "whr": {
+      "unit": "ratio",
+      "p10": 0.70653,
+      "p25": 0.788069,
+      "p50": 0.876441,
+      "p75": 0.964145,
+      "p90": 1.04265,
+      "quantiles": [
+        { "percentile": 10, "value": 0.70653 },
+        { "percentile": 25, "value": 0.788069 },
+        { "percentile": 50, "value": 0.876441 },
+        { "percentile": 75, "value": 0.964145 },
+        { "percentile": 90, "value": 1.04265 }
+      ],
+      "computedFrom": {
+        "waist_mm": { "p5": 685, "p50": 944, "p95": 1260 },
+        "hip_mm": { "p5": 935, "p50": 1077, "p95": 1275 },
+        "assumptions": {
+          "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
+          "correlation_rho": 0.6,
+          "samples": 150000,
+          "method": "Monte Carlo; ratio = waist / hip"
+        }
+      },
+      "notes": "Adult female waist-to-hip ratio derived from NHANES 2015–2018 distribution of waist and hip circumferences."
+    },
+    "thighHeightRatio": {
+      "unit": "ratio",
+      "p10": 0.310289,
+      "p25": 0.337386,
+      "p50": 0.36817,
+      "p75": 0.398989,
+      "p90": 0.42662,
+      "quantiles": [
+        { "percentile": 10, "value": 0.310289 },
+        { "percentile": 25, "value": 0.337386 },
+        { "percentile": 50, "value": 0.36817 },
+        { "percentile": 75, "value": 0.398989 },
+        { "percentile": 90, "value": 0.42662 }
+      ],
+      "computedFrom": {
+        "height_mm": { "p5": 1512, "p50": 1621, "p95": 1749 },
+        "thigh_circumference_mm": { "p5": 490, "p50": 597, "p95": 744 },
+        "assumptions": {
+          "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
+          "correlation_rho": 0.3,
+          "samples": 150000,
+          "method": "Monte Carlo; ratio = thigh / height"
+        }
+      },
+      "notes": "Upper thigh circumference divided by stature; simulated from NHANES adult female upper leg girths and stature."
+    },
+    "calfHeightRatio": {
+      "unit": "ratio",
+      "p10": 0.208791,
+      "p25": 0.223501,
+      "p50": 0.239886,
+      "p75": 0.25644,
+      "p90": 0.271254,
+      "quantiles": [
+        { "percentile": 10, "value": 0.208791 },
+        { "percentile": 25, "value": 0.223501 },
+        { "percentile": 50, "value": 0.239886 },
+        { "percentile": 75, "value": 0.25644 },
+        { "percentile": 90, "value": 0.271254 }
+      ],
+      "computedFrom": {
+        "height_mm": { "p5": 1512, "p50": 1621, "p95": 1749 },
+        "calf_circumference_mm": { "p5": 331, "p50": 389, "p95": 466 },
+        "assumptions": {
+          "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
+          "correlation_rho": 0.3,
+          "samples": 150000,
+          "method": "Monte Carlo; ratio = calf / height"
+        }
+      },
+      "notes": "Calf circumference divided by stature; simulated from NHANES adult female lower leg girths and stature."
+    },
+    "whrFemale": {
+      "unit": "ratio",
+      "cut": 0.85,
+      "quantiles": [
+        { "percentile": 10, "value": 0.70653 },
+        { "percentile": 25, "value": 0.788069 },
+        { "percentile": 50, "value": 0.876441 },
+        { "percentile": 75, "value": 0.964145 },
+        { "percentile": 90, "value": 1.04265 }
+      ],
+      "computedFrom": {
+        "waist_mm": { "p5": 685, "p50": 944, "p95": 1260 },
+        "hip_mm": { "p5": 935, "p50": 1077, "p95": 1275 },
+        "assumptions": {
+          "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
+          "correlation_rho": 0.6,
+          "samples": 150000,
+          "method": "Monte Carlo; ratio = waist / hip"
+        }
+      },
+      "notes": "Female waist-to-hip distribution (NHANES 2015–2018); cut = WHO metabolic risk alert (0.85)."
+    },
+    "whrMale": {
+      "unit": "ratio",
+      "cut": 0.9,
+      "quantiles": [
+        { "percentile": 10, "value": 0.819085 },
+        { "percentile": 25, "value": 0.890476 },
+        { "percentile": 50, "value": 0.968766 },
+        { "percentile": 75, "value": 1.046516 },
+        { "percentile": 90, "value": 1.117174 }
+      ],
+      "computedFrom": {
+        "waist_mm": { "p5": 783, "p50": 1016, "p95": 1281 },
+        "hip_mm": { "p5": 914, "p50": 1049, "p95": 1214 },
+        "assumptions": {
+          "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
+          "correlation_rho": 0.6,
+          "samples": 150000,
+          "method": "Monte Carlo; ratio = waist / hip"
+        }
+      },
+      "notes": "Male waist-to-hip distribution (NHANES 2015–2018) included for mixed-household comparisons; cut = WHO metabolic risk alert (0.90)."
     }
   }
 }
