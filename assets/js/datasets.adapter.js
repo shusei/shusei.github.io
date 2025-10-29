@@ -192,7 +192,9 @@ function normalizeMetric(metric) {
     unit: typeof metric.unit === 'string' ? metric.unit : null,
     raw: sortedRaw,
     quantiles: uniqueQuantiles,
-    cut: typeof metric.cut === 'number' && Number.isFinite(metric.cut) ? metric.cut : null
+    cut: typeof metric.cut === 'number' && Number.isFinite(metric.cut) ? metric.cut : null,
+    betterDirection:
+      typeof metric.betterDirection === 'string' ? metric.betterDirection : null
   };
 }
 
@@ -354,47 +356,98 @@ function upperBound(sorted, value) {
   return low;
 }
 
+function clampPercentile(value) {
+  if (!Number.isFinite(value)) return null;
+  if (value < 0) return 0;
+  if (value > 100) return 100;
+  return Number(value);
+}
+
+function interpolatePercentile(lower, upper, target) {
+  if (!lower || !upper) return null;
+  if (upper.value === lower.value) {
+    return (upper.percentile + lower.percentile) / 2;
+  }
+  const fraction = (target - lower.value) / (upper.value - lower.value);
+  return lower.percentile + fraction * (upper.percentile - lower.percentile);
+}
+
 export function getPR(metric, value) {
   const numeric = toNumber(value);
-  if (numeric === null || !metric) return null;
+  if (numeric === null || !metric) {
+    return { percentile: null, rawPercentile: null, method: null };
+  }
 
   if (Array.isArray(metric.raw) && metric.raw.length > 0) {
     const position = upperBound(metric.raw, numeric);
-    const percentile = (position / metric.raw.length) * 100;
-    return Number(Math.max(0, Math.min(100, percentile)));
+    const rawPercentile = (position / metric.raw.length) * 100;
+    return {
+      percentile: clampPercentile(rawPercentile),
+      rawPercentile,
+      method: 'empirical'
+    };
   }
 
   if (Array.isArray(metric.quantiles) && metric.quantiles.length >= 2) {
-    const points = metric.quantiles
-      .map((entry) => ({ value: entry.value, percentile: entry.percentile }))
-      .filter((entry) => Number.isFinite(entry.value) && Number.isFinite(entry.percentile))
-      .sort((a, b) => a.value - b.value);
-    if (points.length < 2) return null;
-    if (numeric <= points[0].value) {
-      return Number(Math.max(0, Math.min(100, points[0].percentile)));
+    const deduped = new Map();
+    metric.quantiles.forEach((entry) => {
+      const percentile = toNumber(entry.percentile ?? entry.p ?? entry.quantile);
+      const valueNumber = toNumber(entry.value);
+      if (!Number.isFinite(percentile) || !Number.isFinite(valueNumber)) return;
+      const key = valueNumber.toPrecision(12);
+      const existing = deduped.get(key);
+      if (!existing || percentile > existing.percentile) {
+        deduped.set(key, { value: valueNumber, percentile });
+      }
+    });
+    const points = Array.from(deduped.values()).sort((a, b) => a.value - b.value);
+    if (points.length === 0) {
+      return { percentile: null, rawPercentile: null, method: null };
     }
+    if (points.length === 1) {
+      const rawPercentile = points[0].percentile;
+      return { percentile: clampPercentile(rawPercentile), rawPercentile, method: 'quantile-single' };
+    }
+
+    const firstPoint = points[0];
     const lastPoint = points[points.length - 1];
-    if (numeric >= lastPoint.value) {
-      return Number(Math.max(0, Math.min(100, lastPoint.percentile)));
+    let rawPercentile = null;
+
+    if (numeric <= firstPoint.value) {
+      rawPercentile = interpolatePercentile(firstPoint, points[1], numeric);
+    } else if (numeric >= lastPoint.value) {
+      rawPercentile = interpolatePercentile(points[points.length - 2], lastPoint, numeric);
+    } else {
+      for (let i = 1; i < points.length; i += 1) {
+        const previous = points[i - 1];
+        const current = points[i];
+        if (numeric === current.value) {
+          rawPercentile = current.percentile;
+          break;
+        }
+        if (numeric === previous.value) {
+          rawPercentile = previous.percentile;
+          break;
+        }
+        if (numeric < current.value) {
+          rawPercentile = interpolatePercentile(previous, current, numeric);
+          break;
+        }
+      }
     }
-    for (let i = 1; i < points.length; i += 1) {
-      const current = points[i];
-      const previous = points[i - 1];
-      if (numeric === current.value) {
-        return Number(Math.max(0, Math.min(100, current.percentile)));
-      }
-      if (numeric === previous.value) {
-        return Number(Math.max(0, Math.min(100, previous.percentile)));
-      }
-      if (numeric < current.value && current.value !== previous.value) {
-        const fraction = (numeric - previous.value) / (current.value - previous.value);
-        const interpolated = previous.percentile + fraction * (current.percentile - previous.percentile);
-        return Number(Math.max(0, Math.min(100, interpolated)));
-      }
+
+    if (!Number.isFinite(rawPercentile)) {
+      rawPercentile = lastPoint.percentile;
     }
+
+    return {
+      percentile: clampPercentile(rawPercentile),
+      rawPercentile,
+      method: 'quantile-linear'
+    };
   }
 
-  return null;
+  return { percentile: null, rawPercentile: null, method: null };
 }
 
 function normalizeKeyVariants(key) {

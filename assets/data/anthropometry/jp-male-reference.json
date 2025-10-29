@@ -15,7 +15,7 @@
       "note": "Country-level P5/P50/P95 for stature and biacromial breadth used to derive ratio percentiles."
     },
     {
-      "title": "Japanese Industrial Standards Committee. JIS Z 8500:2019 — Human body dimensions", 
+      "title": "Japanese Industrial Standards Committee. JIS Z 8500:2019 — Human body dimensions",
       "url": "https://www.jisc.go.jp/eng/",
       "note": "Adult anthropometry (20–59 yrs) providing P5/P50/P95 waist, hip, thigh, calf circumferences for ratio simulation."
     }
@@ -55,7 +55,19 @@
           "method": "Monte Carlo via correlated normals; ratio = biacromial / height"
         }
       },
-      "notes": "Derived by simulating correlated stature and biacromial breadth using country-specific P5/P50/P95. Correlation reflects positive covariation of height and shoulder breadth. The ratio percentiles (p10,p25,p50,p75,p90) are intended for labeling only; use 'diagnostic' if auditing."
+      "notes": "Derived by simulating correlated stature and biacromial breadth using country-specific P5/P50/P95. Correlation reflects positive covariation of height and shoulder breadth. The ratio percentiles (p10,p25,p50,p75,p90) are intended for labeling only; use 'diagnostic' if auditing.",
+      "p95": 0.254509,
+      "p99": 0.262117,
+      "quantiles": [
+        {
+          "percentile": 95,
+          "value": 0.254509
+        },
+        {
+          "percentile": 99,
+          "value": 0.262117
+        }
+      ]
     },
     "whtR": {
       "unit": "ratio",
@@ -66,15 +78,46 @@
       "p90": 0.541454,
       "cut": 0.5,
       "quantiles": [
-        { "percentile": 10, "value": 0.431956 },
-        { "percentile": 25, "value": 0.457771 },
-        { "percentile": 50, "value": 0.486372 },
-        { "percentile": 75, "value": 0.515323 },
-        { "percentile": 90, "value": 0.541454 }
+        {
+          "percentile": 10,
+          "value": 0.431956
+        },
+        {
+          "percentile": 25,
+          "value": 0.457771
+        },
+        {
+          "percentile": 50,
+          "value": 0.486372
+        },
+        {
+          "percentile": 75,
+          "value": 0.515323
+        },
+        {
+          "percentile": 90,
+          "value": 0.541454
+        },
+        {
+          "percentile": 95,
+          "value": 0.557387
+        },
+        {
+          "percentile": 99,
+          "value": 0.587334
+        }
       ],
       "computedFrom": {
-        "height_mm": { "p5": 1602, "p50": 1707, "p95": 1811 },
-        "waist_mm": { "p5": 714, "p50": 830, "p95": 958 },
+        "height_mm": {
+          "p5": 1602,
+          "p50": 1707,
+          "p95": 1811
+        },
+        "waist_mm": {
+          "p5": 714,
+          "p50": 830,
+          "p95": 958
+        },
         "assumptions": {
           "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
           "correlation_rho": 0.25,
@@ -82,7 +125,10 @@
           "method": "Monte Carlo; ratio = waist / height"
         }
       },
-      "notes": "Waist-to-height ratio simulated from JIS Z 8500 adult male circumference tables with modest height-waist correlation."
+      "notes": "Waist-to-height ratio simulated from JIS Z 8500 adult male circumference tables with modest height-waist correlation.",
+      "betterDirection": "lower",
+      "p95": 0.557387,
+      "p99": 0.587334
     },
     "whr": {
       "unit": "ratio",
@@ -92,15 +138,46 @@
       "p75": 0.904347,
       "p90": 0.942046,
       "quantiles": [
-        { "percentile": 10, "value": 0.783194 },
-        { "percentile": 25, "value": 0.820844 },
-        { "percentile": 50, "value": 0.862747 },
-        { "percentile": 75, "value": 0.904347 },
-        { "percentile": 90, "value": 0.942046 }
+        {
+          "percentile": 10,
+          "value": 0.783194
+        },
+        {
+          "percentile": 25,
+          "value": 0.820844
+        },
+        {
+          "percentile": 50,
+          "value": 0.862747
+        },
+        {
+          "percentile": 75,
+          "value": 0.904347
+        },
+        {
+          "percentile": 90,
+          "value": 0.942046
+        },
+        {
+          "percentile": 95,
+          "value": 0.96427
+        },
+        {
+          "percentile": 99,
+          "value": 1.005636
+        }
       ],
       "computedFrom": {
-        "waist_mm": { "p5": 714, "p50": 830, "p95": 958 },
-        "hip_mm": { "p5": 890, "p50": 962, "p95": 1049 },
+        "waist_mm": {
+          "p5": 714,
+          "p50": 830,
+          "p95": 958
+        },
+        "hip_mm": {
+          "p5": 890,
+          "p50": 962,
+          "p95": 1049
+        },
         "assumptions": {
           "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
           "correlation_rho": 0.6,
@@ -108,7 +185,10 @@
           "method": "Monte Carlo; ratio = waist / hip"
         }
       },
-      "notes": "Adult male waist-to-hip ratio derived from JIS Z 8500 waist and hip circumference percentiles."
+      "notes": "Adult male waist-to-hip ratio derived from JIS Z 8500 waist and hip circumference percentiles.",
+      "betterDirection": "lower",
+      "p95": 0.96427,
+      "p99": 1.005636
     },
     "thighHeightRatio": {
       "unit": "ratio",
@@ -118,15 +198,46 @@
       "p75": 0.32764,
       "p90": 0.341568,
       "quantiles": [
-        { "percentile": 10, "value": 0.283613 },
-        { "percentile": 25, "value": 0.297092 },
-        { "percentile": 50, "value": 0.312304 },
-        { "percentile": 75, "value": 0.32764 },
-        { "percentile": 90, "value": 0.341568 }
+        {
+          "percentile": 10,
+          "value": 0.283613
+        },
+        {
+          "percentile": 25,
+          "value": 0.297092
+        },
+        {
+          "percentile": 50,
+          "value": 0.312304
+        },
+        {
+          "percentile": 75,
+          "value": 0.32764
+        },
+        {
+          "percentile": 90,
+          "value": 0.341568
+        },
+        {
+          "percentile": 95,
+          "value": 0.34988
+        },
+        {
+          "percentile": 99,
+          "value": 0.365667
+        }
       ],
       "computedFrom": {
-        "height_mm": { "p5": 1602, "p50": 1707, "p95": 1811 },
-        "thigh_circumference_mm": { "p5": 471, "p50": 533, "p95": 601 },
+        "height_mm": {
+          "p5": 1602,
+          "p50": 1707,
+          "p95": 1811
+        },
+        "thigh_circumference_mm": {
+          "p5": 471,
+          "p50": 533,
+          "p95": 601
+        },
         "assumptions": {
           "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
           "correlation_rho": 0.3,
@@ -134,7 +245,9 @@
           "method": "Monte Carlo; ratio = thigh / height"
         }
       },
-      "notes": "Upper thigh circumference divided by stature using JIS Z 8500 leg girths and heights."
+      "notes": "Upper thigh circumference divided by stature using JIS Z 8500 leg girths and heights.",
+      "p95": 0.34988,
+      "p99": 0.365667
     },
     "calfHeightRatio": {
       "unit": "ratio",
@@ -144,15 +257,46 @@
       "p75": 0.223462,
       "p90": 0.232799,
       "quantiles": [
-        { "percentile": 10, "value": 0.193953 },
-        { "percentile": 25, "value": 0.20304 },
-        { "percentile": 50, "value": 0.213215 },
-        { "percentile": 75, "value": 0.223462 },
-        { "percentile": 90, "value": 0.232799 }
+        {
+          "percentile": 10,
+          "value": 0.193953
+        },
+        {
+          "percentile": 25,
+          "value": 0.20304
+        },
+        {
+          "percentile": 50,
+          "value": 0.213215
+        },
+        {
+          "percentile": 75,
+          "value": 0.223462
+        },
+        {
+          "percentile": 90,
+          "value": 0.232799
+        },
+        {
+          "percentile": 95,
+          "value": 0.238439
+        },
+        {
+          "percentile": 99,
+          "value": 0.249329
+        }
       ],
       "computedFrom": {
-        "height_mm": { "p5": 1602, "p50": 1707, "p95": 1811 },
-        "calf_circumference_mm": { "p5": 323, "p50": 364, "p95": 410 },
+        "height_mm": {
+          "p5": 1602,
+          "p50": 1707,
+          "p95": 1811
+        },
+        "calf_circumference_mm": {
+          "p5": 323,
+          "p50": 364,
+          "p95": 410
+        },
         "assumptions": {
           "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
           "correlation_rho": 0.3,
@@ -160,21 +304,54 @@
           "method": "Monte Carlo; ratio = calf / height"
         }
       },
-      "notes": "Calf circumference divided by stature using JIS Z 8500 lower leg girths and heights."
+      "notes": "Calf circumference divided by stature using JIS Z 8500 lower leg girths and heights.",
+      "p95": 0.238439,
+      "p99": 0.249329
     },
     "whrFemale": {
       "unit": "ratio",
       "cut": 0.85,
       "quantiles": [
-        { "percentile": 10, "value": 0.702903 },
-        { "percentile": 25, "value": 0.744161 },
-        { "percentile": 50, "value": 0.78908 },
-        { "percentile": 75, "value": 0.833213 },
-        { "percentile": 90, "value": 0.872611 }
+        {
+          "percentile": 10,
+          "value": 0.702903
+        },
+        {
+          "percentile": 25,
+          "value": 0.744161
+        },
+        {
+          "percentile": 50,
+          "value": 0.78908
+        },
+        {
+          "percentile": 75,
+          "value": 0.833213
+        },
+        {
+          "percentile": 90,
+          "value": 0.872611
+        },
+        {
+          "percentile": 95,
+          "value": 0.896222
+        },
+        {
+          "percentile": 99,
+          "value": 0.940594
+        }
       ],
       "computedFrom": {
-        "waist_mm": { "p5": 622, "p50": 729, "p95": 865 },
-        "hip_mm": { "p5": 869, "p50": 924, "p95": 990 },
+        "waist_mm": {
+          "p5": 622,
+          "p50": 729,
+          "p95": 865
+        },
+        "hip_mm": {
+          "p5": 869,
+          "p50": 924,
+          "p95": 990
+        },
         "assumptions": {
           "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
           "correlation_rho": 0.6,
@@ -182,21 +359,55 @@
           "method": "Monte Carlo; ratio = waist / hip"
         }
       },
-      "notes": "Female waist-to-hip distribution (JIS Z 8500) provided for cross-sex comparison; cut = WHO metabolic risk alert (0.85)."
+      "notes": "Female waist-to-hip distribution (JIS Z 8500) provided for cross-sex comparison; cut = WHO metabolic risk alert (0.85).",
+      "betterDirection": "lower",
+      "p95": 0.896222,
+      "p99": 0.940594
     },
     "whrMale": {
       "unit": "ratio",
       "cut": 0.9,
       "quantiles": [
-        { "percentile": 10, "value": 0.783194 },
-        { "percentile": 25, "value": 0.820844 },
-        { "percentile": 50, "value": 0.862747 },
-        { "percentile": 75, "value": 0.904347 },
-        { "percentile": 90, "value": 0.942046 }
+        {
+          "percentile": 10,
+          "value": 0.783194
+        },
+        {
+          "percentile": 25,
+          "value": 0.820844
+        },
+        {
+          "percentile": 50,
+          "value": 0.862747
+        },
+        {
+          "percentile": 75,
+          "value": 0.904347
+        },
+        {
+          "percentile": 90,
+          "value": 0.942046
+        },
+        {
+          "percentile": 95,
+          "value": 0.964008
+        },
+        {
+          "percentile": 99,
+          "value": 1.006631
+        }
       ],
       "computedFrom": {
-        "waist_mm": { "p5": 714, "p50": 830, "p95": 958 },
-        "hip_mm": { "p5": 890, "p50": 962, "p95": 1049 },
+        "waist_mm": {
+          "p5": 714,
+          "p50": 830,
+          "p95": 958
+        },
+        "hip_mm": {
+          "p5": 890,
+          "p50": 962,
+          "p95": 1049
+        },
         "assumptions": {
           "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
           "correlation_rho": 0.6,
@@ -204,7 +415,10 @@
           "method": "Monte Carlo; ratio = waist / hip"
         }
       },
-      "notes": "Male waist-to-hip distribution aligned with JIS Z 8500; cut = WHO metabolic risk alert (0.90)."
+      "notes": "Male waist-to-hip distribution aligned with JIS Z 8500; cut = WHO metabolic risk alert (0.90).",
+      "betterDirection": "lower",
+      "p95": 0.964008,
+      "p99": 1.006631
     }
   }
 }
