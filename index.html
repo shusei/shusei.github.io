@@ -111,10 +111,15 @@
                 <option value="aware">適應中</option>
               </select>
             </label>
-            <button type="button" class="btn-primary" data-calc-trigger>計算</button>
+            <div class="btn-row">
+              <button type="button" class="btn-outline" data-save-values>儲存</button>
+              <button type="button" class="btn-outline" data-load-values>載入</button>
+              <button type="button" class="btn-primary" data-calc-trigger>計算</button>
+            </div>
           </div>
-          <p id="calc-note" class="calc-note">結果僅供自我追蹤。無自動儲存，僅在瀏覽器上即時展示。</p>
+          <p id="calc-note" class="calc-note">結果僅供自我追蹤。可儲存在本機瀏覽器後再載入使用。</p>
           <p class="calc-note" data-dataset-info aria-live="polite" hidden></p>
+          <p class="calc-note" data-storage-info aria-live="polite" hidden></p>
         </form>
         <div class="calc-output">
           <table id="calc-results">

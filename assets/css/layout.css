@@ -361,6 +361,14 @@ tbody td {
   font-size: 0.85rem;
 }
 
+.calc-note[data-state='success'] {
+  color: var(--accent);
+}
+
+.calc-note[data-state='error'] {
+  color: #f87171;
+}
+
 @container (min-width: 720px) {
   .calculator {
     grid-template-columns: 2fr 1fr;

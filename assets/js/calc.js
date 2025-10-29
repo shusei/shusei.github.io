@@ -1,6 +1,8 @@
 import { qs, qsa, createEl, safeNumber, formatRatio, formatBadge } from './dom.js';
 import { loadDatasetManifest, loadDataset, getPercentile } from './datasets.js';
 
+const STORAGE_KEY = 'calc:formValues';
+
 const metrics = [
   {
     key: 'bmi',
@@ -219,6 +221,66 @@ function renderDatasetInfo(element, dataset) {
   element.hidden = false;
 }
 
+function persistFormValues(values) {
+  if (typeof localStorage === 'undefined') {
+    return false;
+  }
+  try {
+    const serialized = JSON.stringify(values);
+    localStorage.setItem(STORAGE_KEY, serialized);
+    return true;
+  } catch (error) {
+    console.error('Failed to persist form values', error);
+    return false;
+  }
+}
+
+function restoreFormValues() {
+  if (typeof localStorage === 'undefined') {
+    return null;
+  }
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return null;
+    return parsed;
+  } catch (error) {
+    console.error('Failed to restore form values', error);
+    return null;
+  }
+}
+
+function applyFormValues(form, values) {
+  if (!values) return;
+  qsa('input, select', form).forEach((field) => {
+    if (Object.prototype.hasOwnProperty.call(values, field.name)) {
+      const storedValue = values[field.name];
+      if (typeof storedValue === 'string') {
+        if (field.tagName === 'SELECT') {
+          const option = qsa('option', field).find((item) => item.value === storedValue);
+          if (option) {
+            field.value = storedValue;
+          }
+        } else {
+          field.value = storedValue;
+        }
+      }
+    }
+  });
+}
+
+function updateStorageMessage(element, message, state = 'info') {
+  if (!element) return;
+  element.textContent = message;
+  element.hidden = false;
+  if (state) {
+    element.dataset.state = state;
+  } else {
+    delete element.dataset.state;
+  }
+}
+
 function collectFormValues(form) {
   const values = {};
   qsa('input, select', form).forEach((field) => {
@@ -334,6 +396,11 @@ function attachCalculator() {
   const referenceSelect = qs('select[name="reference"]', form);
   const trigger = qs('[data-calc-trigger]', form);
   const datasetInfo = qs('[data-dataset-info]', calculator);
+  const saveButton = qs('[data-save-values]', form);
+  const loadButton = qs('[data-load-values]', form);
+  const storageInfo = qs('[data-storage-info]', calculator);
+
+  const showStorageMessage = (message, state) => updateStorageMessage(storageInfo, message, state);
 
   populateDatasets(datasetSelect);
 
@@ -359,6 +426,30 @@ function attachCalculator() {
   datasetSelect.addEventListener('change', () => {
     trigger.click();
   });
+
+  if (saveButton) {
+    saveButton.addEventListener('click', () => {
+      const formValues = collectFormValues(form);
+      if (persistFormValues(formValues)) {
+        showStorageMessage('已儲存目前輸入，資料僅存在此瀏覽器。', 'success');
+      } else {
+        showStorageMessage('無法寫入瀏覽器儲存區，請確認瀏覽器權限設定。', 'error');
+      }
+    });
+  }
+
+  if (loadButton) {
+    loadButton.addEventListener('click', () => {
+      const storedValues = restoreFormValues();
+      if (!storedValues) {
+        showStorageMessage('尚未找到可載入的紀錄。', 'info');
+        return;
+      }
+      applyFormValues(form, storedValues);
+      showStorageMessage('已載入上次儲存的數值。', 'success');
+      trigger.click();
+    });
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
