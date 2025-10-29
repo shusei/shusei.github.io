@@ -122,17 +122,29 @@
           <p class="calc-note" data-storage-info aria-live="polite" hidden></p>
         </form>
         <div class="calc-output">
+          <div class="benchmark-controls">
+            <label class="select-group" for="population-select">一般人群 PR 基準
+              <select id="population-select" data-population-select aria-label="一般人群 PR 基準"></select>
+            </label>
+            <label class="select-group" for="model-select">模特資料（可選）
+              <select id="model-select" data-model-select aria-label="模特資料（可選）"></select>
+            </label>
+          </div>
           <table id="calc-results">
             <caption>比例指標</caption>
             <thead>
               <tr>
                 <th scope="col">指標</th>
                 <th scope="col">數值</th>
+                <th scope="col">PR 值（一般人群）</th>
+                <th scope="col">平面模特範圍</th>
+                <th scope="col">伸展台模特範圍</th>
                 <th scope="col">備註</th>
               </tr>
             </thead>
             <tbody aria-live="polite"></tbody>
           </table>
+          <div class="calc-footnote" data-footnote role="note" aria-live="polite" hidden></div>
           <aside class="suggestion" data-suggestion aria-live="polite"></aside>
         </div>
       </div>

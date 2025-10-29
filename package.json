@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "test": "npm run test:syntax && npm run test:markup",
-    "test:syntax": "node --check assets/js/app.js assets/js/calc.js assets/js/datasets.js assets/js/dom.js assets/js/i18n.js",
+    "test:syntax": "node --check assets/js/app.js assets/js/calc.js assets/js/datasets.js assets/js/dom.js assets/js/i18n.js assets/js/datasets.adapter.js",
     "test:markup": "node scripts/check-static.js"
   }
 }
