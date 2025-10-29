@@ -496,6 +496,11 @@ function renderResults(tbody, results, dataset, reference, populationDataset, mo
       const rawPercentile = Number.isFinite(prResult.rawPercentile) ? prResult.rawPercentile : null;
       const displayPercentile = projectDisplayPercentile(prResult.percentile, populationMetric.betterDirection);
       prCell.textContent = formatPrDisplay(displayPercentile);
+      if (prResult.clamped === 'low') {
+        addNoteSegment(noteSegments, '低於資料範圍');
+      } else if (prResult.clamped === 'high') {
+        addNoteSegment(noteSegments, '高於資料範圍');
+      }
       if (Number.isFinite(rawPercentile)) {
         if (rawPercentile >= 85) {
           addNoteSegment(noteSegments, '原始 PR ≥85：數值高於約 85% 的人，建議持續追蹤相關風險。');
