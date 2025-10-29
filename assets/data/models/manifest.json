@@ -1,3 +1,16 @@
 {
-  "datasets": []
+  "datasets": [
+    {
+      "id": "model-reference-asia-2024",
+      "name": "2024 亞洲平面/伸展台模特比例參考",
+      "description": "2024 亞洲時裝週與精品拍攝的平面/伸展台模特身形比例。",
+      "file": "assets/data/models/model-reference-asia-2024.json"
+    },
+    {
+      "id": "model-reference-global-2022",
+      "name": "2022 全球商拍/伸展台模特比例參考",
+      "description": "2022 歐美 casting 與商業拍攝整理的模特比例範圍。",
+      "file": "assets/data/models/model-reference-global-2022.json"
+    }
+  ]
 }
