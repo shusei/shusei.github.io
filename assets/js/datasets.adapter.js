@@ -215,13 +215,18 @@ function normalizePopulationDataset(data) {
       sampleSize: sampleSize ?? null
     },
     metrics: {
+      bmi: normalizeMetric(metrics.bmi),
       shoulderHeightRatio: normalizeMetric(metrics.shoulderHeightRatio),
+      shoulderHipRatio: normalizeMetric(metrics.shoulderHipRatio),
+      bustWaistRatio: normalizeMetric(metrics.bustWaistRatio),
+      bustHeightRatio: normalizeMetric(metrics.bustHeightRatio),
       thighHeightRatio: normalizeMetric(metrics.thighHeightRatio),
       calfHeightRatio: normalizeMetric(metrics.calfHeightRatio),
       whtR: normalizeMetric(metrics.whtR),
       whr: normalizeMetric(metrics.whr),
       whrFemale: normalizeMetric(metrics.whrFemale),
-      whrMale: normalizeMetric(metrics.whrMale)
+      whrMale: normalizeMetric(metrics.whrMale),
+      bodyFatPct: normalizeMetric(metrics.bodyFatPct)
     },
     whtRCut: metrics.whtR && typeof metrics.whtR.cut === 'number' ? metrics.whtR.cut : null,
     whrFemaleCut: metrics.whrFemale && typeof metrics.whrFemale.cut === 'number' ? metrics.whrFemale.cut : null,

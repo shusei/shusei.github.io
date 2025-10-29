@@ -1,7 +1,7 @@
 # Anthropometry Datasets — Local Norms (JP / KR) + US Baseline
 
 This package adds country-specific adult references for Japan (JP) and Republic of Korea (KR), plus a US baseline,
-providing **shoulderHeightRatio** percentiles (p10, p25, p50, p75, p90) for use in your calculator.
+providing **BMI**, **shoulder / torso ratios**, and **body fat percentiles** (p10, p25, p50, p75, p90) for use in your calculator.
 
 ## Files
 
@@ -40,10 +40,15 @@ providing **shoulderHeightRatio** percentiles (p10, p25, p50, p75, p90) for use 
   "gender": "male",               // male | female
   "source": [ { "title": "...", "url": "...", "note": "..." } ],
   "metrics": {
+    "bmi": {
+      "unit": "kg/m²",
+      "p10": 20.1, "p25": 21.7, "p50": 23.4, "p75": 25.5, "p90": 27.8,
+      "quantiles": [ { "percentile": 10, "value": 20.1 }, … ]
+    },
     "shoulderHeightRatio": {
       "unit": "ratio",
       "p10": 0.235, "p25": 0.238, "p50": 0.241, "p75": 0.244, "p90": 0.247,
-      "diagnostic": { "p05": ..., "p10": ..., "p25": ..., "p50": ..., "p75": ..., "p90": ..., "p95": ... },
+      "diagnostic": { "p05": … },
       "computedFrom": {
         "height_mm": { "p5": 1597, "p50": 1696, "p95": 1795 },
         "biacromial_mm": { "p5": 374, "p50": 401, "p95": 431 },
@@ -53,8 +58,31 @@ providing **shoulderHeightRatio** percentiles (p10, p25, p50, p75, p90) for use 
           "samples": 250000,
           "method": "Monte Carlo; ratio = biacromial / height"
         }
-      },
-      "notes": "如何推估的簡述…"
+      }
+    },
+    "shoulderHipRatio": {
+      "unit": "ratio",
+      "p10": 0.388, "p25": 0.401, "p50": 0.417, "p75": 0.433, "p90": 0.448,
+      "computedFrom": {
+        "biacromial_mm": { "p5": 374, "p50": 401, "p95": 431 },
+        "hip_mm": { "p5": 890, "p50": 962, "p95": 1049 },
+        "assumptions": { "distribution": "Normal via (p5,p50,p95)", "correlation_rho": 0.28, "samples": 500000,
+          "method": "Monte Carlo; ratio = biacromial / hip" }
+      }
+    },
+    "bustWaistRatio": { … },
+    "bustHeightRatio": { … },
+    "thighHeightRatio": { … },
+    "calfHeightRatio": { … },
+    "whtR": { … },
+    "whr": { … },
+    "whrFemale": { … },
+    "whrMale": { … },
+    "bodyFatPct": {
+      "unit": "percent",
+      "betterDirection": "lower",
+      "p10": 12.0, "p25": 15.5, "p50": 19.8, "p75": 24.2, "p90": 28.0,
+      "quantiles": [ { "percentile": 10, "value": 12.0 }, … ]
     }
   }
 }
@@ -66,19 +94,23 @@ providing **shoulderHeightRatio** percentiles (p10, p25, p50, p75, p90) for use 
 
 ### Metrics in `assets/data/anthropometry/*.json`
 
+- `bmi` — 直接引用各國成人健康調查的 BMI 百分位。
 - `shoulderHeightRatio` — 肩寬除以身高的模擬百分位（搭配 `diagnostic` 與 `computedFrom` 用於稽核／追蹤參數）。
+- `shoulderHipRatio` — 肩寬除以臀圍，透過 biacromial × hip 百分位進行 Monte Carlo 推估。
+- `bustWaistRatio`、`bustHeightRatio` — 胸圍對腰圍／身高比值，使用胸圍 × 腰圍 × 身高百分位與正相關假設模擬。
 - `thighHeightRatio`、`calfHeightRatio` — 大腿／小腿圍對身高的比例百分位。
 - `whtR` — 腰高比（Waist-to-Height Ratio），含 `cut` 臨界值與 `betterDirection`。
 - `whr` — 腰臀比一般向；`whrFemale`、`whrMale` 針對特定參考口徑的臨界值與百分位資訊。
+- `bodyFatPct` — 體脂率百分位（BIA 或 DXA），`betterDirection` 固定為 `lower`。
 - 所有度量皆以 `quantiles` 補充擬合百分位、`computedFrom` 描述採用的 P5/P50/P95 原始量測與假設。
 
 #### Data source summary
 
 | File | Locale | Primary data sources |
 | --- | --- | --- |
-| `jp-male-reference.json`, `jp-female-reference.json` | Japan (成人 20–59) | ISO/TR 7250-2:2024 國別彙整、Continental 2024 P5/P50/P95、JIS Z 8500:2019 身體尺寸（腰、臀、腿圍） |
-| `kr-male-reference.json`, `kr-female-reference.json` | Republic of Korea (成人 20–59) | ISO/TR 7250-2:2024、Continental 2024 P5/P50/P95、Size Korea 第六次量測 (2015) 腰臀腿圍百分位 |
-| `us-male-reference.json`, `us-female-reference.json` | United States (NHANES 成人 ≥20) | ISO/TR 7250-2:2024、Continental 2024 P5/P50/P95、NHANES 2015–2018 腰臀腿圍（Vital and Health Statistics Series 3 No.46） |
+| `jp-male-reference.json`, `jp-female-reference.json` | Japan (成人 20–59) | ISO/TR 7250-2:2024 國別彙整、Continental 2024 P5/P50/P95、JIS Z 8500:2019 身體尺寸、NHNS 2019 BMI／體脂表 |
+| `kr-male-reference.json`, `kr-female-reference.json` | Republic of Korea (成人 20–59) | ISO/TR 7250-2:2024、Continental 2024 P5/P50/P95、Size Korea 第六次量測 (2015)、KNHANES 2017–2021 BMI／體脂 |
+| `us-male-reference.json`, `us-female-reference.json` | United States (NHANES 成人 ≥20) | ISO/TR 7250-2:2024、Continental 2024 P5/P50/P95、NHANES 2015–2018 腰臀腿圍（Series 3 No.46）、NHANES 2017–2020 DXA 體脂 |
 
 ### Placeholder templates — `*sample.json`
 
@@ -132,6 +164,10 @@ providing **shoulderHeightRatio** percentiles (p10, p25, p50, p75, p90) for use 
 - **JIS Z 8500:2019 — Human body dimensions** — Japanese adult waist/hip/leg circumferences (P5/P50/P95) for simulation.
 - **Size Korea 6th Anthropometric Survey (2015)** — Korean adult circumference percentiles (20–59 yrs). https://sizekorea.kr/
 - **NHANES 2015–2018 Anthropometric Reference Data (Series 3 No.46)** — US waist/hip/thigh/calf statistics. https://stacks.cdc.gov/view/cdc/104773
+- **National Health and Nutrition Survey 2019 (Japan)** — adult BMI / body fat percentiles (20–59 yrs). https://www.mhlw.go.jp/content/10900000/000687163.pdf
+- **Korea National Health and Nutrition Examination Survey (KNHANES) 2017–2021** — adult BMI & bioimpedance body fat tables. https://knhanes.kdca.go.kr/
+- **NHANES 2017–2020 Body Composition (DXA)** — US DXA fat percentage distribution. https://wwwn.cdc.gov/nchs/nhanes
+- **ACSM's Guidelines for Exercise Testing and Prescription (11th ed., 2022)** — healthy body fat reference ranges used in calculator annotations.
 - **2024 台北時裝週造型統計、亞洲精品平面拍攝匯整** — 平面/伸展台模特比率樣本，用於 `model-reference-asia-2024.json`。
 - **2022 歐洲時裝週試鏡紀錄、國際商業拍攝統計** — 商拍／伸展台模特比率範圍，用於 `model-reference-global-2022.json`。
 
@@ -139,17 +175,22 @@ providing **shoulderHeightRatio** percentiles (p10, p25, p50, p75, p90) for use 
 
 ## Method (what Codex must know)
 
-1. Treat **stature** and **biacromial breadth** as *individually normal* with μ = P50 and σ = (P95−P5)/(z95−z05).  
-   (z05 = −1.644853..., z95 = +1.644853...)
-2. Assume a positive correlation ρ (male 0.35, female 0.30) between height and shoulder breadth.
-3. Draw N=250k correlated normal samples; compute **ratio = biacromial / height**.
-4. Report percentiles p10, p25, p50, p75, p90 (rounded to 6 decimals). Keep p05/p95 in `diagnostic` for QA.
-5. Do **not** divide univariate percentiles directly (e.g., p10/p10) — this biases ratios.
+1. For simulated ratios, treat each underlying measure (height, shoulder width, hip, bust, waist, thigh, calf) as *individually normal* with μ = P50 and σ = (P95−P5)/(z95−z05). (z05 = −1.644853…, z95 = +1.644853…)
+2. Apply a positive correlation ρ when pairing measurements:
+   - `shoulderHeightRatio`: ρ(height, shoulder) = 0.35 (male) / 0.30 (female).
+   - `shoulderHipRatio`: ρ(shoulder, hip) = 0.28.
+   - `bustWaistRatio`: ρ(bust, waist) = 0.75；`bustHeightRatio`: ρ(bust, height) = 0.35.
+   - `thighHeightRatio` / `calfHeightRatio`: reuse原始 0.30 假設（見既有檔案）。
+3. Draw 250k–500k correlated normal samples；計算對應比值（肩/身高、肩/臀、胸/腰、胸/身高等）。
+4. 報告 p10、p25、p50、p75、p90 與補充的 p95、p99；`diagnostic` 留存 p05/p95 供稽核。
+5. `bmi` 與 `bodyFatPct` 為直接引入的國家調查百分位；無須 Monte Carlo。
+6. Do **not** divide univariate percentiles directly (e.g., p10/p10) — this biases ratios.
 
 ## Integration checklist
 
 - Add new entries from `assets/data/datasets.json` to your site’s manifest.  
-- Ensure `calc.js` / `getPercentile()` consumes keys named exactly `shoulderHeightRatio`.
+- Ensure `calc.js` / `getPercentile()` consumes keys `bmi`、`shoulderHeightRatio`、`shoulderHipRatio`、`bustWaistRatio`、`bustHeightRatio`、`bodyFatPct`（見 `metrics` 陣列）。
+- `calc.js` 內建 WHO BMI 與 ACSM 體脂備註；若自訂門檻請同步調整 `bmiGuidelines` 與 `bodyFatGuidelines`。
 - Labels can annotate “在地常模（日本／韓國）” to avoid cross‑population confusion.
 
 ## Caveats

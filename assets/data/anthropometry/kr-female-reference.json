@@ -18,9 +18,55 @@
       "title": "Korean Agency for Technology and Standards. Size Korea 6th Survey Anthropometric Data (2015)",
       "url": "https://sizekorea.kr/",
       "note": "Adults aged 20–59; provides P5/P50/P95 waist, hip, thigh, calf circumferences used for ratio simulation."
+    },
+    {
+      "title": "KDCA (2022) Korea National Health and Nutrition Examination Survey Anthropometry Tables",
+      "url": "https://knhanes.kdca.go.kr/",
+      "note": "KNHANES pooled 2017–2021 adult female BMI and body fat percentiles."
     }
   ],
   "metrics": {
+    "bmi": {
+      "unit": "kg/m²",
+      "p10": 19.1,
+      "p25": 20.8,
+      "p50": 22.9,
+      "p75": 25.8,
+      "p90": 29.4,
+      "p95": 31.8,
+      "p99": 35.5,
+      "quantiles": [
+        {
+          "percentile": 10,
+          "value": 19.1
+        },
+        {
+          "percentile": 25,
+          "value": 20.8
+        },
+        {
+          "percentile": 50,
+          "value": 22.9
+        },
+        {
+          "percentile": 75,
+          "value": 25.8
+        },
+        {
+          "percentile": 90,
+          "value": 29.4
+        },
+        {
+          "percentile": 95,
+          "value": 31.8
+        },
+        {
+          "percentile": 99,
+          "value": 35.5
+        }
+      ],
+      "notes": "KNHANES pooled 2017–2021 adult female BMI percentiles."
+    },
     "shoulderHeightRatio": {
       "unit": "ratio",
       "p10": 0.213822,
@@ -68,6 +114,301 @@
           "value": 0.255766
         }
       ]
+    },
+    "shoulderHipRatio": {
+      "unit": "ratio",
+      "p10": 0.364912,
+      "p25": 0.376257,
+      "p50": 0.389295,
+      "p75": 0.402841,
+      "p90": 0.415524,
+      "p95": 0.423317,
+      "p99": 0.438323,
+      "quantiles": [
+        {
+          "percentile": 10,
+          "value": 0.364912
+        },
+        {
+          "percentile": 25,
+          "value": 0.376257
+        },
+        {
+          "percentile": 50,
+          "value": 0.389295
+        },
+        {
+          "percentile": 75,
+          "value": 0.402841
+        },
+        {
+          "percentile": 90,
+          "value": 0.415524
+        },
+        {
+          "percentile": 95,
+          "value": 0.423317
+        },
+        {
+          "percentile": 99,
+          "value": 0.438323
+        }
+      ],
+      "computedFrom": {
+        "biacromial_mm": {
+          "p5": 340,
+          "p50": 364,
+          "p95": 390
+        },
+        "hip_mm": {
+          "p5": 874,
+          "p50": 935,
+          "p95": 1005
+        },
+        "assumptions": {
+          "distribution": "Normal approximation per variable via (p5,p50,p95) → (μ,σ)",
+          "correlation_rho": 0.28,
+          "samples": 500000,
+          "method": "Monte Carlo via correlated normals; ratio = biacromial / hip"
+        }
+      },
+      "notes": "Derived from Continental shoulder breadth and Size Korea hip circumferences."
+    },
+    "bustWaistRatio": {
+      "unit": "ratio",
+      "p10": 1.109843,
+      "p25": 1.155815,
+      "p50": 1.212895,
+      "p75": 1.277496,
+      "p90": 1.34399,
+      "p95": 1.387877,
+      "p99": 1.48079,
+      "quantiles": [
+        {
+          "percentile": 10,
+          "value": 1.109843
+        },
+        {
+          "percentile": 25,
+          "value": 1.155815
+        },
+        {
+          "percentile": 50,
+          "value": 1.212895
+        },
+        {
+          "percentile": 75,
+          "value": 1.277496
+        },
+        {
+          "percentile": 90,
+          "value": 1.34399
+        },
+        {
+          "percentile": 95,
+          "value": 1.387877
+        },
+        {
+          "percentile": 99,
+          "value": 1.48079
+        }
+      ],
+      "computedFrom": {
+        "bust_mm": {
+          "p5": 830,
+          "p50": 900,
+          "p95": 980
+        },
+        "waist_mm": {
+          "p5": 631,
+          "p50": 742,
+          "p95": 885
+        },
+        "assumptions": {
+          "distribution": "Normal approximation per variable via (p5,p50,p95) → (μ,σ)",
+          "correlation_rho": 0.75,
+          "samples": 500000,
+          "method": "Monte Carlo via correlated normals; ratio = bust / waist"
+        }
+      },
+      "notes": "Derived from Size Korea chest and waist circumferences."
+    },
+    "bustHeightRatio": {
+      "unit": "ratio",
+      "p10": 0.528049,
+      "p25": 0.544882,
+      "p50": 0.564001,
+      "p75": 0.583329,
+      "p90": 0.601039,
+      "p95": 0.611798,
+      "p99": 0.632375,
+      "quantiles": [
+        {
+          "percentile": 10,
+          "value": 0.528049
+        },
+        {
+          "percentile": 25,
+          "value": 0.544882
+        },
+        {
+          "percentile": 50,
+          "value": 0.564001
+        },
+        {
+          "percentile": 75,
+          "value": 0.583329
+        },
+        {
+          "percentile": 90,
+          "value": 0.601039
+        },
+        {
+          "percentile": 95,
+          "value": 0.611798
+        },
+        {
+          "percentile": 99,
+          "value": 0.632375
+        }
+      ],
+      "computedFrom": {
+        "bust_mm": {
+          "p5": 830,
+          "p50": 900,
+          "p95": 980
+        },
+        "height_mm": {
+          "p5": 1505,
+          "p50": 1596,
+          "p95": 1687
+        },
+        "assumptions": {
+          "distribution": "Normal approximation per variable via (p5,p50,p95) → (μ,σ)",
+          "correlation_rho": 0.35,
+          "samples": 500000,
+          "method": "Monte Carlo via correlated normals; ratio = bust / height"
+        }
+      },
+      "notes": "Derived from Continental stature and Size Korea chest circumferences."
+    },
+    "thighHeightRatio": {
+      "unit": "ratio",
+      "p10": 0.308139,
+      "p25": 0.326924,
+      "p50": 0.348082,
+      "p75": 0.36927,
+      "p90": 0.388565,
+      "quantiles": [
+        {
+          "percentile": 10,
+          "value": 0.308139
+        },
+        {
+          "percentile": 25,
+          "value": 0.326924
+        },
+        {
+          "percentile": 50,
+          "value": 0.348082
+        },
+        {
+          "percentile": 75,
+          "value": 0.36927
+        },
+        {
+          "percentile": 90,
+          "value": 0.388565
+        },
+        {
+          "percentile": 95,
+          "value": 0.400088
+        },
+        {
+          "percentile": 99,
+          "value": 0.421584
+        }
+      ],
+      "computedFrom": {
+        "height_mm": {
+          "p5": 1504,
+          "p50": 1600,
+          "p95": 1696
+        },
+        "thigh_circumference_mm": {
+          "p5": 478,
+          "p50": 557,
+          "p95": 650
+        },
+        "assumptions": {
+          "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
+          "correlation_rho": 0.3,
+          "samples": 150000,
+          "method": "Monte Carlo; ratio = thigh / height"
+        }
+      },
+      "notes": "Upper thigh circumference divided by stature using Size Korea 6th leg girths and heights.",
+      "p95": 0.400088,
+      "p99": 0.421584
+    },
+    "calfHeightRatio": {
+      "unit": "ratio",
+      "p10": 0.208017,
+      "p25": 0.216602,
+      "p50": 0.226201,
+      "p75": 0.236026,
+      "p90": 0.24504,
+      "quantiles": [
+        {
+          "percentile": 10,
+          "value": 0.208017
+        },
+        {
+          "percentile": 25,
+          "value": 0.216602
+        },
+        {
+          "percentile": 50,
+          "value": 0.226201
+        },
+        {
+          "percentile": 75,
+          "value": 0.236026
+        },
+        {
+          "percentile": 90,
+          "value": 0.24504
+        },
+        {
+          "percentile": 95,
+          "value": 0.250347
+        },
+        {
+          "percentile": 99,
+          "value": 0.260698
+        }
+      ],
+      "computedFrom": {
+        "height_mm": {
+          "p5": 1504,
+          "p50": 1600,
+          "p95": 1696
+        },
+        "calf_circumference_mm": {
+          "p5": 328,
+          "p50": 362,
+          "p95": 405
+        },
+        "assumptions": {
+          "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
+          "correlation_rho": 0.3,
+          "samples": 150000,
+          "method": "Monte Carlo; ratio = calf / height"
+        }
+      },
+      "notes": "Calf circumference divided by stature using Size Korea 6th lower leg girths and heights.",
+      "p95": 0.250347,
+      "p99": 0.260698
     },
     "whtR": {
       "unit": "ratio",
@@ -190,124 +531,6 @@
       "p95": 0.934072,
       "p99": 0.982922
     },
-    "thighHeightRatio": {
-      "unit": "ratio",
-      "p10": 0.308139,
-      "p25": 0.326924,
-      "p50": 0.348082,
-      "p75": 0.36927,
-      "p90": 0.388565,
-      "quantiles": [
-        {
-          "percentile": 10,
-          "value": 0.308139
-        },
-        {
-          "percentile": 25,
-          "value": 0.326924
-        },
-        {
-          "percentile": 50,
-          "value": 0.348082
-        },
-        {
-          "percentile": 75,
-          "value": 0.36927
-        },
-        {
-          "percentile": 90,
-          "value": 0.388565
-        },
-        {
-          "percentile": 95,
-          "value": 0.400088
-        },
-        {
-          "percentile": 99,
-          "value": 0.421584
-        }
-      ],
-      "computedFrom": {
-        "height_mm": {
-          "p5": 1504,
-          "p50": 1600,
-          "p95": 1696
-        },
-        "thigh_circumference_mm": {
-          "p5": 478,
-          "p50": 557,
-          "p95": 650
-        },
-        "assumptions": {
-          "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
-          "correlation_rho": 0.3,
-          "samples": 150000,
-          "method": "Monte Carlo; ratio = thigh / height"
-        }
-      },
-      "notes": "Upper thigh circumference divided by stature using Size Korea 6th leg girths and heights.",
-      "p95": 0.400088,
-      "p99": 0.421584
-    },
-    "calfHeightRatio": {
-      "unit": "ratio",
-      "p10": 0.208017,
-      "p25": 0.216602,
-      "p50": 0.226201,
-      "p75": 0.236026,
-      "p90": 0.24504,
-      "quantiles": [
-        {
-          "percentile": 10,
-          "value": 0.208017
-        },
-        {
-          "percentile": 25,
-          "value": 0.216602
-        },
-        {
-          "percentile": 50,
-          "value": 0.226201
-        },
-        {
-          "percentile": 75,
-          "value": 0.236026
-        },
-        {
-          "percentile": 90,
-          "value": 0.24504
-        },
-        {
-          "percentile": 95,
-          "value": 0.250347
-        },
-        {
-          "percentile": 99,
-          "value": 0.260698
-        }
-      ],
-      "computedFrom": {
-        "height_mm": {
-          "p5": 1504,
-          "p50": 1600,
-          "p95": 1696
-        },
-        "calf_circumference_mm": {
-          "p5": 328,
-          "p50": 362,
-          "p95": 405
-        },
-        "assumptions": {
-          "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
-          "correlation_rho": 0.3,
-          "samples": 150000,
-          "method": "Monte Carlo; ratio = calf / height"
-        }
-      },
-      "notes": "Calf circumference divided by stature using Size Korea 6th lower leg girths and heights.",
-      "p95": 0.250347,
-      "p99": 0.260698
-    },
     "whrFemale": {
       "unit": "ratio",
       "cut": 0.85,
@@ -419,6 +642,48 @@
       "betterDirection": "lower",
       "p95": 0.978878,
       "p99": 1.025214
+    },
+    "bodyFatPct": {
+      "unit": "percent",
+      "betterDirection": "lower",
+      "p10": 22.4,
+      "p25": 25.8,
+      "p50": 30.5,
+      "p75": 35.9,
+      "p90": 40.8,
+      "p95": 43.6,
+      "p99": 47.9,
+      "quantiles": [
+        {
+          "percentile": 10,
+          "value": 22.4
+        },
+        {
+          "percentile": 25,
+          "value": 25.8
+        },
+        {
+          "percentile": 50,
+          "value": 30.5
+        },
+        {
+          "percentile": 75,
+          "value": 35.9
+        },
+        {
+          "percentile": 90,
+          "value": 40.8
+        },
+        {
+          "percentile": 95,
+          "value": 43.6
+        },
+        {
+          "percentile": 99,
+          "value": 47.9
+        }
+      ],
+      "notes": "KNHANES bioimpedance adult female body fat percentiles."
     }
   }
 }

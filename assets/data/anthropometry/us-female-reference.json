@@ -18,9 +18,60 @@
       "title": "Fryar CD, Kruszon-Moran D, Gu Q, Ogden CL. Anthropometric Reference Data for Children and Adults: United States, 2015–2018. Vital and Health Statistics. 2021;3(46)",
       "url": "https://stacks.cdc.gov/view/cdc/104773",
       "note": "NHANES 2015–2018 waist, hip, thigh, calf circumferences (P5/P50/P95) for adults aged ≥20 years."
+    },
+    {
+      "title": "CDC/NCHS (2021) Anthropometric Reference Data for Adults: United States, 2015–2018",
+      "url": "https://stacks.cdc.gov/view/cdc/104773",
+      "note": "NHANES 2015–2018 adult female BMI and circumference percentiles."
+    },
+    {
+      "title": "CDC/NCHS (2023) NHANES Body Composition (DXA) 2017–2020",
+      "url": "https://wwwn.cdc.gov/nchs/nhanes",
+      "note": "DXA-derived body fat percentiles for US adults."
     }
   ],
   "metrics": {
+    "bmi": {
+      "unit": "kg/m²",
+      "p10": 22.1,
+      "p25": 25.1,
+      "p50": 29.6,
+      "p75": 35.4,
+      "p90": 40.5,
+      "p95": 44.2,
+      "p99": 50.1,
+      "quantiles": [
+        {
+          "percentile": 10,
+          "value": 22.1
+        },
+        {
+          "percentile": 25,
+          "value": 25.1
+        },
+        {
+          "percentile": 50,
+          "value": 29.6
+        },
+        {
+          "percentile": 75,
+          "value": 35.4
+        },
+        {
+          "percentile": 90,
+          "value": 40.5
+        },
+        {
+          "percentile": 95,
+          "value": 44.2
+        },
+        {
+          "percentile": 99,
+          "value": 50.1
+        }
+      ],
+      "notes": "NHANES 2015–2018 adult female BMI percentiles."
+    },
     "shoulderHeightRatio": {
       "unit": "ratio",
       "p10": 0.212648,
@@ -68,6 +119,301 @@
           "value": 0.264328
         }
       ]
+    },
+    "shoulderHipRatio": {
+      "unit": "ratio",
+      "p10": 0.345903,
+      "p25": 0.358152,
+      "p50": 0.372386,
+      "p75": 0.387285,
+      "p90": 0.401429,
+      "p95": 0.410204,
+      "p99": 0.427528,
+      "quantiles": [
+        {
+          "percentile": 10,
+          "value": 0.345903
+        },
+        {
+          "percentile": 25,
+          "value": 0.358152
+        },
+        {
+          "percentile": 50,
+          "value": 0.372386
+        },
+        {
+          "percentile": 75,
+          "value": 0.387285
+        },
+        {
+          "percentile": 90,
+          "value": 0.401429
+        },
+        {
+          "percentile": 95,
+          "value": 0.410204
+        },
+        {
+          "percentile": 99,
+          "value": 0.427528
+        }
+      ],
+      "computedFrom": {
+        "biacromial_mm": {
+          "p5": 347,
+          "p50": 372,
+          "p95": 400
+        },
+        "hip_mm": {
+          "p5": 918,
+          "p50": 999,
+          "p95": 1091
+        },
+        "assumptions": {
+          "distribution": "Normal approximation per variable via (p5,p50,p95) → (μ,σ)",
+          "correlation_rho": 0.28,
+          "samples": 500000,
+          "method": "Monte Carlo via correlated normals; ratio = biacromial / hip"
+        }
+      },
+      "notes": "Derived from Continental shoulder breadth and NHANES hip circumferences."
+    },
+    "bustWaistRatio": {
+      "unit": "ratio",
+      "p10": 1.010756,
+      "p25": 1.064503,
+      "p50": 1.132516,
+      "p75": 1.212547,
+      "p90": 1.298438,
+      "p95": 1.357688,
+      "p99": 1.48966,
+      "quantiles": [
+        {
+          "percentile": 10,
+          "value": 1.010756
+        },
+        {
+          "percentile": 25,
+          "value": 1.064503
+        },
+        {
+          "percentile": 50,
+          "value": 1.132516
+        },
+        {
+          "percentile": 75,
+          "value": 1.212547
+        },
+        {
+          "percentile": 90,
+          "value": 1.298438
+        },
+        {
+          "percentile": 95,
+          "value": 1.357688
+        },
+        {
+          "percentile": 99,
+          "value": 1.48966
+        }
+      ],
+      "computedFrom": {
+        "bust_mm": {
+          "p5": 880,
+          "p50": 990,
+          "p95": 1125
+        },
+        "waist_mm": {
+          "p5": 701,
+          "p50": 874,
+          "p95": 1100
+        },
+        "assumptions": {
+          "distribution": "Normal approximation per variable via (p5,p50,p95) → (μ,σ)",
+          "correlation_rho": 0.75,
+          "samples": 500000,
+          "method": "Monte Carlo via correlated normals; ratio = bust / waist"
+        }
+      },
+      "notes": "Derived from NHANES chest and waist circumferences."
+    },
+    "bustHeightRatio": {
+      "unit": "ratio",
+      "p10": 0.554598,
+      "p25": 0.580549,
+      "p50": 0.609579,
+      "p75": 0.638728,
+      "p90": 0.665137,
+      "p95": 0.681176,
+      "p99": 0.711038,
+      "quantiles": [
+        {
+          "percentile": 10,
+          "value": 0.554598
+        },
+        {
+          "percentile": 25,
+          "value": 0.580549
+        },
+        {
+          "percentile": 50,
+          "value": 0.609579
+        },
+        {
+          "percentile": 75,
+          "value": 0.638728
+        },
+        {
+          "percentile": 90,
+          "value": 0.665137
+        },
+        {
+          "percentile": 95,
+          "value": 0.681176
+        },
+        {
+          "percentile": 99,
+          "value": 0.711038
+        }
+      ],
+      "computedFrom": {
+        "bust_mm": {
+          "p5": 880,
+          "p50": 990,
+          "p95": 1125
+        },
+        "height_mm": {
+          "p5": 1534,
+          "p50": 1624,
+          "p95": 1714
+        },
+        "assumptions": {
+          "distribution": "Normal approximation per variable via (p5,p50,p95) → (μ,σ)",
+          "correlation_rho": 0.35,
+          "samples": 500000,
+          "method": "Monte Carlo via correlated normals; ratio = bust / height"
+        }
+      },
+      "notes": "Derived from Continental stature and NHANES chest circumferences."
+    },
+    "thighHeightRatio": {
+      "unit": "ratio",
+      "p10": 0.310289,
+      "p25": 0.337386,
+      "p50": 0.36817,
+      "p75": 0.398989,
+      "p90": 0.42662,
+      "quantiles": [
+        {
+          "percentile": 10,
+          "value": 0.310289
+        },
+        {
+          "percentile": 25,
+          "value": 0.337386
+        },
+        {
+          "percentile": 50,
+          "value": 0.36817
+        },
+        {
+          "percentile": 75,
+          "value": 0.398989
+        },
+        {
+          "percentile": 90,
+          "value": 0.42662
+        },
+        {
+          "percentile": 95,
+          "value": 0.443713
+        },
+        {
+          "percentile": 99,
+          "value": 0.475439
+        }
+      ],
+      "computedFrom": {
+        "height_mm": {
+          "p5": 1512,
+          "p50": 1621,
+          "p95": 1749
+        },
+        "thigh_circumference_mm": {
+          "p5": 490,
+          "p50": 597,
+          "p95": 744
+        },
+        "assumptions": {
+          "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
+          "correlation_rho": 0.3,
+          "samples": 150000,
+          "method": "Monte Carlo; ratio = thigh / height"
+        }
+      },
+      "notes": "Upper thigh circumference divided by stature; simulated from NHANES adult female upper leg girths and stature.",
+      "p95": 0.443713,
+      "p99": 0.475439
+    },
+    "calfHeightRatio": {
+      "unit": "ratio",
+      "p10": 0.208791,
+      "p25": 0.223501,
+      "p50": 0.239886,
+      "p75": 0.25644,
+      "p90": 0.271254,
+      "quantiles": [
+        {
+          "percentile": 10,
+          "value": 0.208791
+        },
+        {
+          "percentile": 25,
+          "value": 0.223501
+        },
+        {
+          "percentile": 50,
+          "value": 0.239886
+        },
+        {
+          "percentile": 75,
+          "value": 0.25644
+        },
+        {
+          "percentile": 90,
+          "value": 0.271254
+        },
+        {
+          "percentile": 95,
+          "value": 0.280571
+        },
+        {
+          "percentile": 99,
+          "value": 0.298052
+        }
+      ],
+      "computedFrom": {
+        "height_mm": {
+          "p5": 1512,
+          "p50": 1621,
+          "p95": 1749
+        },
+        "calf_circumference_mm": {
+          "p5": 331,
+          "p50": 389,
+          "p95": 466
+        },
+        "assumptions": {
+          "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
+          "correlation_rho": 0.3,
+          "samples": 150000,
+          "method": "Monte Carlo; ratio = calf / height"
+        }
+      },
+      "notes": "Calf circumference divided by stature; simulated from NHANES adult female lower leg girths and stature.",
+      "p95": 0.280571,
+      "p99": 0.298052
     },
     "whtR": {
       "unit": "ratio",
@@ -190,124 +536,6 @@
       "p95": 1.089825,
       "p99": 1.180684
     },
-    "thighHeightRatio": {
-      "unit": "ratio",
-      "p10": 0.310289,
-      "p25": 0.337386,
-      "p50": 0.36817,
-      "p75": 0.398989,
-      "p90": 0.42662,
-      "quantiles": [
-        {
-          "percentile": 10,
-          "value": 0.310289
-        },
-        {
-          "percentile": 25,
-          "value": 0.337386
-        },
-        {
-          "percentile": 50,
-          "value": 0.36817
-        },
-        {
-          "percentile": 75,
-          "value": 0.398989
-        },
-        {
-          "percentile": 90,
-          "value": 0.42662
-        },
-        {
-          "percentile": 95,
-          "value": 0.443713
-        },
-        {
-          "percentile": 99,
-          "value": 0.475439
-        }
-      ],
-      "computedFrom": {
-        "height_mm": {
-          "p5": 1512,
-          "p50": 1621,
-          "p95": 1749
-        },
-        "thigh_circumference_mm": {
-          "p5": 490,
-          "p50": 597,
-          "p95": 744
-        },
-        "assumptions": {
-          "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
-          "correlation_rho": 0.3,
-          "samples": 150000,
-          "method": "Monte Carlo; ratio = thigh / height"
-        }
-      },
-      "notes": "Upper thigh circumference divided by stature; simulated from NHANES adult female upper leg girths and stature.",
-      "p95": 0.443713,
-      "p99": 0.475439
-    },
-    "calfHeightRatio": {
-      "unit": "ratio",
-      "p10": 0.208791,
-      "p25": 0.223501,
-      "p50": 0.239886,
-      "p75": 0.25644,
-      "p90": 0.271254,
-      "quantiles": [
-        {
-          "percentile": 10,
-          "value": 0.208791
-        },
-        {
-          "percentile": 25,
-          "value": 0.223501
-        },
-        {
-          "percentile": 50,
-          "value": 0.239886
-        },
-        {
-          "percentile": 75,
-          "value": 0.25644
-        },
-        {
-          "percentile": 90,
-          "value": 0.271254
-        },
-        {
-          "percentile": 95,
-          "value": 0.280571
-        },
-        {
-          "percentile": 99,
-          "value": 0.298052
-        }
-      ],
-      "computedFrom": {
-        "height_mm": {
-          "p5": 1512,
-          "p50": 1621,
-          "p95": 1749
-        },
-        "calf_circumference_mm": {
-          "p5": 331,
-          "p50": 389,
-          "p95": 466
-        },
-        "assumptions": {
-          "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
-          "correlation_rho": 0.3,
-          "samples": 150000,
-          "method": "Monte Carlo; ratio = calf / height"
-        }
-      },
-      "notes": "Calf circumference divided by stature; simulated from NHANES adult female lower leg girths and stature.",
-      "p95": 0.280571,
-      "p99": 0.298052
-    },
     "whrFemale": {
       "unit": "ratio",
       "cut": 0.85,
@@ -419,6 +647,48 @@
       "betterDirection": "lower",
       "p95": 1.159283,
       "p99": 1.242102
+    },
+    "bodyFatPct": {
+      "unit": "percent",
+      "betterDirection": "lower",
+      "p10": 22.6,
+      "p25": 27.6,
+      "p50": 34.0,
+      "p75": 40.2,
+      "p90": 45.8,
+      "p95": 49.0,
+      "p99": 53.8,
+      "quantiles": [
+        {
+          "percentile": 10,
+          "value": 22.6
+        },
+        {
+          "percentile": 25,
+          "value": 27.6
+        },
+        {
+          "percentile": 50,
+          "value": 34.0
+        },
+        {
+          "percentile": 75,
+          "value": 40.2
+        },
+        {
+          "percentile": 90,
+          "value": 45.8
+        },
+        {
+          "percentile": 95,
+          "value": 49.0
+        },
+        {
+          "percentile": 99,
+          "value": 53.8
+        }
+      ],
+      "notes": "NHANES 2017–2020 DXA adult female body fat percentiles."
     }
   }
 }

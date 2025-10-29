@@ -24,7 +24,8 @@ const metrics = [
       return w / (h * h);
     },
     formatter: (value) => formatRatio(value, 1),
-    requirements: ['height', 'weight']
+    requirements: ['height', 'weight'],
+    percentileKey: 'bmi'
   },
   {
     key: 'whtR',
@@ -101,7 +102,8 @@ const metrics = [
       return s / h;
     },
     formatter: formatRatio,
-    requirements: ['shoulder', 'hip']
+    requirements: ['shoulder', 'hip'],
+    percentileKey: 'shoulderHipRatio'
   },
   {
     key: 'bustWaist',
@@ -113,7 +115,8 @@ const metrics = [
       return b / w;
     },
     formatter: formatRatio,
-    requirements: ['bust', 'waist']
+    requirements: ['bust', 'waist'],
+    percentileKey: 'bustWaistRatio'
   },
   {
     key: 'bustHeight',
@@ -125,7 +128,8 @@ const metrics = [
       return b / h;
     },
     formatter: formatRatio,
-    requirements: ['bust', 'height']
+    requirements: ['bust', 'height'],
+    percentileKey: 'bustHeightRatio'
   },
   {
     key: 'bodyfat',
@@ -135,7 +139,8 @@ const metrics = [
       return Number.isFinite(bf) ? bf : NaN;
     },
     formatter: (value) => (Number.isFinite(value) ? `${value.toFixed(1)}%` : ''),
-    requirements: ['bodyfat']
+    requirements: ['bodyfat'],
+    percentileKey: 'bodyFatPct'
   }
 ];
 
@@ -149,6 +154,18 @@ const whrReferenceNotes = {
   neutral: '建議留意 0.9 以下的彈性空間。',
   female: '建議留意 0.85 以下的彈性空間。',
   male: '建議留意 0.9 以下的彈性空間。'
+};
+
+const bmiGuidelines = {
+  neutral: { underweight: 18.5, asianRisk: 23, overweight: 25, obesity: 30 },
+  female: { underweight: 18.5, asianRisk: 23, overweight: 25, obesity: 30 },
+  male: { underweight: 18.5, asianRisk: 23, overweight: 25, obesity: 30 }
+};
+
+const bodyFatGuidelines = {
+  neutral: { low: 15, optimalHi: 28, caution: 33 },
+  female: { low: 20, optimalHi: 32, caution: 38 },
+  male: { low: 10, optimalHi: 25, caution: 30 }
 };
 
 const suggestionRules = [
@@ -465,8 +482,37 @@ function renderResults(tbody, results, dataset, reference, populationDataset, mo
 
     if (metric.key === 'whr') {
       addNoteSegment(noteSegments, whrReferenceNotes[reference] ?? whrReferenceNotes.neutral);
-    } else if (metric.key === 'bodyfat' && Number.isFinite(value)) {
+    }
+
+    if (metric.key === 'bmi' && Number.isFinite(value)) {
+      const guide = bmiGuidelines[reference] ?? bmiGuidelines.neutral;
+      addNoteSegment(noteSegments, 'WHO 正常 18.5–24.9；亞太建議 <23。');
+      if (value < guide.underweight) {
+        addNoteSegment(noteSegments, '落在 WHO 體重過低 (<18.5) 區段，需評估營養狀態。');
+      } else if (value >= guide.obesity) {
+        addNoteSegment(noteSegments, '落在 WHO 肥胖 (≥30) 區段，建議諮詢專業人員。');
+      } else if (value >= guide.overweight) {
+        addNoteSegment(noteSegments, '落在 WHO 過重 (25–29.9) 區段。');
+      } else if (value >= guide.asianRisk) {
+        addNoteSegment(noteSegments, '超過亞太建議 23，建議留意代謝指標。');
+      } else {
+        addNoteSegment(noteSegments, '位於亞太建議 18.5–22.9 正常範圍。');
+      }
+    }
+
+    if (metric.key === 'bodyfat' && Number.isFinite(value)) {
       addNoteSegment(noteSegments, '手動輸入數值，僅於瀏覽器顯示。');
+      const guide = bodyFatGuidelines[reference] ?? bodyFatGuidelines.neutral;
+      addNoteSegment(noteSegments, 'ACSM 建議：女性約 20–32%，男性約 10–22%。');
+      if (value < guide.low) {
+        addNoteSegment(noteSegments, '低於建議下限，請留意荷爾蒙與營養狀態。');
+      } else if (value > guide.caution) {
+        addNoteSegment(noteSegments, '高於建議上限，建議與專業人員檢視。');
+      } else if (value > guide.optimalHi) {
+        addNoteSegment(noteSegments, '略高於建議範圍，可規劃體脂管理。');
+      } else {
+        addNoteSegment(noteSegments, '位於建議範圍內。');
+      }
     }
 
     if (metric.key === 'whtR') {

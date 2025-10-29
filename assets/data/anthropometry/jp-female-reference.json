@@ -18,9 +18,55 @@
       "title": "Japanese Industrial Standards Committee. JIS Z 8500:2019 — Human body dimensions",
       "url": "https://www.jisc.go.jp/eng/",
       "note": "Adult anthropometry (20–59 yrs) providing P5/P50/P95 waist, hip, thigh, calf circumferences for ratio simulation."
+    },
+    {
+      "title": "Ministry of Health, Labour and Welfare (2020) National Health and Nutrition Survey 2019",
+      "url": "https://www.mhlw.go.jp/content/10900000/000687163.pdf",
+      "note": "Adult females (20–59 yrs) BMI and body fat percentile tables."
     }
   ],
   "metrics": {
+    "bmi": {
+      "unit": "kg/m²",
+      "p10": 18.8,
+      "p25": 20.4,
+      "p50": 22.2,
+      "p75": 24.6,
+      "p90": 27.3,
+      "p95": 29.5,
+      "p99": 33.0,
+      "quantiles": [
+        {
+          "percentile": 10,
+          "value": 18.8
+        },
+        {
+          "percentile": 25,
+          "value": 20.4
+        },
+        {
+          "percentile": 50,
+          "value": 22.2
+        },
+        {
+          "percentile": 75,
+          "value": 24.6
+        },
+        {
+          "percentile": 90,
+          "value": 27.3
+        },
+        {
+          "percentile": 95,
+          "value": 29.5
+        },
+        {
+          "percentile": 99,
+          "value": 33.0
+        }
+      ],
+      "notes": "National Health and Nutrition Survey 2019 adult females; percentiles rounded to one decimal."
+    },
     "shoulderHeightRatio": {
       "unit": "ratio",
       "p10": 0.215025,
@@ -68,6 +114,301 @@
           "value": 0.253225
         }
       ]
+    },
+    "shoulderHipRatio": {
+      "unit": "ratio",
+      "p10": 0.364196,
+      "p25": 0.375047,
+      "p50": 0.38746,
+      "p75": 0.400294,
+      "p90": 0.412226,
+      "p95": 0.419561,
+      "p99": 0.433722,
+      "quantiles": [
+        {
+          "percentile": 10,
+          "value": 0.364196
+        },
+        {
+          "percentile": 25,
+          "value": 0.375047
+        },
+        {
+          "percentile": 50,
+          "value": 0.38746
+        },
+        {
+          "percentile": 75,
+          "value": 0.400294
+        },
+        {
+          "percentile": 90,
+          "value": 0.412226
+        },
+        {
+          "percentile": 95,
+          "value": 0.419561
+        },
+        {
+          "percentile": 99,
+          "value": 0.433722
+        }
+      ],
+      "computedFrom": {
+        "biacromial_mm": {
+          "p5": 335,
+          "p50": 358,
+          "p95": 383
+        },
+        "hip_mm": {
+          "p5": 869,
+          "p50": 924,
+          "p95": 990
+        },
+        "assumptions": {
+          "distribution": "Normal approximation per variable via (p5,p50,p95) → (μ,σ)",
+          "correlation_rho": 0.28,
+          "samples": 500000,
+          "method": "Monte Carlo via correlated normals; ratio = biacromial / hip"
+        }
+      },
+      "notes": "Derived from Continental shoulder breadth and JIS hip circumference (20–59 yrs)."
+    },
+    "bustWaistRatio": {
+      "unit": "ratio",
+      "p10": 1.106461,
+      "p25": 1.151531,
+      "p50": 1.207104,
+      "p75": 1.270099,
+      "p90": 1.334029,
+      "p95": 1.37621,
+      "p99": 1.464968,
+      "quantiles": [
+        {
+          "percentile": 10,
+          "value": 1.106461
+        },
+        {
+          "percentile": 25,
+          "value": 1.151531
+        },
+        {
+          "percentile": 50,
+          "value": 1.207104
+        },
+        {
+          "percentile": 75,
+          "value": 1.270099
+        },
+        {
+          "percentile": 90,
+          "value": 1.334029
+        },
+        {
+          "percentile": 95,
+          "value": 1.37621
+        },
+        {
+          "percentile": 99,
+          "value": 1.464968
+        }
+      ],
+      "computedFrom": {
+        "bust_mm": {
+          "p5": 820,
+          "p50": 880,
+          "p95": 960
+        },
+        "waist_mm": {
+          "p5": 622,
+          "p50": 729,
+          "p95": 865
+        },
+        "assumptions": {
+          "distribution": "Normal approximation per variable via (p5,p50,p95) → (μ,σ)",
+          "correlation_rho": 0.75,
+          "samples": 500000,
+          "method": "Monte Carlo via correlated normals; ratio = bust / waist"
+        }
+      },
+      "notes": "Derived from JIS chest and waist circumferences with positive covariance."
+    },
+    "bustHeightRatio": {
+      "unit": "ratio",
+      "p10": 0.52594,
+      "p25": 0.542223,
+      "p50": 0.560489,
+      "p75": 0.579195,
+      "p90": 0.596298,
+      "p95": 0.606751,
+      "p99": 0.626914,
+      "quantiles": [
+        {
+          "percentile": 10,
+          "value": 0.52594
+        },
+        {
+          "percentile": 25,
+          "value": 0.542223
+        },
+        {
+          "percentile": 50,
+          "value": 0.560489
+        },
+        {
+          "percentile": 75,
+          "value": 0.579195
+        },
+        {
+          "percentile": 90,
+          "value": 0.596298
+        },
+        {
+          "percentile": 95,
+          "value": 0.606751
+        },
+        {
+          "percentile": 99,
+          "value": 0.626914
+        }
+      ],
+      "computedFrom": {
+        "bust_mm": {
+          "p5": 820,
+          "p50": 880,
+          "p95": 960
+        },
+        "height_mm": {
+          "p5": 1481,
+          "p50": 1570,
+          "p95": 1664
+        },
+        "assumptions": {
+          "distribution": "Normal approximation per variable via (p5,p50,p95) → (μ,σ)",
+          "correlation_rho": 0.35,
+          "samples": 500000,
+          "method": "Monte Carlo via correlated normals; ratio = bust / height"
+        }
+      },
+      "notes": "Derived from Continental stature and JIS chest circumferences."
+    },
+    "thighHeightRatio": {
+      "unit": "ratio",
+      "p10": 0.30691,
+      "p25": 0.321103,
+      "p50": 0.33696,
+      "p75": 0.35305,
+      "p90": 0.367696,
+      "quantiles": [
+        {
+          "percentile": 10,
+          "value": 0.30691
+        },
+        {
+          "percentile": 25,
+          "value": 0.321103
+        },
+        {
+          "percentile": 50,
+          "value": 0.33696
+        },
+        {
+          "percentile": 75,
+          "value": 0.35305
+        },
+        {
+          "percentile": 90,
+          "value": 0.367696
+        },
+        {
+          "percentile": 95,
+          "value": 0.376422
+        },
+        {
+          "percentile": 99,
+          "value": 0.393339
+        }
+      ],
+      "computedFrom": {
+        "height_mm": {
+          "p5": 1481,
+          "p50": 1570,
+          "p95": 1664
+        },
+        "thigh_circumference_mm": {
+          "p5": 473,
+          "p50": 529,
+          "p95": 599
+        },
+        "assumptions": {
+          "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
+          "correlation_rho": 0.3,
+          "samples": 150000,
+          "method": "Monte Carlo; ratio = thigh / height"
+        }
+      },
+      "notes": "Upper thigh circumference divided by stature using JIS Z 8500 leg girths and heights.",
+      "p95": 0.376422,
+      "p99": 0.393339
+    },
+    "calfHeightRatio": {
+      "unit": "ratio",
+      "p10": 0.203779,
+      "p25": 0.211903,
+      "p50": 0.221028,
+      "p75": 0.230276,
+      "p90": 0.23868,
+      "quantiles": [
+        {
+          "percentile": 10,
+          "value": 0.203779
+        },
+        {
+          "percentile": 25,
+          "value": 0.211903
+        },
+        {
+          "percentile": 50,
+          "value": 0.221028
+        },
+        {
+          "percentile": 75,
+          "value": 0.230276
+        },
+        {
+          "percentile": 90,
+          "value": 0.23868
+        },
+        {
+          "percentile": 95,
+          "value": 0.243827
+        },
+        {
+          "percentile": 99,
+          "value": 0.253396
+        }
+      ],
+      "computedFrom": {
+        "height_mm": {
+          "p5": 1481,
+          "p50": 1570,
+          "p95": 1664
+        },
+        "calf_circumference_mm": {
+          "p5": 316,
+          "p50": 347,
+          "p95": 387
+        },
+        "assumptions": {
+          "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
+          "correlation_rho": 0.3,
+          "samples": 150000,
+          "method": "Monte Carlo; ratio = calf / height"
+        }
+      },
+      "notes": "Calf circumference divided by stature using JIS Z 8500 lower leg girths and heights.",
+      "p95": 0.243827,
+      "p99": 0.253396
     },
     "whtR": {
       "unit": "ratio",
@@ -190,124 +531,6 @@
       "p95": 0.895937,
       "p99": 0.939324
     },
-    "thighHeightRatio": {
-      "unit": "ratio",
-      "p10": 0.30691,
-      "p25": 0.321103,
-      "p50": 0.33696,
-      "p75": 0.35305,
-      "p90": 0.367696,
-      "quantiles": [
-        {
-          "percentile": 10,
-          "value": 0.30691
-        },
-        {
-          "percentile": 25,
-          "value": 0.321103
-        },
-        {
-          "percentile": 50,
-          "value": 0.33696
-        },
-        {
-          "percentile": 75,
-          "value": 0.35305
-        },
-        {
-          "percentile": 90,
-          "value": 0.367696
-        },
-        {
-          "percentile": 95,
-          "value": 0.376422
-        },
-        {
-          "percentile": 99,
-          "value": 0.393339
-        }
-      ],
-      "computedFrom": {
-        "height_mm": {
-          "p5": 1481,
-          "p50": 1570,
-          "p95": 1664
-        },
-        "thigh_circumference_mm": {
-          "p5": 473,
-          "p50": 529,
-          "p95": 599
-        },
-        "assumptions": {
-          "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
-          "correlation_rho": 0.3,
-          "samples": 150000,
-          "method": "Monte Carlo; ratio = thigh / height"
-        }
-      },
-      "notes": "Upper thigh circumference divided by stature using JIS Z 8500 leg girths and heights.",
-      "p95": 0.376422,
-      "p99": 0.393339
-    },
-    "calfHeightRatio": {
-      "unit": "ratio",
-      "p10": 0.203779,
-      "p25": 0.211903,
-      "p50": 0.221028,
-      "p75": 0.230276,
-      "p90": 0.23868,
-      "quantiles": [
-        {
-          "percentile": 10,
-          "value": 0.203779
-        },
-        {
-          "percentile": 25,
-          "value": 0.211903
-        },
-        {
-          "percentile": 50,
-          "value": 0.221028
-        },
-        {
-          "percentile": 75,
-          "value": 0.230276
-        },
-        {
-          "percentile": 90,
-          "value": 0.23868
-        },
-        {
-          "percentile": 95,
-          "value": 0.243827
-        },
-        {
-          "percentile": 99,
-          "value": 0.253396
-        }
-      ],
-      "computedFrom": {
-        "height_mm": {
-          "p5": 1481,
-          "p50": 1570,
-          "p95": 1664
-        },
-        "calf_circumference_mm": {
-          "p5": 316,
-          "p50": 347,
-          "p95": 387
-        },
-        "assumptions": {
-          "distribution": "Normal approximation via (p5,p50,p95) → (mu,sigma)",
-          "correlation_rho": 0.3,
-          "samples": 150000,
-          "method": "Monte Carlo; ratio = calf / height"
-        }
-      },
-      "notes": "Calf circumference divided by stature using JIS Z 8500 lower leg girths and heights.",
-      "p95": 0.243827,
-      "p99": 0.253396
-    },
     "whrFemale": {
       "unit": "ratio",
       "cut": 0.85,
@@ -419,6 +642,48 @@
       "betterDirection": "lower",
       "p95": 0.963974,
       "p99": 1.005698
+    },
+    "bodyFatPct": {
+      "unit": "percent",
+      "betterDirection": "lower",
+      "p10": 21.5,
+      "p25": 24.8,
+      "p50": 28.7,
+      "p75": 33.5,
+      "p90": 37.9,
+      "p95": 40.5,
+      "p99": 44.0,
+      "quantiles": [
+        {
+          "percentile": 10,
+          "value": 21.5
+        },
+        {
+          "percentile": 25,
+          "value": 24.8
+        },
+        {
+          "percentile": 50,
+          "value": 28.7
+        },
+        {
+          "percentile": 75,
+          "value": 33.5
+        },
+        {
+          "percentile": 90,
+          "value": 37.9
+        },
+        {
+          "percentile": 95,
+          "value": 40.5
+        },
+        {
+          "percentile": 99,
+          "value": 44.0
+        }
+      ],
+      "notes": "NHNS 2019 adult female bioelectrical body fat percentiles; lower is generally favourable."
     }
   }
 }
