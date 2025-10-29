@@ -367,10 +367,16 @@ function upperBound(sorted, value) {
 }
 
 function clampPercentile(value) {
-  if (!Number.isFinite(value)) return null;
-  if (value < 0) return 0;
-  if (value > 100) return 100;
-  return Number(value);
+  if (!Number.isFinite(value)) {
+    return { percentile: null, clamped: null };
+  }
+  if (value < 0) {
+    return { percentile: 0, clamped: 'low' };
+  }
+  if (value > 100) {
+    return { percentile: 100, clamped: 'high' };
+  }
+  return { percentile: Number(value), clamped: null };
 }
 
 function interpolatePercentile(lower, upper, target) {
@@ -385,16 +391,18 @@ function interpolatePercentile(lower, upper, target) {
 export function getPR(metric, value) {
   const numeric = toNumber(value);
   if (numeric === null || !metric) {
-    return { percentile: null, rawPercentile: null, method: null };
+    return { percentile: null, rawPercentile: null, method: null, clamped: null };
   }
 
   if (Array.isArray(metric.raw) && metric.raw.length > 0) {
     const position = upperBound(metric.raw, numeric);
     const rawPercentile = (position / metric.raw.length) * 100;
+    const { percentile, clamped } = clampPercentile(rawPercentile);
     return {
-      percentile: clampPercentile(rawPercentile),
+      percentile,
       rawPercentile,
-      method: 'empirical'
+      method: 'empirical',
+      clamped
     };
   }
 
@@ -412,11 +420,12 @@ export function getPR(metric, value) {
     });
     const points = Array.from(deduped.values()).sort((a, b) => a.value - b.value);
     if (points.length === 0) {
-      return { percentile: null, rawPercentile: null, method: null };
+      return { percentile: null, rawPercentile: null, method: null, clamped: null };
     }
     if (points.length === 1) {
       const rawPercentile = points[0].percentile;
-      return { percentile: clampPercentile(rawPercentile), rawPercentile, method: 'quantile-single' };
+      const { percentile, clamped } = clampPercentile(rawPercentile);
+      return { percentile, rawPercentile, method: 'quantile-single', clamped };
     }
 
     const firstPoint = points[0];
@@ -450,14 +459,16 @@ export function getPR(metric, value) {
       rawPercentile = lastPoint.percentile;
     }
 
+    const { percentile, clamped } = clampPercentile(rawPercentile);
     return {
-      percentile: clampPercentile(rawPercentile),
+      percentile,
       rawPercentile,
-      method: 'quantile-linear'
+      method: 'quantile-linear',
+      clamped
     };
   }
 
-  return { percentile: null, rawPercentile: null, method: null };
+  return { percentile: null, rawPercentile: null, method: null, clamped: null };
 }
 
 function normalizeKeyVariants(key) {
