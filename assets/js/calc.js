@@ -265,10 +265,19 @@ function formatModelRange(range, formatter) {
   return '—';
 }
 
+function projectDisplayPercentile(percentile, betterDirection) {
+  if (!Number.isFinite(percentile)) return null;
+  const bounded = Math.max(0, Math.min(100, percentile));
+  if (typeof betterDirection === 'string' && betterDirection.toLowerCase() === 'lower') {
+    return Math.max(0, Math.min(100, 100 - bounded));
+  }
+  return bounded;
+}
+
 function formatPrDisplay(value) {
   if (!Number.isFinite(value)) return '—';
   const bounded = Math.max(0, Math.min(100, value));
-  return `${Math.round(bounded)} PR`;
+  return `贏過 ${Math.round(bounded)}%（PR）`;
 }
 
 function evaluateModelDeviation(value, range, label) {
@@ -434,14 +443,16 @@ function renderResults(tbody, results, dataset, reference, populationDataset, mo
     const populationMetricKey = metric.percentileKey ?? metric.key;
     const populationMetric = populationDataset?.metrics?.[populationMetricKey];
     if (Number.isFinite(value) && populationMetric) {
-      const prValue = getPopulationPR(populationMetric, value);
-      prCell.textContent = formatPrDisplay(prValue);
-      if (Number.isFinite(prValue)) {
-        if (prValue >= 85) {
-          addNoteSegment(noteSegments, 'PR ≥85：指標落在人群較高段，建議持續追蹤相關風險。');
+      const prResult = getPopulationPR(populationMetric, value) || {};
+      const rawPercentile = Number.isFinite(prResult.rawPercentile) ? prResult.rawPercentile : null;
+      const displayPercentile = projectDisplayPercentile(prResult.percentile, populationMetric.betterDirection);
+      prCell.textContent = formatPrDisplay(displayPercentile);
+      if (Number.isFinite(rawPercentile)) {
+        if (rawPercentile >= 85) {
+          addNoteSegment(noteSegments, '原始 PR ≥85：數值高於約 85% 的人，建議持續追蹤相關風險。');
         }
-        if (prValue <= 15) {
-          addNoteSegment(noteSegments, 'PR ≤15：指標落在人群較低段，建議與專業人員討論可能的健康影響。');
+        if (rawPercentile <= 15) {
+          addNoteSegment(noteSegments, '原始 PR ≤15：數值低於約 15% 的人，建議與專業人員討論可能的健康影響。');
         }
       }
     }
@@ -647,7 +658,9 @@ function extractModelMeta(modelEntry, modelData) {
 
 function renderFootnotes(container, populationEntry, populationData, modelEntry, modelData) {
   if (!container) return;
-  const segments = [];
+  const segments = [
+    'PR（Percentile Rank）代表贏過多少比例的一般人群；例如 PR 70 ≈ 贏過 70%。部分指標會倒轉顯示為贏過比例，備註仍以原始 PR 值判斷風險。'
+  ];
   if (populationEntry) {
     const pieces = [];
     const populationName = populationEntry.name || populationData?.name || populationEntry.id;
