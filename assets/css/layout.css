@@ -321,6 +321,28 @@ tbody td {
   font-size: 0.9rem;
 }
 
+#calc-results th[scope="row"] .indicator-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.indicator-arrow {
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+}
+
+.indicator-label-name {
+  font-weight: 600;
+}
+
+.indicator-label-note {
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+  font-weight: 500;
+}
+
 .calc-output tbody td:nth-child(3) {
   min-width: 10.5rem;
   white-space: nowrap;
@@ -356,6 +378,9 @@ tbody td {
     display: block;
     font-weight: 700;
     margin-bottom: 4px;
+  }
+  #calc-results th[scope="row"] .indicator-label {
+    gap: 0.25rem;
   }
   #calc-results td {
     display: block;

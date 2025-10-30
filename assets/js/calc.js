@@ -6,7 +6,8 @@ import {
   getPR as getPopulationPR,
   loadModelList,
   loadModelData,
-  getModelRange as resolveModelRange
+  getModelRange as resolveModelRange,
+  computeConditionalShoulder
 } from './datasets.adapter.js';
 
 const STORAGE_KEY = 'calc:formValues';
@@ -106,6 +107,16 @@ const metrics = [
     percentileKey: 'shoulderHipRatio'
   },
   {
+    key: 'absoluteShoulderCm',
+    label: '肩寬 (cm)',
+    compute: ({ shoulder }) => {
+      const s = safeNumber(shoulder);
+      return Number.isFinite(s) ? s : NaN;
+    },
+    formatter: (value) => (Number.isFinite(value) ? `${value.toFixed(1)} cm` : ''),
+    requirements: ['shoulder']
+  },
+  {
     key: 'bustWaist',
     label: '胸/腰 (BWR)',
     compute: ({ bust, waist }) => {
@@ -143,6 +154,208 @@ const metrics = [
     percentileKey: 'bodyFatPct'
   }
 ];
+
+const INDICATOR_META = {
+  bmi: {
+    direction: 'neutral',
+    arrow: '↔︎',
+    note: '體重/身高²',
+    labelShort: 'BMI',
+    description: '趨勢參考：屬於中性指標，請結合個人目標評估。'
+  },
+  whtR: {
+    direction: 'lower_is_better',
+    arrow: '↘︎',
+    note: '腰高比',
+    labelShort: 'WHtR',
+    description: '趨勢參考：數值越低通常代表腰圍負擔較小。'
+  },
+  whr: {
+    direction: 'lower_is_better',
+    arrow: '↘︎',
+    note: '腰臀比',
+    labelShort: 'WHR',
+    description: '趨勢參考：數值越低通常代表腰臀差距較大。'
+  },
+  thighHeight: {
+    direction: 'neutral',
+    arrow: '↔︎',
+    note: '大腿/身高',
+    labelShort: 'Th/H',
+    description: '趨勢參考：以自我追蹤為主，無固定優劣方向。'
+  },
+  calfHeight: {
+    direction: 'neutral',
+    arrow: '↔︎',
+    note: '小腿/身高',
+    labelShort: 'Ca/H',
+    description: '趨勢參考：以自我追蹤為主，無固定優劣方向。'
+  },
+  shoulderHeight: {
+    direction: 'lower_is_narrower',
+    arrow: '↘︎',
+    note: '肩/身高',
+    labelShort: 'SHtR',
+    description: '趨勢參考：比例越低通常代表肩線較窄。'
+  },
+  shoulderHip: {
+    direction: 'lower_is_narrower',
+    arrow: '↘︎',
+    note: '肩/臀',
+    labelShort: 'SHR',
+    description: '趨勢參考：比例越低通常代表肩線相對臀部較窄。'
+  },
+  absoluteShoulderCm: {
+    direction: 'neutral',
+    arrow: '↔︎',
+    note: '實測肩寬',
+    labelShort: '肩寬',
+    description: '趨勢參考：顯示實際肩寬，可搭配條件 PR 觀察。'
+  },
+  bustWaist: {
+    direction: 'neutral',
+    arrow: '↔︎',
+    note: '胸/腰',
+    labelShort: 'BWR',
+    description: '趨勢參考：以個人造型需求為主，無固定優劣方向。'
+  },
+  bustHeight: {
+    direction: 'neutral',
+    arrow: '↔︎',
+    note: '胸/身高',
+    labelShort: 'B/H',
+    description: '趨勢參考：以自我追蹤為主，無固定優劣方向。'
+  },
+  bodyfat: {
+    direction: 'neutral',
+    arrow: '↔︎',
+    note: '體脂率',
+    labelShort: 'Body Fat',
+    description: '趨勢參考：請搭配醫療建議與個人目標解讀。'
+  }
+};
+
+const DIRECTION_FALLBACK_DESCRIPTION = {
+  neutral: '趨勢參考：屬於中性指標，請觀察個人變化。',
+  higher_is_better: '趨勢參考：數值越高通常較有利。',
+  lower_is_better: '趨勢參考：數值越低通常較有利。',
+  lower_is_narrower: '趨勢參考：數值越低通常代表線條較窄。'
+};
+
+const REFERENCE_COHORT_PREFERENCE = {
+  female: ['cisFemale', 'female', 'combined', 'default'],
+  male: ['cisMale', 'male', 'combined', 'default'],
+  neutral: ['combined', 'neutral', 'default'],
+  default: ['default']
+};
+
+function resolveIndicatorMeta(key, fallbackLabel) {
+  const base = INDICATOR_META[key] ?? {};
+  const direction = base.direction ?? 'neutral';
+  const description = base.description ?? DIRECTION_FALLBACK_DESCRIPTION[direction] ?? DIRECTION_FALLBACK_DESCRIPTION.neutral;
+  return {
+    direction,
+    arrow: base.arrow ?? '↔︎',
+    note: base.note ?? fallbackLabel,
+    labelShort: base.labelShort ?? fallbackLabel,
+    description
+  };
+}
+
+function buildIndicatorLabel(meta) {
+  const wrapper = createEl('span', { className: 'indicator-label' });
+  const arrow = createEl('span', {
+    className: 'indicator-arrow',
+    text: meta.arrow,
+    attrs: {
+      role: 'img',
+      'aria-label': meta.description
+    }
+  });
+  const name = createEl('span', { className: 'indicator-label-name', text: meta.labelShort });
+  wrapper.append(arrow, name);
+  if (meta.note) {
+    wrapper.appendChild(createEl('span', { className: 'indicator-label-note', text: meta.note }));
+  }
+  return wrapper;
+}
+
+function resolveShoulderCohortKey(reference, joint) {
+  if (!joint || typeof joint !== 'object') return null;
+  const keys = Object.keys(joint);
+  if (!keys.length) return null;
+  const normalized = typeof reference === 'string' && reference ? reference.toLowerCase() : 'neutral';
+  const preference = REFERENCE_COHORT_PREFERENCE[normalized] ?? REFERENCE_COHORT_PREFERENCE.neutral;
+  for (const candidate of preference) {
+    if (candidate && Object.prototype.hasOwnProperty.call(joint, candidate)) {
+      return candidate;
+    }
+  }
+  return keys[0];
+}
+
+function prepareConditionalShoulder(populationDataset, reference, formValues) {
+  const height = safeNumber(formValues?.height);
+  const shoulder = safeNumber(formValues?.shoulder);
+  const joint = populationDataset?.metrics?.shoulderHeightRatio?.joint ?? null;
+  const cohortKey = resolveShoulderCohortKey(reference, joint);
+
+  if (!populationDataset) {
+    return { reason: '尚未載入常模。', cohortKey, height, shoulder, flags: {} };
+  }
+  if (!joint) {
+    return { reason: '常模未提供肩寬條件分布。', cohortKey, height, shoulder, flags: {} };
+  }
+  if (!cohortKey || !joint[cohortKey]) {
+    return { reason: '常模缺少對應群體的肩寬條件分布。', cohortKey, height, shoulder, flags: {} };
+  }
+  if (!Number.isFinite(height)) {
+    return { reason: '尚未輸入身高。', cohortKey, height, shoulder, flags: {} };
+  }
+  if (!Number.isFinite(shoulder)) {
+    return { reason: '尚未輸入肩寬。', cohortKey, height, shoulder, flags: {} };
+  }
+
+  const computed = computeConditionalShoulder(height, shoulder, cohortKey);
+  if (!computed) {
+    return { reason: '條件肩寬計算失敗。', cohortKey, height, shoulder, flags: {} };
+  }
+  if (computed.flags?.missingRho) {
+    return { reason: '常模缺少相關係數，無法條件化。', cohortKey, height, shoulder, flags: computed.flags };
+  }
+
+  const tooltipParts = [];
+  if (Number.isFinite(computed.muCond)) {
+    tooltipParts.push(`條件平均：${computed.muCond.toFixed(2)} cm`);
+  }
+  if (Number.isFinite(computed.sigmaCond)) {
+    tooltipParts.push(`條件標準差：${computed.sigmaCond.toFixed(2)} cm`);
+  }
+  if (Number.isFinite(computed.pr)) {
+    tooltipParts.push(`原始 PR：${computed.pr.toFixed(2)}`);
+  }
+  if (Number.isFinite(computed.z)) {
+    tooltipParts.push(`原始 z：${computed.z.toFixed(3)}`);
+  }
+  if (computed.flags?.heightClamped) {
+    tooltipParts.push('身高超出常模範圍，已以邊界值計算。');
+  }
+
+  const notes = ['條件 PR 依輸入身高估算肩寬常模。'];
+  if (computed.flags?.heightClamped) {
+    notes.push('身高超出常模範圍，條件 PR 以邊界值估算。');
+  }
+
+  return {
+    result: computed,
+    tooltip: tooltipParts.join('\n'),
+    notes,
+    cohortKey,
+    height,
+    shoulder,
+    flags: computed.flags ?? {}
+  };
+}
 
 const datasetInfoHighlights = [
   { key: 'shoulderHeightRatio', label: '肩/身高' },
@@ -293,12 +506,20 @@ function projectDisplayPercentile(percentile, betterDirection) {
   return bounded;
 }
 
-function formatPrDisplay(value, clamped) {
-  if (clamped === 'low') return '＜P1（資料範圍外）';
-  if (clamped === 'high') return '＞P99（資料範圍外）';
-  if (!Number.isFinite(value)) return '—';
-  const bounded = Math.max(0, Math.min(100, value));
-  return `贏過 ${Math.round(bounded)}%（PR）`;
+function formatPrDisplay(value, options = {}) {
+  const { z = null, clamped = null } = options;
+  const zText = Number.isFinite(z) ? `z=${z >= 0 ? '+' : ''}${Math.abs(z).toFixed(2)}` : 'z=—';
+  if (!Number.isFinite(value)) {
+    return `PR：—｜${zText}`;
+  }
+  const rounded = Math.round(value);
+  let prText = `p${rounded}`;
+  if (clamped === 'low' || value < 1) {
+    prText = '<p1';
+  } else if (clamped === 'high' || value > 99) {
+    prText = '>p99';
+  }
+  return `PR：${prText}｜${zText}`;
 }
 
 function evaluateModelDeviation(value, range, label) {
@@ -479,25 +700,35 @@ function renderResults(
   reference,
   populationDataset,
   modelDataset,
-  modelSelection
+  modelSelection,
+  formValues = {}
 ) {
   tbody.innerHTML = '';
   const context = {};
+  const normalizedReference = typeof reference === 'string' && reference ? reference.toLowerCase() : 'neutral';
+  const conditionalShoulder = prepareConditionalShoulder(populationDataset, normalizedReference, formValues);
   const createDataCell = (label, text = '') =>
     createEl('td', {
       text,
       attrs: { 'data-label': label }
     });
+
   metrics.forEach((metric) => {
     const row = createEl('tr');
-    const labelCell = createEl('th', { text: metric.label, attrs: { scope: 'row' } });
+    const indicatorMeta = resolveIndicatorMeta(metric.key, metric.label);
+    const labelCell = createEl('th', { attrs: { scope: 'row' } });
+    labelCell.title = metric.label;
+    labelCell.appendChild(buildIndicatorLabel(indicatorMeta));
+
     const valueCell = createDataCell('數值');
     const prCell = createDataCell('PR 值（一般人群）', '—');
     const flatCell = createDataCell('平面模特範圍', '—');
     const runwayCell = createDataCell('伸展台模特範圍', '—');
     const noteCell = createDataCell('備註');
     noteCell.textContent = '';
+
     const noteSegments = [];
+    addNoteSegment(noteSegments, indicatorMeta.description);
     let percentileBadge = null;
 
     const value = results[metric.key];
@@ -507,38 +738,71 @@ function renderResults(
       valueCell.textContent = '';
     }
 
-    const populationMetricKey = metric.percentileKey ?? metric.key;
-    const populationMetric = populationDataset?.metrics?.[populationMetricKey];
-    if (Number.isFinite(value) && populationMetric) {
-      const prResult = getPopulationPR(populationMetric, value) || {};
-      const rawPercentile = Number.isFinite(prResult.rawPercentile) ? prResult.rawPercentile : null;
-      const displayPercentile = projectDisplayPercentile(prResult.percentile, populationMetric.betterDirection);
-      prCell.textContent = formatPrDisplay(displayPercentile, prResult.clamped);
-      if (prResult.clamped === 'low') {
-        addNoteSegment(noteSegments, '低於資料範圍');
-      } else if (prResult.clamped === 'high') {
-        addNoteSegment(noteSegments, '高於資料範圍');
-      }
-      if (Number.isFinite(rawPercentile)) {
-        if (rawPercentile >= 85) {
-          addNoteSegment(noteSegments, '原始 PR ≥85：數值高於約 85% 的人，建議持續追蹤相關風險。');
-        }
-        if (rawPercentile <= 15) {
-          addNoteSegment(noteSegments, '原始 PR ≤15：數值低於約 15% 的人，建議與專業人員討論可能的健康影響。');
-        }
-      }
-    }
-
-    const modelMetricKey = metric.percentileKey ?? metric.key;
-    const hasModelSelection = modelDataset && modelSelection !== 'off';
+    let prTooltip = '';
+    const hasModelSelection = Boolean(modelDataset) && modelSelection && modelSelection !== 'off';
     let flatRange = null;
     let runwayRange = null;
 
-    if (!hasModelSelection) {
-      const noModelText = '未選擇模特資料';
-      flatCell.textContent = noModelText;
-      runwayCell.textContent = noModelText;
+    if (metric.key === 'absoluteShoulderCm') {
+      if (conditionalShoulder.result && Number.isFinite(conditionalShoulder.result.pr)) {
+        const prValue = conditionalShoulder.result.pr;
+        const clampedState = prValue < 1 ? 'low' : prValue > 99 ? 'high' : null;
+        prCell.textContent = formatPrDisplay(prValue, {
+          z: conditionalShoulder.result.z,
+          clamped: clampedState
+        });
+        prTooltip = conditionalShoulder.tooltip;
+        if (Array.isArray(conditionalShoulder.notes)) {
+          conditionalShoulder.notes.forEach((text) => addNoteSegment(noteSegments, text));
+        }
+        if (conditionalShoulder.flags?.heightClamped) {
+          addNoteSegment(noteSegments, '身高超出常模範圍（條件 PR 已以邊界值推估）。');
+        }
+      } else {
+        prCell.textContent = '—';
+        if (conditionalShoulder.reason) {
+          prTooltip = conditionalShoulder.reason;
+        }
+      }
     } else {
+      const populationMetricKey = metric.percentileKey ?? metric.key;
+      const populationMetric = populationDataset?.metrics?.[populationMetricKey];
+      if (Number.isFinite(value) && populationMetric) {
+        const prResult = getPopulationPR(populationMetric, value) || {};
+        const rawPercentile = Number.isFinite(prResult.rawPercentile) ? prResult.rawPercentile : null;
+        const displayPercentile = projectDisplayPercentile(prResult.percentile, populationMetric.betterDirection);
+        prCell.textContent = formatPrDisplay(displayPercentile, { clamped: prResult.clamped });
+        const tooltipParts = [];
+        if (Number.isFinite(rawPercentile)) {
+          tooltipParts.push(`原始 PR：${rawPercentile.toFixed(2)}`);
+        }
+        if (prResult.clamped === 'low') {
+          addNoteSegment(noteSegments, '低於資料範圍');
+          tooltipParts.push('原始值低於資料範圍。');
+        } else if (prResult.clamped === 'high') {
+          addNoteSegment(noteSegments, '高於資料範圍');
+          tooltipParts.push('原始值高於資料範圍。');
+        }
+        if (tooltipParts.length > 0) {
+          prTooltip = tooltipParts.join('\n');
+        }
+        if (Number.isFinite(rawPercentile)) {
+          if (rawPercentile >= 85) {
+            addNoteSegment(noteSegments, '原始 PR ≥85：位於常模的高位區段，建議留意相關風險。');
+          }
+          if (rawPercentile <= 15) {
+            addNoteSegment(noteSegments, '原始 PR ≤15：位於常模的低位區段，建議與專業人員討論。');
+          }
+        }
+      } else if (Number.isFinite(value)) {
+        prCell.textContent = '—';
+        prTooltip = '常模尚未提供此指標的 PR。';
+        addNoteSegment(noteSegments, '常模未提供 PR。');
+      }
+    }
+
+    if (hasModelSelection) {
+      const modelMetricKey = metric.percentileKey ?? metric.key;
       flatRange = resolveModelRange(modelDataset, 'flat', modelMetricKey);
       runwayRange = resolveModelRange(modelDataset, 'runway', modelMetricKey);
       const flatText = formatModelRange(flatRange, metric.formatter);
@@ -548,49 +812,18 @@ function renderResults(
       if (flatText === '—' && runwayText === '—') {
         addNoteSegment(noteSegments, '模特資料未提供此指標');
       }
-    }
-
-    if (metric.key === 'whr') {
-      addNoteSegment(noteSegments, whrReferenceNotes[reference] ?? whrReferenceNotes.neutral);
-    }
-
-    if (metric.key === 'bmi' && Number.isFinite(value)) {
-      const guide = bmiGuidelines[reference] ?? bmiGuidelines.neutral;
-      addNoteSegment(noteSegments, 'WHO 正常 18.5–24.9；亞太建議 <23。');
-      if (value < guide.underweight) {
-        addNoteSegment(noteSegments, '落在 WHO 體重過低 (<18.5) 區段，需評估營養狀態。');
-      } else if (value >= guide.obesity) {
-        addNoteSegment(noteSegments, '落在 WHO 肥胖 (≥30) 區段，建議諮詢專業人員。');
-      } else if (value >= guide.overweight) {
-        addNoteSegment(noteSegments, '落在 WHO 過重 (25–29.9) 區段。');
-      } else if (value >= guide.asianRisk) {
-        addNoteSegment(noteSegments, '超過亞太建議 23，建議留意代謝指標。');
-      } else {
-        addNoteSegment(noteSegments, '位於亞太建議 18.5–22.9 正常範圍。');
-      }
-    }
-
-    if (metric.key === 'bodyfat' && Number.isFinite(value)) {
-      addNoteSegment(noteSegments, '手動輸入數值，僅於瀏覽器顯示。');
-      const guide = bodyFatGuidelines[reference] ?? bodyFatGuidelines.neutral;
-      addNoteSegment(noteSegments, 'ACSM 建議：女性約 20–32%，男性約 10–22%。');
-      if (value < guide.low) {
-        addNoteSegment(noteSegments, '低於建議下限，請留意荷爾蒙與營養狀態。');
-      } else if (value > guide.caution) {
-        addNoteSegment(noteSegments, '高於建議上限，建議與專業人員檢視。');
-      } else if (value > guide.optimalHi) {
-        addNoteSegment(noteSegments, '略高於建議範圍，可規劃體脂管理。');
-      } else {
-        addNoteSegment(noteSegments, '位於建議範圍內。');
-      }
+    } else {
+      const noModelText = '未選擇模特資料';
+      flatCell.textContent = noModelText;
+      runwayCell.textContent = noModelText;
     }
 
     if (metric.key === 'whtR') {
       const cutValue = Number.isFinite(populationDataset?.whtRCut)
         ? populationDataset.whtRCut
         : Number.isFinite(populationDataset?.metrics?.whtR?.cut)
-        ? populationDataset.metrics.whtR.cut
-        : null;
+          ? populationDataset.metrics.whtR.cut
+          : null;
       if (Number.isFinite(cutValue)) {
         addNoteSegment(noteSegments, `臨界值 ${formatRatio(cutValue, 2)}`);
       }
@@ -598,13 +831,33 @@ function renderResults(
 
     if (metric.key === 'whr') {
       const whrCut =
-        reference === 'female'
+        normalizedReference === 'female'
           ? populationDataset?.whrFemaleCut ?? populationDataset?.metrics?.whrFemale?.cut ?? null
-          : reference === 'male'
+          : normalizedReference === 'male'
             ? populationDataset?.whrMaleCut ?? populationDataset?.metrics?.whrMale?.cut ?? null
             : populationDataset?.metrics?.whr?.cut ?? null;
       if (Number.isFinite(whrCut)) {
         addNoteSegment(noteSegments, `臨界值 ${formatRatio(whrCut, 2)}`);
+      }
+      const note = whrReferenceNotes[normalizedReference] || whrReferenceNotes.neutral;
+      if (note) {
+        addNoteSegment(noteSegments, note);
+      }
+    }
+
+    if (metric.key === 'bmi' && Number.isFinite(value)) {
+      const guide = bmiGuidelines[normalizedReference] || bmiGuidelines.neutral;
+      addNoteSegment(noteSegments, 'WHO 正常 18.5–24.9；亞太建議 <23。');
+      if (value < guide.underweight) {
+        addNoteSegment(noteSegments, '低於建議範圍，可回顧飲食與荷爾蒙影響。');
+      } else if (value >= guide.obesity) {
+        addNoteSegment(noteSegments, '高於臨界範圍，建議與專業人員討論。');
+      } else if (value >= guide.overweight) {
+        addNoteSegment(noteSegments, '高於建議上限，建議進行體重管理。');
+      } else if (value >= guide.asianRisk) {
+        addNoteSegment(noteSegments, '接近警戒範圍，可觀察內臟脂肪變化。');
+      } else {
+        addNoteSegment(noteSegments, '落在建議範圍內。');
       }
     }
 
@@ -625,6 +878,21 @@ function renderResults(
       }
       if (shoulderNotes.length > 0) {
         addNoteSegment(noteSegments, shoulderNotes.join('；'));
+      }
+    }
+
+    if (metric.key === 'bodyfat' && Number.isFinite(value)) {
+      addNoteSegment(noteSegments, '手動輸入數值，僅於瀏覽器顯示。');
+      const guide = bodyFatGuidelines[normalizedReference] || bodyFatGuidelines.neutral;
+      addNoteSegment(noteSegments, 'ACSM 建議：女性約 20–32%，男性約 10–22%。');
+      if (value < guide.low) {
+        addNoteSegment(noteSegments, '低於建議下限，請留意荷爾蒙與營養狀態。');
+      } else if (value > guide.caution) {
+        addNoteSegment(noteSegments, '高於建議上限，建議與專業人員檢視。');
+      } else if (value > guide.optimalHi) {
+        addNoteSegment(noteSegments, '略高於建議範圍，可規劃體脂管理。');
+      } else {
+        addNoteSegment(noteSegments, '位於建議範圍內。');
       }
     }
 
@@ -671,9 +939,20 @@ function renderResults(
       noteCell.appendChild(document.createTextNode(noteSegments.join(' ')));
     }
 
+    if (prTooltip) {
+      prCell.title = prTooltip;
+    } else {
+      prCell.removeAttribute('title');
+    }
+
     row.append(labelCell, valueCell, prCell, flatCell, runwayCell, noteCell);
     tbody.appendChild(row);
   });
+
+  context.conditionalShoulder = conditionalShoulder.result ?? null;
+  context.conditionalShoulderReason = conditionalShoulder.reason ?? null;
+  context.conditionalShoulderCohort = conditionalShoulder.cohortKey ?? null;
+
   return context;
 }
 
@@ -805,7 +1084,8 @@ function extractModelMeta(modelEntry, modelData) {
 function renderFootnotes(container, populationEntry, populationData, modelEntry, modelData) {
   if (!container) return;
   const segments = [
-    'PR（Percentile Rank）代表贏過多少比例的一般人群；例如 PR 70 ≈ 贏過 70%。部分指標會倒轉顯示為贏過比例，備註仍以原始 PR 值判斷風險。'
+    'PR（Percentile Rank）代表常模中的百分位位置；顯示值會在 <p1 與 >p99 之間截斷，詳細原始數據可於提示查看。',
+    '條件 PR 僅應用於肩寬並結合輸入身高，其餘指標維持原始常模百分位。'
   ];
   if (populationEntry) {
     const pieces = [];
@@ -1030,7 +1310,8 @@ function attachCalculator() {
       formValues.reference || 'neutral',
       populationData,
       modelData,
-      modelId
+      modelId,
+      formValues
     );
     renderSuggestion(suggestionBox, results, context);
     renderFootnotes(footnote, populationEntry, populationData, modelEntry, modelData);
