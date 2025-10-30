@@ -65,6 +65,7 @@
           "value": 33.0
         }
       ],
+      "betterDirection": "lower",
       "notes": "KNHANES pooled 2017–2021 adult male BMI percentiles."
     },
     "shoulderHeightRatio": {

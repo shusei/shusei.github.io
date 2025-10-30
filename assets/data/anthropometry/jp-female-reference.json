@@ -65,6 +65,7 @@
           "value": 33.0
         }
       ],
+      "betterDirection": "lower",
       "notes": "National Health and Nutrition Survey 2019 adult females; percentiles rounded to one decimal."
     },
     "shoulderHeightRatio": {
