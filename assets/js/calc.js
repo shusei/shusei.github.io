@@ -467,7 +467,17 @@ function computeMetrics(values) {
   return result;
 }
 
-function renderResults(tbody, results, dataset, reference, populationDataset, modelDataset) {
+// modelSelection passes the currently selected option from the model dataset
+// picker so that we can render fallback text when it is explicitly set to "off".
+function renderResults(
+  tbody,
+  results,
+  dataset,
+  reference,
+  populationDataset,
+  modelDataset,
+  modelSelection
+) {
   tbody.innerHTML = '';
   const context = {};
   metrics.forEach((metric) => {
@@ -512,10 +522,25 @@ function renderResults(tbody, results, dataset, reference, populationDataset, mo
     }
 
     const modelMetricKey = metric.percentileKey ?? metric.key;
-    const flatRange = modelDataset ? resolveModelRange(modelDataset, 'flat', modelMetricKey) : null;
-    const runwayRange = modelDataset ? resolveModelRange(modelDataset, 'runway', modelMetricKey) : null;
-    flatCell.textContent = formatModelRange(flatRange, metric.formatter);
-    runwayCell.textContent = formatModelRange(runwayRange, metric.formatter);
+    const hasModelSelection = modelDataset && modelSelection !== 'off';
+    let flatRange = null;
+    let runwayRange = null;
+
+    if (!hasModelSelection) {
+      const noModelText = '未選擇模特資料';
+      flatCell.textContent = noModelText;
+      runwayCell.textContent = noModelText;
+    } else {
+      flatRange = resolveModelRange(modelDataset, 'flat', modelMetricKey);
+      runwayRange = resolveModelRange(modelDataset, 'runway', modelMetricKey);
+      const flatText = formatModelRange(flatRange, metric.formatter);
+      const runwayText = formatModelRange(runwayRange, metric.formatter);
+      flatCell.textContent = flatText;
+      runwayCell.textContent = runwayText;
+      if (flatText === '—' && runwayText === '—') {
+        addNoteSegment(noteSegments, '模特資料未提供此指標');
+      }
+    }
 
     if (metric.key === 'whr') {
       addNoteSegment(noteSegments, whrReferenceNotes[reference] ?? whrReferenceNotes.neutral);
@@ -595,7 +620,7 @@ function renderResults(tbody, results, dataset, reference, populationDataset, mo
       }
     }
 
-    if (Number.isFinite(value)) {
+    if (Number.isFinite(value) && hasModelSelection) {
       const modelNotes = [];
       const flatDeviation = evaluateModelDeviation(value, flatRange, '平面模特');
       if (flatDeviation) modelNotes.push(flatDeviation);
@@ -1008,7 +1033,8 @@ function attachCalculator() {
       dataset,
       formValues.reference || 'neutral',
       populationData,
-      modelData
+      modelData,
+      modelId
     );
     renderSuggestion(suggestionBox, results, context, formValues);
     renderFootnotes(footnote, populationEntry, populationData, modelEntry, modelData);
