@@ -65,6 +65,7 @@
           "value": 35.5
         }
       ],
+      "betterDirection": "lower",
       "notes": "KNHANES pooled 2017–2021 adult female BMI percentiles."
     },
     "shoulderHeightRatio": {

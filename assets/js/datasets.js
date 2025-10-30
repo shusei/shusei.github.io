@@ -67,6 +67,16 @@ export function getPercentile(metricData, value) {
     state = 'alert';
   }
   const fallback = sorted.length === 1 && sorted[0].key === 'p50';
+  if (metricData.betterDirection === 'lower') {
+    const remap = {
+      P10: 'P90',
+      P25: 'P75',
+      P50: 'P50',
+      P75: 'P25',
+      P90: 'P10'
+    };
+    label = remap[label] ?? label;
+  }
   return { label, state, fallback };
 }
 

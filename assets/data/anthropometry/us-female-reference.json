@@ -70,6 +70,7 @@
           "value": 50.1
         }
       ],
+      "betterDirection": "lower",
       "notes": "NHANES 2015–2018 adult female BMI percentiles."
     },
     "shoulderHeightRatio": {

@@ -70,6 +70,7 @@
           "value": 45.0
         }
       ],
+      "betterDirection": "lower",
       "notes": "NHANES 2015–2018 adult male BMI percentiles."
     },
     "shoulderHeightRatio": {

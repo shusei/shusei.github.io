@@ -275,8 +275,31 @@ select:focus {
   gap: 1.5rem;
 }
 
+.table-wrapper {
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  overflow-x: auto;
+  overflow-y: hidden;
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.16);
+  scrollbar-width: thin;
+}
+
+.table-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 999px;
+}
+
 table {
   width: 100%;
+  min-width: 720px;
   border-collapse: collapse;
   border-radius: var(--radius-md);
   overflow: hidden;
