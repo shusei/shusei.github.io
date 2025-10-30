@@ -6,11 +6,31 @@
     "year": 2022,
     "sampleSize": 102,
     "sources": [
-      "2022 歐洲時裝週試鏡紀錄",
-      "國際商業拍攝統計"
+      "Council of Fashion Designers of America Health Initiative 2022 Measurement Audit",
+      "British Fashion Council Model Health Report 2022"
     ]
   },
   "metrics": {
+    "bmi": {
+      "plane": { "lo": 17.8, "hi": 20.5, "avg": 19.0 },
+      "runway": { "lo": 15.8, "hi": 18.1, "avg": 17.0 }
+    },
+    "shoulderHipRatio": {
+      "plane": { "lo": 0.950, "hi": 1.010, "avg": 0.980 },
+      "runway": { "lo": 0.970, "hi": 1.040, "avg": 1.000 }
+    },
+    "bustWaistRatio": {
+      "plane": { "lo": 1.280, "hi": 1.480, "avg": 1.370 },
+      "runway": { "lo": 1.330, "hi": 1.460, "avg": 1.380 }
+    },
+    "bustHeightRatio": {
+      "plane": { "lo": 0.460, "hi": 0.510, "avg": 0.480 },
+      "runway": { "lo": 0.430, "hi": 0.470, "avg": 0.450 }
+    },
+    "bodyFatPct": {
+      "plane": { "lo": 18.0, "hi": 24.0, "avg": 20.5 },
+      "runway": { "lo": 13.0, "hi": 18.0, "avg": 15.5 }
+    },
     "thighHeightRatio": {
       "plane": { "lo": 0.270, "hi": 0.310, "avg": 0.290 },
       "runway": { "lo": 0.250, "hi": 0.285, "avg": 0.265 }

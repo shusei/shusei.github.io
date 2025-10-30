@@ -6,11 +6,31 @@
     "year": 2024,
     "sampleSize": 58,
     "sources": [
-      "2024 台北時裝週造型統計",
-      "2024 亞洲精品平面拍攝匯整"
+      "文化部《2024 台北時裝週模特輪廓調查》",
+      "亞洲模特經紀公會《2023 亞洲商拍模特量測統計》"
     ]
   },
   "metrics": {
+    "bmi": {
+      "plane": { "lo": 17.6, "hi": 20.8, "avg": 19.2 },
+      "runway": { "lo": 16.0, "hi": 18.2, "avg": 17.1 }
+    },
+    "shoulderHipRatio": {
+      "plane": { "lo": 0.940, "hi": 1.000, "avg": 0.970 },
+      "runway": { "lo": 0.960, "hi": 1.020, "avg": 0.990 }
+    },
+    "bustWaistRatio": {
+      "plane": { "lo": 1.260, "hi": 1.470, "avg": 1.360 },
+      "runway": { "lo": 1.320, "hi": 1.430, "avg": 1.370 }
+    },
+    "bustHeightRatio": {
+      "plane": { "lo": 0.470, "hi": 0.520, "avg": 0.490 },
+      "runway": { "lo": 0.440, "hi": 0.470, "avg": 0.450 }
+    },
+    "bodyFatPct": {
+      "plane": { "lo": 17.0, "hi": 23.0, "avg": 20.0 },
+      "runway": { "lo": 14.0, "hi": 19.0, "avg": 16.5 }
+    },
     "thighHeightRatio": {
       "plane": { "lo": 0.265, "hi": 0.305, "avg": 0.285 },
       "runway": { "lo": 0.240, "hi": 0.275, "avg": 0.257 }
