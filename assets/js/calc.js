@@ -489,17 +489,19 @@ function renderResults(
 ) {
   tbody.innerHTML = '';
   const context = {};
+  const createDataCell = (label, text = '') =>
+    createEl('td', {
+      text,
+      attrs: { 'data-label': label }
+    });
   metrics.forEach((metric) => {
     const row = createEl('tr');
     const labelCell = createEl('th', { text: metric.label, attrs: { scope: 'row' } });
-    const valueCell = createEl('td', { attrs: { 'data-label': '數值' } });
-    const prCell = createEl('td', {
-      text: '—',
-      attrs: { 'data-label': 'PR 值（一般人群）' }
-    });
-    const flatCell = createEl('td', { text: '—', attrs: { 'data-label': '平面模特範圍' } });
-    const runwayCell = createEl('td', { text: '—', attrs: { 'data-label': '伸展台模特範圍' } });
-    const noteCell = createEl('td', { attrs: { 'data-label': '備註' } });
+    const valueCell = createDataCell('數值');
+    const prCell = createDataCell('PR 值（一般人群）', '—');
+    const flatCell = createDataCell('平面模特範圍', '—');
+    const runwayCell = createDataCell('伸展台模特範圍', '—');
+    const noteCell = createDataCell('備註');
     noteCell.textContent = '';
     const noteSegments = [];
     let percentileBadge = null;
