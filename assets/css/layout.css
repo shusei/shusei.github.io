@@ -278,8 +278,8 @@ select:focus {
 .table-wrapper {
   border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--bg) 92%, transparent);
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow-x: visible;
+  overflow-y: visible;
   box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.16);
   scrollbar-width: thin;
 }
@@ -299,7 +299,6 @@ select:focus {
 
 table {
   width: 100%;
-  min-width: 720px;
   border-collapse: collapse;
   border-radius: var(--radius-md);
   overflow: hidden;
@@ -327,119 +326,97 @@ tbody td {
   white-space: nowrap;
 }
 
-@container section (max-width: 720px) {
-  .table-wrapper {
-    overflow: visible;
-  }
+/* === 讓計算區成為容器（容器查詢用） === */
+/* 同時支援 #calc-section 與 .calc-section（避免 id 已被佔用） */
+#calc-section, .calc-section {
+  container-type: inline-size;
+}
 
-  #calc-results {
-    min-width: 0;
-    border-collapse: separate;
-  }
+/* === 桌機基底（全寬表格） === */
+.table-wrapper { overflow-x: visible; }
+#calc-results { min-width: 100%; width: 100%; table-layout: auto; }
 
-  #calc-results thead {
-    display: none;
-  }
+/* === A. 容器查詢：容器寬 < 720px 時切換卡片版 === */
+@container (max-width: 720px) {
+  .table-wrapper { overflow-x: visible; }
+  #calc-results { min-width: 0; width: 100%; display: block; }
+  #calc-results thead { display: none; }
 
-  #calc-results tbody {
+  #calc-results tbody { display: grid; gap: 12px; }
+  #calc-results tr {
     display: grid;
-    gap: 1rem;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 12px;
+    background: var(--surface, #fff);
   }
-
-  #calc-results tbody tr {
-    display: grid;
-    gap: 0.75rem;
-    padding: 1rem;
-    border-radius: var(--radius-md);
-    border: 1px solid rgba(148, 163, 184, 0.25);
-    background: color-mix(in srgb, var(--bg-card) 80%, transparent);
-    box-shadow: var(--shadow-light);
+  #calc-results th[scope="row"] {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 4px;
   }
-
-  #calc-results tbody tr td {
-    display: grid;
-    gap: 0.25rem;
-    padding: 0;
-    border: 0;
-    font-size: 0.95rem;
-    line-height: 1.5;
-  }
-
-  #calc-results tbody tr td::before {
-    content: attr(data-label);
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-    color: var(--fg-muted);
-  }
-
-  #calc-results tbody tr td .badge {
-    justify-self: start;
-  }
-
-  .calc-output tbody td:nth-child(3) {
+  #calc-results td {
+    display: block;
+    padding: 4px 0;
     min-width: 0;
     white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+  #calc-results td::before {
+    content: attr(data-label) "：";
+    font-weight: 600;
+    margin-right: .25em;
+    color: var(--muted, #6b7280);
+  }
+  #calc-results th, #calc-results td {
+    font-size: clamp(12px, 2.8vw, 14px);
+    line-height: 1.35;
   }
 }
 
+/* === B. 後備：老瀏覽器（不支援容器查詢）走 Media Query === */
+/* 務必放在檔案尾端，確保覆蓋到桌機基底樣式 */
 @supports not (container-type: inline-size) {
   @media (max-width: 720px) {
-    .table-wrapper {
-      overflow: visible;
-    }
+    .table-wrapper { overflow-x: visible; }
+    #calc-results { min-width: 0; width: 100%; display: block; }
+    #calc-results thead { display: none; }
 
-    #calc-results {
+    #calc-results tbody { display: grid; gap: 12px; }
+    #calc-results tr {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid var(--border, #e5e7eb);
+      border-radius: 12px;
+      background: var(--surface, #fff);
+    }
+    #calc-results th[scope="row"] {
       display: block;
-      min-width: 0;
-      border-collapse: separate;
+      font-weight: 700;
+      margin-bottom: 4px;
     }
-
-    #calc-results thead {
-      display: none;
-    }
-
-    #calc-results tbody {
-      display: grid;
-      gap: 1rem;
-    }
-
-    #calc-results tbody tr {
-      display: grid;
-      gap: 0.75rem;
-      padding: 1rem;
-      border-radius: var(--radius-md);
-      border: 1px solid rgba(148, 163, 184, 0.25);
-      background: color-mix(in srgb, var(--bg-card) 80%, transparent);
-      box-shadow: var(--shadow-light);
-    }
-
-    #calc-results tbody tr td {
-      display: grid;
-      gap: 0.25rem;
-      padding: 0;
-      border: 0;
-      font-size: 0.95rem;
-      line-height: 1.5;
-    }
-
-    #calc-results tbody tr td::before {
-      content: attr(data-label);
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-      color: var(--fg-muted);
-    }
-
-    #calc-results tbody tr td .badge {
-      justify-self: start;
-    }
-
-    .calc-output tbody td:nth-child(3) {
+    #calc-results td {
+      display: block;
+      padding: 4px 0;
       min-width: 0;
       white-space: normal;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    #calc-results td::before {
+      content: attr(data-label) "：";
+      font-weight: 600;
+      margin-right: .25em;
+      color: var(--muted, #6b7280);
+    }
+    #calc-results th, #calc-results td {
+      font-size: clamp(12px, 2.8vw, 14px);
+      line-height: 1.35;
     }
   }
 }
