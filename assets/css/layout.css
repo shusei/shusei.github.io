@@ -384,6 +384,66 @@ tbody td {
   }
 }
 
+@supports not (container-type: inline-size) {
+  @media (max-width: 720px) {
+    .table-wrapper {
+      overflow: visible;
+    }
+
+    #calc-results {
+      display: block;
+      min-width: 0;
+      border-collapse: separate;
+    }
+
+    #calc-results thead {
+      display: none;
+    }
+
+    #calc-results tbody {
+      display: grid;
+      gap: 1rem;
+    }
+
+    #calc-results tbody tr {
+      display: grid;
+      gap: 0.75rem;
+      padding: 1rem;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      background: color-mix(in srgb, var(--bg-card) 80%, transparent);
+      box-shadow: var(--shadow-light);
+    }
+
+    #calc-results tbody tr td {
+      display: grid;
+      gap: 0.25rem;
+      padding: 0;
+      border: 0;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    #calc-results tbody tr td::before {
+      content: attr(data-label);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: var(--fg-muted);
+    }
+
+    #calc-results tbody tr td .badge {
+      justify-self: start;
+    }
+
+    .calc-output tbody td:nth-child(3) {
+      min-width: 0;
+      white-space: normal;
+    }
+  }
+}
+
 .badge {
   display: inline-flex;
   align-items: center;
