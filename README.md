@@ -78,6 +78,12 @@ npm run test:markup  # 執行 scripts/check-static.js
   2. 在百分位欄位填入數字（以小數表示比例），無數據處維持 `null`。
   3. 更新 README 與站內段落以標註資料來源日期。
 
+## 模特比例資料來源與適用性
+
+- 《2024 台北時裝週模特輪廓調查》（文化部）與《2023 亞洲商拍模特量測統計》（亞洲模特經紀公會）提供 2024 亞洲資料集的平面（plane）與伸展台（runway）分組，涵蓋 BMI、肩/臀、胸/腰、胸/身高與體脂範圍，合計樣本 58 位。
+- Council of Fashion Designers of America Health Initiative 2022 Measurement Audit 與 British Fashion Council Model Health Report 2022 提供 2022 全球資料集，分別對商拍與伸展台模特進行量測共 102 位，並區分平面與伸展台需求場景。
+- 資料僅適用於職業模特族群，請勿外推至一般族群或醫療判斷。
+
 ## 部署
 
 1. 將整個資料夾推送至 GitHub repo 的 `main` 或 `gh-pages` 分支。
