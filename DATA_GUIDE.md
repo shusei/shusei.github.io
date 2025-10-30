@@ -5,7 +5,7 @@ providing **BMI**, **shoulder / torso ratios**, and **body fat percentiles** (p1
 
 ## Files
 
-- `assets/data/datasets.json` — manifest for the UI selector
+- `assets/data/datasets.json` — manifest shared by the PR baseline selector and percentile badges
 - `assets/data/anthropometry/*.json` — per-dataset files (one per locale × gender)
 - `assets/data/anthropometry/*sample.json` — placeholder structures for integrators (no data, keep nulls until sourced)
 - `assets/data/models/manifest.json` — manifest for fashion model ratio datasets (plane/runway)
@@ -15,8 +15,8 @@ providing **BMI**, **shoulder / torso ratios**, and **body fat percentiles** (p1
 
 ### `assets/data/datasets.json`
 
-- **`datasets[]`** — entries feeding the「資料集」下拉選單。
-  - `id`：對應 `select[name="dataset"]` 的值，亦用於 `loadDataset()` 快取。
+- **`datasets[]`** — entries feeding the PR 基準選單與常模徽章。
+  - `id`：對應 PR 基準的 `select[data-population-select]` 選項，同步提供 `loadDataset()` 快取。
   - `name`：UI 顯示名稱。
   - `file`：指向 `assets/data/anthropometry/*.json` 的實際資料檔。
 - **來源**：僅列出內部清單；百分位與引用需查閱對應的 anthropometry JSON（見下節）。
