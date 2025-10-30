@@ -99,13 +99,6 @@
                 <option value="male">男性向</option>
               </select>
             </label>
-            <label class="select-group">足踝/高跟新手
-              <select name="heelLevel">
-                <option value="none">—</option>
-                <option value="beginner">初學者</option>
-                <option value="aware">適應中</option>
-              </select>
-            </label>
             <div class="btn-row">
               <button type="button" class="btn-outline" data-save-values>儲存</button>
               <button type="button" class="btn-outline" data-load-values>載入</button>
@@ -113,8 +106,7 @@
             </div>
           </div>
           <p class="calc-note">
-            工具包含三個互相關聯的下拉選單：「參考口徑」決定 WHR 臨界值與備註語氣；「一般人群 PR 基準」會載入對應常模，並自動決定百分位徽章與常模摘要的來源；「足踝/高跟新手」目前僅用來觸發新手訓練建議卡，若要與指標掛鉤，可在
-            <code>assets/js/calc.js</code> 的 <code>suggestionRules</code> 追加條件，將 <code>heelLevel</code> 與特定 PR 結果一併檢查後再出現提示。
+            工具包含兩個互相關聯的下拉選單：「參考口徑」決定 WHR 臨界值與備註語氣；「一般人群 PR 基準」會載入對應常模，並自動決定百分位徽章與常模摘要的來源。
           </p>
           <p id="calc-note" class="calc-note">結果僅供自我追蹤。可儲存在本機瀏覽器後再載入使用。</p>
           <p class="calc-note" data-dataset-info aria-live="polite" hidden></p>
