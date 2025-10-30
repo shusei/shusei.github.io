@@ -13,6 +13,459 @@ const modelDataCache = new Map();
 
 const percentilePattern = /^p(\d{1,3})(?:_(\d{1,3}))?$/i;
 
+const Z5 = -1.6448536269;
+const Z95 = 1.6448536269;
+const Z10 = -1.2815515655;
+const Z90 = 1.2815515655;
+const MIN_SIGMA = 1e-6;
+
+const shoulderHeightJointLibrary = new Map();
+
+export function normalCdf(z) {
+  if (Number.isNaN(z)) return NaN;
+  if (z === Number.POSITIVE_INFINITY) return 1;
+  if (z === Number.NEGATIVE_INFINITY) return 0;
+  const sign = z < 0 ? -1 : 1;
+  const abs = Math.abs(z) / Math.SQRT2;
+  const t = 1 / (1 + 0.3275911 * abs);
+  const poly =
+    (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t;
+  const erf = 1 - poly * Math.exp(-abs * abs);
+  const cdf = 0.5 * (1 + sign * erf);
+  return Math.max(0, Math.min(1, cdf));
+}
+
+export function normalInvCdf(p) {
+  if (Number.isNaN(p)) return NaN;
+  if (p <= 0) return Number.NEGATIVE_INFINITY;
+  if (p >= 1) return Number.POSITIVE_INFINITY;
+
+  const a = [
+    -3.969683028665376e+01,
+    2.209460984245205e+02,
+    -2.759285104469687e+02,
+    1.383577518672690e+02,
+    -3.066479806614716e+01,
+    2.506628277459239e+00
+  ];
+  const b = [
+    -5.447609879822406e+01,
+    1.615858368580409e+02,
+    -1.556989798598866e+02,
+    6.680131188771972e+01,
+    -1.328068155288572e+01
+  ];
+  const c = [
+    -7.784894002430293e-03,
+    -3.223964580411365e-01,
+    -2.400758277161838e+00,
+    -2.549732539343734e+00,
+    4.374664141464968e+00,
+    2.938163982698783e+00
+  ];
+  const d = [
+    7.784695709041462e-03,
+    3.224671290700398e-01,
+    2.445134137142996e+00,
+    3.754408661907416e+00
+  ];
+
+  const plow = 0.02425;
+  const phigh = 1 - plow;
+  let q = 0;
+  let r = 0;
+
+  if (p < plow) {
+    q = Math.sqrt(-2 * Math.log(p));
+    return (
+      (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+      ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1)
+    );
+  }
+  if (p > phigh) {
+    q = Math.sqrt(-2 * Math.log(1 - p));
+    return -(
+      (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+      ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1)
+    );
+  }
+
+  q = p - 0.5;
+  r = q * q;
+  return (
+    (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q /
+    (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1)
+  );
+}
+
+export function percentilesToNormal(qLow, q50, qHigh, zLow, zHigh) {
+  const mu = Number.isFinite(q50) ? q50 : null;
+  if (mu === null) return null;
+
+  const sigmaCandidates = [];
+  if (Number.isFinite(qLow) && Number.isFinite(zLow) && zLow !== 0) {
+    const candidate = (mu - qLow) / (-zLow);
+    if (candidate > 0) sigmaCandidates.push(candidate);
+  }
+  if (Number.isFinite(qHigh) && Number.isFinite(zHigh) && zHigh !== 0) {
+    const candidate = (qHigh - mu) / zHigh;
+    if (candidate > 0) sigmaCandidates.push(candidate);
+  }
+
+  if (sigmaCandidates.length === 0) return null;
+  const sigma = sigmaCandidates.reduce((sum, value) => sum + value, 0) / sigmaCandidates.length;
+  if (!(sigma > 0)) return null;
+  return { mu, sigma };
+}
+
+export function conditionalParams(muH, sigmaH, muS, sigmaS, rho, h) {
+  if (
+    !Number.isFinite(muH) ||
+    !Number.isFinite(sigmaH) ||
+    sigmaH <= 0 ||
+    !Number.isFinite(muS) ||
+    !Number.isFinite(sigmaS) ||
+    sigmaS <= 0 ||
+    !Number.isFinite(rho) ||
+    !Number.isFinite(h)
+  ) {
+    return null;
+  }
+  const muCond = muS + rho * (sigmaS / sigmaH) * (h - muH);
+  const variance = Math.max(0, 1 - rho * rho);
+  const sigmaCond = Math.max(MIN_SIGMA, sigmaS * Math.sqrt(variance));
+  return { muCond, sigmaCond };
+}
+
+function detectUnit(section) {
+  if (!section || typeof section !== 'object') return null;
+  const unitCandidate = section.unit ?? section.units ?? null;
+  if (typeof unitCandidate !== 'string') return null;
+  const normalized = unitCandidate.trim().toLowerCase();
+  if (!normalized) return null;
+  if (normalized.includes('millimeter') || normalized.includes('mm')) return 'mm';
+  if (normalized.includes('centimeter') || normalized.includes('cm')) return 'cm';
+  if (normalized.includes('meter') || normalized.includes('m ')) return 'm';
+  return normalized === 'm' ? 'm' : null;
+}
+
+function toCentimeters(value, unitHint) {
+  const numeric = toNumber(value);
+  if (!Number.isFinite(numeric)) return null;
+  if (unitHint === 'cm') return numeric;
+  if (unitHint === 'mm') return numeric / 10;
+  if (unitHint === 'm') return numeric * 100;
+  if (numeric > 300) return numeric / 10;
+  if (numeric < 3) return numeric * 100;
+  return numeric;
+}
+
+function readPercentileMap(section) {
+  const percentiles = new Map();
+  if (!section || typeof section !== 'object') return percentiles;
+
+  const register = (percentile, value) => {
+    const numeric = toNumber(value);
+    if (numeric !== null) {
+      percentiles.set(percentile, numeric);
+    }
+  };
+
+  Object.entries(section).forEach(([key, value]) => {
+    if (value === null || value === undefined) return;
+    const match = key.match(percentilePattern);
+    if (match) {
+      const major = Number.parseInt(match[1], 10);
+      const minor = match[2] ? Number.parseInt(match[2], 10) : 0;
+      const percentile = major + minor / 100;
+      register(percentile, value);
+      return;
+    }
+    const normalizedKey = key.trim().toLowerCase();
+    if ((normalizedKey === 'quantiles' || normalizedKey === 'percentiles') && typeof value === 'object') {
+      if (Array.isArray(value)) {
+        value.forEach((entry) => {
+          if (!entry || typeof entry !== 'object') return;
+          const percentile = toNumber(entry.percentile ?? entry.p ?? entry.quantile);
+          const entryValue = entry.value ?? entry.val ?? entry.metric;
+          if (percentile !== null && entryValue !== undefined) {
+            register(percentile, entryValue);
+          }
+        });
+      } else {
+        Object.entries(value).forEach(([percentileKey, percentileValue]) => {
+          const percentile = toNumber(percentileKey);
+          if (percentile !== null) {
+            register(percentile, percentileValue);
+          }
+        });
+      }
+    }
+  });
+
+  return percentiles;
+}
+
+function readNormalApproximation(section) {
+  if (!section || typeof section !== 'object') return null;
+  const percentiles = readPercentileMap(section);
+  if (!percentiles.has(50)) return null;
+  const unitHint = detectUnit(section);
+
+  const q50 = toCentimeters(percentiles.get(50), unitHint);
+  if (!Number.isFinite(q50)) return null;
+
+  const has5 = percentiles.has(5) && percentiles.has(95);
+  const has10 = percentiles.has(10) && percentiles.has(90);
+  let qLow = null;
+  let qHigh = null;
+  let zLow = null;
+  let zHigh = null;
+  let percentileLow = null;
+  let percentileHigh = null;
+
+  if (has5) {
+    qLow = toCentimeters(percentiles.get(5), unitHint);
+    qHigh = toCentimeters(percentiles.get(95), unitHint);
+    zLow = Z5;
+    zHigh = Z95;
+    percentileLow = 5;
+    percentileHigh = 95;
+  } else if (has10) {
+    qLow = toCentimeters(percentiles.get(10), unitHint);
+    qHigh = toCentimeters(percentiles.get(90), unitHint);
+    zLow = Z10;
+    zHigh = Z90;
+    percentileLow = 10;
+    percentileHigh = 90;
+  } else {
+    return null;
+  }
+
+  if (!Number.isFinite(qLow) || !Number.isFinite(qHigh)) return null;
+  const normal = percentilesToNormal(qLow, q50, qHigh, zLow, zHigh);
+  if (!normal) return null;
+
+  return {
+    ...normal,
+    bounds: { low: qLow, high: qHigh },
+    percentiles: { low: percentileLow, high: percentileHigh }
+  };
+}
+
+function extractRho(payload) {
+  if (!payload || typeof payload !== 'object') return null;
+  const candidates = [
+    payload.rho,
+    payload.correlation,
+    payload.correlation_rho,
+    payload.correlationRho,
+    payload.assumptions?.correlation_rho,
+    payload.assumptions?.correlationRho,
+    payload.assumptions?.rho,
+    payload.assumptions?.correlation
+  ];
+  for (const candidate of candidates) {
+    const numeric = toNumber(candidate);
+    if (numeric === null) continue;
+    if (!Number.isFinite(numeric)) continue;
+    const clamped = Math.max(-0.999999, Math.min(0.999999, numeric));
+    return clamped;
+  }
+  return null;
+}
+
+function genderToCohortKeys(gender) {
+  if (!gender || (typeof gender !== 'string' && typeof gender !== 'number')) return [];
+  const normalized = gender.toString().trim().toLowerCase();
+  if (!normalized) return [];
+  if (['female', 'woman', 'women', 'cisfemale', 'f'].includes(normalized)) return ['cisFemale'];
+  if (['male', 'man', 'men', 'cismale', 'm'].includes(normalized)) return ['cisMale'];
+  if (['nonbinary', 'non-binary', 'nb', 'enby'].includes(normalized)) return ['nonBinary'];
+  if (['transfeminine', 'trans-feminine'].includes(normalized)) return ['transfeminine'];
+  if (['transmasculine', 'trans-masculine'].includes(normalized)) return ['transmasculine'];
+  if (['mixed', 'coed', 'all', 'combined', 'general'].includes(normalized)) return ['combined'];
+  return [];
+}
+
+function determineCohortKeys(payload, datasetMeta, explicitKey) {
+  const set = new Set();
+  const register = (value) => {
+    if (typeof value !== 'string') return;
+    const trimmed = value.trim();
+    if (trimmed) set.add(trimmed);
+  };
+
+  if (explicitKey) register(explicitKey);
+  if (payload && typeof payload === 'object') {
+    if (Array.isArray(payload.cohortKeys)) payload.cohortKeys.forEach(register);
+    register(payload.cohortKey);
+    register(payload.cohort);
+    register(payload.key);
+    register(payload.id);
+    if (payload.gender) {
+      genderToCohortKeys(payload.gender).forEach(register);
+    }
+  }
+
+  if (datasetMeta && typeof datasetMeta === 'object') {
+    if (Array.isArray(datasetMeta.cohortKeys)) datasetMeta.cohortKeys.forEach(register);
+    register(datasetMeta.cohortKey);
+    if (datasetMeta.gender) {
+      genderToCohortKeys(datasetMeta.gender).forEach(register);
+    }
+  }
+
+  if (set.size === 0) {
+    (payload?.gender ? genderToCohortKeys(payload.gender) : []).forEach(register);
+  }
+
+  if (set.size === 0) {
+    register('default');
+  }
+
+  if (set.size > 1 && set.has('default')) {
+    set.delete('default');
+  }
+
+  return Array.from(set);
+}
+
+function parseShoulderHeightJointEntry(payload) {
+  if (!payload || typeof payload !== 'object') return null;
+  const heightSection =
+    payload.height_mm ??
+    payload.stature_mm ??
+    payload.stature ??
+    payload.height ??
+    payload.heightMm ??
+    payload.statureMm;
+  const shoulderSection =
+    payload.biacromial_mm ??
+    payload.shoulder_mm ??
+    payload.biacromial ??
+    payload.shoulder ??
+    payload.biacromialMm ??
+    payload.shoulderMm ??
+    payload.shoulderWidth_mm ??
+    payload.shoulderWidthMm;
+
+  const heightNormal = readNormalApproximation(heightSection);
+  const shoulderNormal = readNormalApproximation(shoulderSection);
+  if (!heightNormal || !shoulderNormal) return null;
+
+  const rho = extractRho(payload);
+
+  return {
+    muHeight: heightNormal.mu,
+    sigmaHeight: heightNormal.sigma,
+    muShoulder: shoulderNormal.mu,
+    sigmaShoulder: shoulderNormal.sigma,
+    rho: rho ?? null,
+    unit: 'cm',
+    heightRange: heightNormal.bounds,
+    shoulderRange: shoulderNormal.bounds,
+    heightPercentiles: heightNormal.percentiles,
+    shoulderPercentiles: shoulderNormal.percentiles
+  };
+}
+
+function buildShoulderHeightJoint(metric, datasetMeta) {
+  if (!metric || typeof metric !== 'object') return null;
+  const computed = metric.computedFrom;
+  if (!computed || typeof computed !== 'object') return null;
+
+  const joint = {};
+
+  const registerEntry = (payload, explicitKey) => {
+    const entry = parseShoulderHeightJointEntry(payload);
+    if (!entry) return;
+    const keys = determineCohortKeys(payload, datasetMeta, explicitKey);
+    keys.forEach((key) => {
+      if (!key) return;
+      joint[key] = entry;
+      shoulderHeightJointLibrary.set(key, entry);
+    });
+  };
+
+  if (Array.isArray(computed.cohorts)) {
+    computed.cohorts.forEach((payload) => {
+      if (!payload || typeof payload !== 'object') return;
+      registerEntry(payload);
+    });
+  } else if (computed.cohorts && typeof computed.cohorts === 'object') {
+    Object.entries(computed.cohorts).forEach(([key, payload]) => {
+      if (!payload || typeof payload !== 'object') return;
+      registerEntry(payload, key);
+    });
+  } else {
+    registerEntry(computed);
+  }
+
+  return Object.keys(joint).length > 0 ? joint : null;
+}
+
+export function computeConditionalShoulder(h, s, cohortKey) {
+  if (!cohortKey || typeof cohortKey !== 'string') return null;
+  const params = shoulderHeightJointLibrary.get(cohortKey.trim());
+  if (!params) return null;
+  if (params.rho === null || !Number.isFinite(params.rho)) {
+    return {
+      z: null,
+      pr: null,
+      muCond: null,
+      sigmaCond: null,
+      flags: { missingRho: true }
+    };
+  }
+
+  const height = toNumber(h);
+  if (!Number.isFinite(height)) return null;
+  const shoulder = toNumber(s);
+
+  let workingHeight = height;
+  const flags = {};
+  if (params.heightRange) {
+    if (Number.isFinite(params.heightRange.low) && workingHeight < params.heightRange.low) {
+      workingHeight = params.heightRange.low;
+      flags.heightClamped = true;
+    } else if (Number.isFinite(params.heightRange.high) && workingHeight > params.heightRange.high) {
+      workingHeight = params.heightRange.high;
+      flags.heightClamped = true;
+    }
+  }
+
+  const conditional = conditionalParams(
+    params.muHeight,
+    params.sigmaHeight,
+    params.muShoulder,
+    params.sigmaShoulder,
+    params.rho,
+    workingHeight
+  );
+  if (!conditional) return null;
+
+  const result = {
+    z: null,
+    pr: null,
+    muCond: conditional.muCond,
+    sigmaCond: conditional.sigmaCond,
+    flags
+  };
+
+  if (Number.isFinite(shoulder)) {
+    const z = (shoulder - conditional.muCond) / conditional.sigmaCond;
+    result.z = z;
+    result.pr = normalCdf(z) * 100;
+  }
+
+  if (Object.keys(result.flags).length === 0) {
+    result.flags = {};
+  }
+
+  return result;
+}
+
 const typeAliases = {
   flat: ['flat', 'print', 'catalog', 'catalogue', 'commercial', 'editorial-flat', 'plane', 'plane-model', '平面', '平面模特', '平面模特兒'],
   runway: ['runway', 'catwalk', 'editorial', 'show', 'runway-model', '伸展台', '伸展台模特']
@@ -206,6 +659,22 @@ function normalizePopulationDataset(data) {
   const year = extractYear(metaContainers);
   const sampleSize = extractSampleSize(metaContainers);
   const shoulderMedians = extractShoulderMedians(metrics.shoulderHeightRatio);
+  let shoulderHeightMetric = normalizeMetric(metrics.shoulderHeightRatio);
+  const shoulderHeightJoint = buildShoulderHeightJoint(metrics.shoulderHeightRatio, data);
+  if (shoulderHeightJoint) {
+    if (shoulderHeightMetric) {
+      shoulderHeightMetric = { ...shoulderHeightMetric, joint: shoulderHeightJoint };
+    } else {
+      shoulderHeightMetric = {
+        unit: metrics.shoulderHeightRatio?.unit ?? null,
+        raw: null,
+        quantiles: [],
+        cut: null,
+        betterDirection: metrics.shoulderHeightRatio?.betterDirection ?? null,
+        joint: shoulderHeightJoint
+      };
+    }
+  }
   const normalized = {
     id: data.id ?? null,
     name: data.name ?? null,
@@ -216,7 +685,7 @@ function normalizePopulationDataset(data) {
     },
     metrics: {
       bmi: normalizeMetric(metrics.bmi),
-      shoulderHeightRatio: normalizeMetric(metrics.shoulderHeightRatio),
+      shoulderHeightRatio: shoulderHeightMetric,
       shoulderHipRatio: normalizeMetric(metrics.shoulderHipRatio),
       bustWaistRatio: normalizeMetric(metrics.bustWaistRatio),
       bustHeightRatio: normalizeMetric(metrics.bustHeightRatio),
@@ -581,4 +1050,5 @@ export function __debugResetCaches() {
   populationDataCache.clear();
   modelManifestPromise = null;
   modelDataCache.clear();
+  shoulderHeightJointLibrary.clear();
 }
