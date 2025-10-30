@@ -119,7 +119,7 @@
           </div>
           <p class="calc-note">
             表單內的三個下拉選單會共同影響結果：「參考口徑」決定 WHR 臨界值與備註語氣；「資料集」需選擇對應常模後才會附加百分位徽章，並在下方列出目前可用的主要指標，選擇 Off
-            則僅保留一般人群 PR；「足踝/高跟新手」目前僅用來觸發新手訓練建議卡，若要與指標掛鉤，可在 <code>assets/js/calc.js</code> 的
+            則僅保留一般人群 PR。若資料集與常模 ID 相同，切換資料集時會自動同步「一般人群 PR 基準」；無對應時則維持原設定。「足踝/高跟新手」目前僅用來觸發新手訓練建議卡，若要與指標掛鉤，可在 <code>assets/js/calc.js</code> 的
             <code>suggestionRules</code> 追加條件，將 <code>heelLevel</code> 與特定 PR 結果一併檢查後再出現提示。
           </p>
           <p id="calc-note" class="calc-note">結果僅供自我追蹤。可儲存在本機瀏覽器後再載入使用。</p>
