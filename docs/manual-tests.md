@@ -11,3 +11,8 @@
 - 期望：模特欄位改為顯示實際範圍；若範圍缺失則顯示 `—` 並於備註追加「模特資料未提供此指標」。
 - 結果：符合預期。
 - 截圖：![Model dataset selected](browser:/invocations/tdpsshme/artifacts/artifacts/model-dataset-selected.png)
+
+## 測試情境：PR 截斷提示
+- 操作：重新整理頁面，輸入極端高（例如腰圍 10cm）或極端低（例如腰圍 500cm）的數值以觸發百分位截斷。
+- 期望：PR 欄位分別顯示 `＜P1（資料範圍外）` 與 `＞P99（資料範圍外）`，備註維持「低於/高於資料範圍」訊息。
+- 結果：符合預期。

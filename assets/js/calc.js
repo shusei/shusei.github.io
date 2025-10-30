@@ -299,7 +299,9 @@ function projectDisplayPercentile(percentile, betterDirection) {
   return bounded;
 }
 
-function formatPrDisplay(value) {
+function formatPrDisplay(value, clamped) {
+  if (clamped === 'low') return '＜P1（資料範圍外）';
+  if (clamped === 'high') return '＞P99（資料範圍外）';
   if (!Number.isFinite(value)) return '—';
   const bounded = Math.max(0, Math.min(100, value));
   return `贏過 ${Math.round(bounded)}%（PR）`;
@@ -505,7 +507,7 @@ function renderResults(
       const prResult = getPopulationPR(populationMetric, value) || {};
       const rawPercentile = Number.isFinite(prResult.rawPercentile) ? prResult.rawPercentile : null;
       const displayPercentile = projectDisplayPercentile(prResult.percentile, populationMetric.betterDirection);
-      prCell.textContent = formatPrDisplay(displayPercentile);
+      prCell.textContent = formatPrDisplay(displayPercentile, prResult.clamped);
       if (prResult.clamped === 'low') {
         addNoteSegment(noteSegments, '低於資料範圍');
       } else if (prResult.clamped === 'high') {

@@ -299,6 +299,11 @@ tbody td {
   font-size: 0.9rem;
 }
 
+.calc-output tbody td:nth-child(3) {
+  min-width: 10.5rem;
+  white-space: nowrap;
+}
+
 .badge {
   display: inline-flex;
   align-items: center;
