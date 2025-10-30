@@ -1,5 +1,5 @@
 import { qs, qsa, createEl, safeNumber, formatRatio, formatBadge } from './dom.js';
-import { loadDatasetManifest, loadDataset, getPercentile } from './datasets.js';
+import { loadDataset, getPercentile } from './datasets.js';
 import {
   loadPopulationList,
   loadPopulationData,
@@ -338,8 +338,12 @@ function renderDatasetInfo(element, dataset, populationEntry, populationData) {
       } else {
         message += ' ｜ 尚未提供肩/身高百分位資料';
       }
+    } else {
+      message += ' ｜ PR 常模載入失敗，僅保留已快取資訊';
     }
     segments.push({ text: message });
+  } else {
+    segments.push({ text: '一般人群 PR 基準：尚未選擇或載入失敗' });
   }
   if (dataset) {
     const name = dataset.name || dataset.id || '—';
@@ -357,9 +361,12 @@ function renderDatasetInfo(element, dataset, populationEntry, populationData) {
       }
       return { label, status: 'available' };
     });
-    segments.push({ text: `資料集：${name}`, highlights });
+    segments.push({ text: `常模百分位徽章來源：${name}`, highlights });
+  } else if (populationEntry?.id) {
+    const identifier = populationEntry.name || populationEntry.id;
+    segments.push({ text: `常模百分位徽章來源：無法載入「${identifier}」常模（僅顯示一般人群 PR）` });
   } else {
-    segments.push({ text: '資料集：未選擇或載入失敗（僅顯示一般人群 PR）' });
+    segments.push({ text: '常模百分位徽章來源：待選擇一般人群 PR 基準' });
   }
   if (segments.length === 0) {
     element.textContent = '';
@@ -909,16 +916,6 @@ function renderSuggestion(container, results, context, formValues) {
   container.append(title, message, linkList);
 }
 
-async function populateDatasets(selectEl) {
-  const manifest = await loadDatasetManifest();
-  manifest.datasets.forEach((dataset) => {
-    const option = document.createElement('option');
-    option.value = dataset.id;
-    option.textContent = dataset.name;
-    selectEl.appendChild(option);
-  });
-}
-
 function attachCalculator() {
   const calculator = qs('[data-calculator]');
   if (!calculator) return;
@@ -927,7 +924,6 @@ function attachCalculator() {
   const suggestionBox = qs('[data-suggestion]', calculator);
   const populationSelect = qs('[data-population-select]', calculator);
   const modelSelect = qs('[data-model-select]', calculator);
-  const datasetSelect = qs('select[name="dataset"]', form);
   const referenceSelect = qs('select[name="reference"]', form);
   const trigger = qs('[data-calc-trigger]', form);
   const datasetInfo = qs('[data-dataset-info]', calculator);
@@ -1013,7 +1009,6 @@ function attachCalculator() {
     modelSelect.disabled = false;
   };
 
-  populateDatasets(datasetSelect);
   initializePopulationSelect();
   initializeModelSelect();
 
@@ -1024,7 +1019,7 @@ function attachCalculator() {
     const populationEntry = populationListEntries.find((item) => item.id === populationId) ?? null;
     const modelId = modelSelect?.value ?? 'off';
     const modelEntry = modelId && modelId !== 'off' ? modelListEntries.find((item) => item.id === modelId) ?? null : null;
-    const datasetPromise = loadDataset(formValues.dataset);
+    const datasetPromise = populationEntry?.id ? loadDataset(populationEntry.id) : Promise.resolve(null);
     const populationPromise = populationEntry ? loadPopulationData(populationEntry.file) : Promise.resolve(null);
     const modelPromise = modelEntry ? loadModelData(modelEntry.file) : Promise.resolve(null);
     const [dataset, populationData, modelData] = await Promise.all([datasetPromise, populationPromise, modelPromise]);
@@ -1049,18 +1044,6 @@ function attachCalculator() {
   });
 
   referenceSelect.addEventListener('change', () => {
-    trigger.click();
-  });
-
-  datasetSelect.addEventListener('change', () => {
-    if (populationSelect && !populationSelect.disabled) {
-      const selectedDatasetId = datasetSelect.value;
-      const matchedPopulation = populationListEntries.find((entry) => entry.id === selectedDatasetId);
-      if (matchedPopulation) {
-        populationSelect.value = matchedPopulation.id;
-        writeSelection(POPULATION_STORAGE_KEY, matchedPopulation.id);
-      }
-    }
     trigger.click();
   });
 
