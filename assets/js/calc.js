@@ -492,11 +492,14 @@ function renderResults(
   metrics.forEach((metric) => {
     const row = createEl('tr');
     const labelCell = createEl('th', { text: metric.label, attrs: { scope: 'row' } });
-    const valueCell = createEl('td');
-    const prCell = createEl('td', { text: '—' });
-    const flatCell = createEl('td', { text: '—' });
-    const runwayCell = createEl('td', { text: '—' });
-    const noteCell = createEl('td');
+    const valueCell = createEl('td', { attrs: { 'data-label': '數值' } });
+    const prCell = createEl('td', {
+      text: '—',
+      attrs: { 'data-label': 'PR 值（一般人群）' }
+    });
+    const flatCell = createEl('td', { text: '—', attrs: { 'data-label': '平面模特範圍' } });
+    const runwayCell = createEl('td', { text: '—', attrs: { 'data-label': '伸展台模特範圍' } });
+    const noteCell = createEl('td', { attrs: { 'data-label': '備註' } });
     noteCell.textContent = '';
     const noteSegments = [];
     let percentileBadge = null;
