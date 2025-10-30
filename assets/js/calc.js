@@ -1051,6 +1051,14 @@ function attachCalculator() {
   });
 
   datasetSelect.addEventListener('change', () => {
+    if (populationSelect && !populationSelect.disabled) {
+      const selectedDatasetId = datasetSelect.value;
+      const matchedPopulation = populationListEntries.find((entry) => entry.id === selectedDatasetId);
+      if (matchedPopulation) {
+        populationSelect.value = matchedPopulation.id;
+        writeSelection(POPULATION_STORAGE_KEY, matchedPopulation.id);
+      }
+    }
     trigger.click();
   });
 
