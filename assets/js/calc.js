@@ -207,12 +207,6 @@ const suggestionRules = [
       { href: '#style', text: '有氧策略' },
       { href: '#絲襪尺寸', text: '絲襪尺寸' }
     ]
-  },
-  {
-    id: 'heelNewbie',
-    test: (_results, _context, formValues) => formValues.heelLevel === 'beginner',
-    message: '若為高跟鞋初學者，可參考「高跟鞋四週訓練」。',
-    links: [{ href: '#高跟鞋四週訓練', text: '高跟鞋四週訓練' }]
   }
 ];
 
@@ -901,9 +895,9 @@ function clearSelection(key) {
   }
 }
 
-function renderSuggestion(container, results, context, formValues) {
+function renderSuggestion(container, results, context) {
   container.innerHTML = '';
-  const rule = suggestionRules.find((item) => item.test(results, context, formValues));
+  const rule = suggestionRules.find((item) => item.test(results, context));
   if (!rule) {
     container.textContent = '尚無特別提示，維持觀察即可。';
     return;
@@ -1038,7 +1032,7 @@ function attachCalculator() {
       modelData,
       modelId
     );
-    renderSuggestion(suggestionBox, results, context, formValues);
+    renderSuggestion(suggestionBox, results, context);
     renderFootnotes(footnote, populationEntry, populationData, modelEntry, modelData);
     tbody.dispatchEvent(new CustomEvent('results-updated', { bubbles: false }));
   });
