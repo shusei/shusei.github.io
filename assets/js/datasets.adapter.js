@@ -405,6 +405,24 @@ function buildShoulderHeightJoint(metric, datasetMeta) {
   return Object.keys(joint).length > 0 ? joint : null;
 }
 
+function attachShoulderJointToMetrics(metrics, datasetMeta) {
+  if (!metrics || typeof metrics !== 'object') {
+    return { metrics, joint: null };
+  }
+  const existing = metrics.shoulderHeightRatio;
+  if (existing && typeof existing === 'object' && existing.joint) {
+    return { metrics, joint: existing.joint };
+  }
+  const joint = buildShoulderHeightJoint(existing, datasetMeta);
+  if (!joint) {
+    return { metrics, joint: null };
+  }
+  const patchedShoulder =
+    existing && typeof existing === 'object' ? { ...existing, joint } : { joint };
+  const patchedMetrics = { ...metrics, shoulderHeightRatio: patchedShoulder };
+  return { metrics: patchedMetrics, joint };
+}
+
 export function computeConditionalShoulder(h, s, cohortKey) {
   if (!cohortKey || typeof cohortKey !== 'string') return null;
   const params = shoulderHeightJointLibrary.get(cohortKey.trim());
@@ -653,14 +671,18 @@ function normalizeMetric(metric) {
 
 function normalizePopulationDataset(data) {
   if (!data || typeof data !== 'object') return null;
-  const metrics = data.metrics && typeof data.metrics === 'object' ? data.metrics : {};
+  const metricsSource =
+    data.metrics && typeof data.metrics === 'object' ? data.metrics : {};
+  const { metrics, joint: shoulderHeightJoint } = attachShoulderJointToMetrics(
+    metricsSource,
+    data
+  );
   const metaContainers = [data, data.metadata, data.meta, data.info, data.details];
   const sources = collectSourceTitles(data.source ?? data.sources ?? data.references ?? data.citations);
   const year = extractYear(metaContainers);
   const sampleSize = extractSampleSize(metaContainers);
   const shoulderMedians = extractShoulderMedians(metrics.shoulderHeightRatio);
   let shoulderHeightMetric = normalizeMetric(metrics.shoulderHeightRatio);
-  const shoulderHeightJoint = buildShoulderHeightJoint(metrics.shoulderHeightRatio, data);
   if (shoulderHeightJoint) {
     if (shoulderHeightMetric) {
       shoulderHeightMetric = { ...shoulderHeightMetric, joint: shoulderHeightJoint };
@@ -811,6 +833,16 @@ export async function loadModelData(file) {
       .then((response) => {
         if (!response.ok) throw new Error('model dataset load failed');
         return response.json();
+      })
+      .then((data) => {
+        if (!data || typeof data !== 'object' || !data.metrics || typeof data.metrics !== 'object') {
+          return data;
+        }
+        const { metrics, joint } = attachShoulderJointToMetrics(data.metrics, data);
+        if (!joint) {
+          return data;
+        }
+        return { ...data, metrics };
       })
       .catch((error) => {
         console.warn('Failed to read model dataset', file, error);
