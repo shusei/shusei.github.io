@@ -13,24 +13,29 @@ app.use(express.json());
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL
 });
-
-// Health Check Endpoint
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
-// Tasks Endpoint (Mock for now until DB is ready)
+// Tasks Endpoint
 app.get('/api/tasks', async (req, res) => {
     try {
-        // Uncomment when DB is ready
-        // const { rows } = await pool.query('SELECT * FROM tasks ORDER BY created_at DESC');
-        // res.json(rows);
+        const { rows } = await pool.query('SELECT * FROM tasks ORDER BY created_at DESC');
+        res.json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
-        // Mock Response
-        res.json([
-            { id: 1, title: 'System Initialization', status: 'completed', created_at: new Date() },
-            { id: 2, title: 'Connect Database', status: 'pending', created_at: new Date() }
-        ]);
+// Create Task Endpoint
+app.post('/api/tasks', async (req, res) => {
+    try {
+        const { title } = req.body;
+        if (!title) {
+            return res.status(400).json({ error: 'Title is required' });
+        }
+        const { rows } = await pool.query(
+            "INSERT INTO tasks (title, status) VALUES ($1, 'pending') RETURNING *",
+            [title]
+        );
+        res.json(rows[0]);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Internal Server Error' });
