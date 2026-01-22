@@ -30,4 +30,23 @@
 
 ## 🚀 如何本地啟動 (Local Development)
 
+### 1. 環境設定 (Setup)
+1.  Clone 專案：`git clone https://github.com/shusei/shusei.github.io.git`
+2.  安裝依賴：
+    ```bash
+    cd backend && npm install
+    cd ../frontend && npm install
+    ```
+3.  設定環境變數：
+    *   在 `backend` 目錄下建立 `.env` 檔案。
+    *   填入 Supabase Connection String: `DATABASE_URL=postgresql://...`
+
+### 2. 資料庫初始化 (Database Init)
+本專案包含自動化腳本，可快速建立所需資料表：
+```bash
+cd backend
+npm run db:init
+```
+
+### 3. 啟動服務 (Start)
 請參閱 [架構文件](./docs/ARCHITECTURE.md#3-詳細實作步驟-step-by-step) 中的詳細步驟。
