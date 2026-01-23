@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import transactionRoutes from './routes/transaction.routes';
+import importRoutes from './routes/import.routes';
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/import', importRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {
