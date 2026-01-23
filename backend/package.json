@@ -1,13 +1,14 @@
 {
-  "name": "portfolio-backend",
+  "name": "moonlight-savior",
   "version": "1.0.0",
-  "description": "Backend API for Portfolio Dashboard",
+  "description": "AI Financial Guardian Backend",
   "main": "dist/server.js",
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "nodemon src/server.ts",
-    "db:init": "ts-node src/init-db.ts"
+    "db:init": "ts-node src/init-db.ts",
+    "db:migrate": "psql $DATABASE_URL -f supabase/migrations/20260122_initial_schema.sql"
   },
   "keywords": [],
   "author": "",
