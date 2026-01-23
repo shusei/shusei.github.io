@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: moonlight-backend
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: node dist/server.js
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: PORT
+        value: 3000
