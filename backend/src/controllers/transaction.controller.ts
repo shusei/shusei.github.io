@@ -65,3 +65,30 @@ export const smartParse = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Failed to parse input' });
     }
 };
+
+export const getTransactions = async (req: Request, res: Response) => {
+    try {
+        const { user_id, limit = 50, offset = 0 } = req.query;
+
+        if (!user_id) {
+            return res.status(400).json({ error: 'user_id is required' });
+        }
+
+        const client = await pool.connect();
+        try {
+            const result = await client.query(
+                `SELECT * FROM transactions 
+                WHERE user_id = $1 
+                ORDER BY transaction_date DESC 
+                LIMIT $2 OFFSET $3`,
+                [user_id, limit, offset]
+            );
+            res.json(result.rows);
+        } finally {
+            client.release();
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch transactions' });
+    }
+};
