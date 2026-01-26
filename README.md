@@ -1,52 +1,83 @@
-# Portfolio: Distributed Task Scheduler Dashboard
+# Moonlight Savior (月光救星) 🌙
 
-> **Live Demo**: [Click Here](https://shusei.github.io/) (Coming Soon)
+**AI 驅動的個人財務守護者**
 
-這是一個展示 **Cloud Native (雲原生)** 架構的後端作品集。
-本專案模擬了一個高併發的分散式任務處理系統，採用 **BFF (Backend for Frontend)** 模式設計。
+Moonlight Savior 是一個現代化的全端記帳系統，結合了 **Google Gemini AI** 的自然語言處理能力、**Redis** 的高併發佇列處理，以及 **Next.js** 的極速前端體驗。旨在幫助使用者輕鬆管理財務，擺脫「月光族」的困擾。
 
-## 📚 系統架構與設計文件 (Architecture & Design)
+## 🏗️ 系統架構
 
-作為一名重視工程思維的後端工程師，我詳細記錄了本專案的架構決策過程 (ADR)：
+本專案採用 **前後端分離 (Monorepo)** 架構：
 
-*   **[核心架構白皮書 (System Architecture)](./docs/ARCHITECTURE.md)**
-    *   詳細說明為什麼選擇 **Node.js + Supabase + Render**。
-    *   包含系統架構圖 (Mermaid) 與資料流設計。
-    *   分析 2026 年後端技術趨勢與 AI 整合策略。
+- **Frontend (`/frontend`)**:
+    - **框架**: Next.js 14 (App Router)
+    - **樣式**: Tailwind CSS v3 + Shadcn/UI
+    - **功能**: 儀表板、交易列表、智慧匯入精靈
+- **Backend (`/backend`)**:
+    - **核心**: Node.js + Express + TypeScript
+    - **資料庫**: PostgreSQL (Supabase)
+    - **AI 引擎**: Google Gemini 2.0 Flash
+    - **佇列**: Redis (Upstash) + BullMQ (非同步匯入)
 
-*   **架構決策紀錄 (Architecture Decision Records)**
-    *   [ADR-000: 專案初始策略](./docs/decisions/000-initial-strategy.md)
-    *   [ADR-001: 伺服器方案評估 (Cloud vs On-Premise)](./docs/decisions/001-server-selection.md)
-    *   [ADR-002: 為什麼放棄 Home Lab 方案](./docs/decisions/002-rejected-home-lab.md)
+## 🚀 快速開始 (Quick Start)
 
-## 🛠️ 技術棧 (Tech Stack)
+想要在本地端跑起來？請跟著以下步驟：
 
-| Component | Technology | Why? |
-| :--- | :--- | :--- |
-| **Frontend** | React + TypeScript + Vite | Type Safety & Modern Build Tool |
-| **Backend** | Node.js + Express (TypeScript) | JSON-native, AI-ready ecosystem |
-| **Database** | PostgreSQL (Supabase) | Relational Data + Vector Search Ready |
-| **DevOps** | GitHub Actions + Render | CI/CD Automation |
+### 1. 環境準備
+確保您的電腦已安裝：
+- [Node.js](https://nodejs.org/) (v20+)
+- [Git](https://git-scm.com/)
 
-## 🚀 如何本地啟動 (Local Development)
-
-### 1. 環境設定 (Setup)
-1.  Clone 專案：`git clone https://github.com/shusei/shusei.github.io.git`
-2.  安裝依賴：
-    ```bash
-    cd backend && npm install
-    cd ../frontend && npm install
-    ```
-3.  設定環境變數：
-    *   在 `backend` 目錄下建立 `.env` 檔案。
-    *   填入 Supabase Connection String: `DATABASE_URL=postgresql://...`
-
-### 2. 資料庫初始化 (Database Init)
-本專案包含自動化腳本，可快速建立所需資料表：
+### 2. 下載專案
 ```bash
-cd backend
-npm run db:init
+git clone https://github.com/shusei/shusei.github.io.git moonlight-savior
+cd moonlight-savior
 ```
 
-### 3. 啟動服務 (Start)
-請參閱 [架構文件](./docs/ARCHITECTURE.md#3-詳細實作步驟-step-by-step) 中的詳細步驟。
+### 3. 啟動後端 (Backend)
+後端負責處理資料、AI 解析與資料庫溝通。
+
+```bash
+cd backend
+npm install
+# 請確保 backend/.env 已經設定好 (參考 backend/README.md)
+npm run dev
+```
+> 後端將運行於 `http://localhost:3000`
+
+### 4. 啟動前端 (Frontend)
+前端提供漂亮的操作介面。
+
+開啟一個新的終端機視窗 (Terminal)：
+```bash
+cd frontend
+npm install
+npm run dev
+```
+> 前端將運行於 `http://localhost:3001` (Next.js 會自動避開 3000 port)
+
+### 5. 開始使用！
+打開瀏覽器前往 **`http://localhost:3001`**，您將看到 Moonlight Savior 的儀表板。
+
+## ✨ 主要功能
+
+1.  **AI 智慧記帳**: 在首頁輸入「晚餐吃拉麵 250 元」，AI 自動幫您分類並記錄。
+2.  **CSV 高速匯入**: 支援銀行對帳單匯入，每分鐘可處理數千筆交易。
+3.  **自動週期帳務**: 設定一次薪水或貸款，系統每月自動記帳，不再忘記。
+4.  **全站繁體中文**: 親切的在地化介面。
+
+## 📂 目錄結構
+
+```
+moonlight-savior/
+├── backend/          # 後端 API 原始碼
+│   ├── src/
+│   ├── Dockerfile    # 後端容器化設定
+│   └── render.yaml   # Render 部署設定
+├── frontend/         # 前端 Next.js 原始碼
+│   ├── src/
+│   └── components.json
+└── README.md         # 專案總說明 (本檔案)
+```
+
+---
+Made with ❤️ by Y2389
