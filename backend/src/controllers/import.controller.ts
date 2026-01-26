@@ -80,3 +80,33 @@ export const startImport = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Failed to start import' });
     }
 };
+
+import { extractTextFromPdf } from '../services/pdf.service';
+import { parseBankStatement } from '../services/gemini.service';
+
+export const analyzePdf = async (req: Request, res: Response) => {
+    try {
+        if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+        const filePath = req.file.path;
+        const fileBuffer = fs.readFileSync(filePath);
+
+        // 1. Extract Text
+        const text = await extractTextFromPdf(fileBuffer);
+
+        // 2. Parse with AI
+        const transactions = await parseBankStatement(text);
+
+        res.json({
+            fileId: req.file.filename,
+            transactions
+        });
+
+    } catch (err: any) {
+        console.error(err);
+        if (err.message === 'RATE_LIMIT') {
+            return res.status(429).json({ error: 'AI 服務忙碌中 (Rate Limit)，請稍後再試' });
+        }
+        res.status(500).json({ error: 'Failed to analyze PDF' });
+    }
+};

@@ -1,3 +1,27 @@
+// Polyfill for pdf-parse
+if (typeof (Promise as any).withResolvers === 'undefined') {
+    // @ts-ignore
+    (Promise as any).withResolvers = function () {
+        let resolve, reject;
+        const promise = new Promise((res, rej) => {
+            resolve = res;
+            reject = rej;
+        });
+        return { promise, resolve, reject };
+    };
+}
+// @ts-ignore
+if (!global.DOMMatrix) {
+    // @ts-ignore
+    global.DOMMatrix = class DOMMatrix {
+        constructor() { return this; }
+        translate() { return this; }
+        scale() { return this; }
+        multiply() { return this; }
+        transformPoint() { return { x: 0, y: 0 }; }
+    };
+}
+
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -23,5 +47,9 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const PORT = process.env.PORT || 3002;
+app.listen(PORT, () => {
+    console.log(`=================================`);
+    console.log(`🚀 BACKEND RUNNING ON PORT ${PORT}`);
+    console.log(`=================================`);
+});
