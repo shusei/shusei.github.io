@@ -32,10 +32,10 @@ export default function TransactionsPage() {
     useEffect(() => {
         const fetchTransactions = async () => {
             try {
-                const res = await axios.get("http://localhost:3000/api/transactions", {
+                const res = await axios.get("http://localhost:3002/api/transactions", {
                     params: {
                         user_id: "b8b8984a-0782-4e36-b5ad-ce42ae297d1b", // Hardcoded for demo
-                        limit: 100
+                        limit: 1000
                     }
                 });
                 setTransactions(res.data);

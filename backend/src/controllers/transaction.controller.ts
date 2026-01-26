@@ -28,7 +28,7 @@ export const createTransaction = async (req: Request, res: Response) => {
                 (user_id, amount, type, description, category, tags, transaction_date, external_id_hash, source)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'api')
                 RETURNING *`,
-                [user_id, amount, type, description, category, tags || [], transactionDate, hash]
+                [user_id, Math.abs(amount), type, description, category, tags || [], transactionDate, hash]
             );
             res.json(result.rows[0]);
         } catch (err: any) {
@@ -60,8 +60,11 @@ export const smartParse = async (req: Request, res: Response) => {
 
         const result = await parseTransactionInput(text);
         res.json(result);
-    } catch (err) {
+    } catch (err: any) {
         console.error(err);
+        if (err.message === 'RATE_LIMIT') {
+            return res.status(429).json({ error: 'AI 服務忙碌中 (Rate Limit)，請稍後再試' });
+        }
         res.status(500).json({ error: 'Failed to parse input' });
     }
 };
@@ -79,7 +82,7 @@ export const getTransactions = async (req: Request, res: Response) => {
             const result = await client.query(
                 `SELECT * FROM transactions 
                 WHERE user_id = $1 
-                ORDER BY transaction_date DESC 
+                ORDER BY transaction_date DESC, created_at DESC 
                 LIMIT $2 OFFSET $3`,
                 [user_id, limit, offset]
             );

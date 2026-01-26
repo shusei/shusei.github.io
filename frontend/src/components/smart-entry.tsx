@@ -19,8 +19,8 @@ export const SmartEntry = () => {
         setLoading(true);
         try {
             // 1. Parse with AI
-            const parseRes = await axios.post("http://localhost:3000/api/transactions/smart", {
-                input
+            const parseRes = await axios.post("http://localhost:3002/api/transactions/smart", {
+                text: input
             });
             const data = parseRes.data;
 
@@ -31,13 +31,13 @@ export const SmartEntry = () => {
             // Backend /smart returns { parsed: ... }. It does NOT create.
 
             // So we need to create it.
-            await axios.post("http://localhost:3000/api/transactions", {
+            await axios.post("http://localhost:3002/api/transactions", {
                 user_id: "b8b8984a-0782-4e36-b5ad-ce42ae297d1b", // Hardcoded for demo
-                ...data.parsed
+                ...data
             });
 
             toast.success("記帳成功！", {
-                description: `${data.parsed.date} - ${data.parsed.description} $${data.parsed.amount}`
+                description: `${data.transaction_date} - ${data.description} $${data.amount}`
             });
             setInput("");
         } catch (err) {
