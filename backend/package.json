@@ -8,7 +8,11 @@
     "start": "node dist/server.js",
     "dev": "nodemon src/server.ts",
     "db:init": "ts-node src/init-db.ts",
-    "db:migrate": "psql $DATABASE_URL -f supabase/migrations/20260122_initial_schema.sql"
+    "db:migrate": "psql $DATABASE_URL -f supabase/migrations/20260122_initial_schema.sql",
+    "debug:pdf": "node scripts/debug-pdf-import.js",
+    "check:db": "ts-node scripts/check-db.ts",
+    "test:gemini": "ts-node scripts/test-gemini.ts",
+    "verify:api": "ts-node scripts/verify-api.ts"
   },
   "keywords": [],
   "author": "",
