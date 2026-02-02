@@ -19,7 +19,9 @@ Project Guild 是一個以「異世界傭兵公會」為 UX 主題的任務媒�
 *   **可觀測性 Observability + 基本 SLO 指標**（production readiness）
 *   **權限與資料隔離 RBAC/RLS/ABAC**（security & privacy by design）
 
-*   **專案定位聲明**：本案以展示 **「平台級後端工程 (Backend Engineering)」** 能力為主；真實商業化營運（如串接法幣金流、保險合作）屬於 V2 階段規劃。
+*   **權限與資料隔離 RBAC/RLS/ABAC**（security & privacy by design）
+
+*   **專案核心價值 (Core Value Proposition)**：本平台致力於打造具備 **「金融級交易正確性」** 與 **「企業級風控」** 的媒合基礎建設，優先驗證高併發架構與資安合規性基礎。
 
 ---
 
@@ -65,7 +67,7 @@ Project Guild 的核心不是「更便宜的跑腿」，而是：
 *   **公會規章（Rulebook）**：把安全規則「寫成公會法令」，用世界觀提高遵守率
 
 ### 3.3 托管結算（Escrow Ledger, MVP 版）
-*   MVP 不直接碰真金流，使用「平台點數」：
+*   MVP 不直接碰法幣金流，使用「平台點數」：
     1.  委託人先把點數押到托管池（Escrow）
     2.  傭兵交付 → 委託人驗收 → 托管放款
 *   全程可追溯帳本（Ledger），支援爭議凍結
@@ -220,33 +222,32 @@ Node.js；PostgreSQL；Redis（搶單鎖、排行榜快取、節流）；Queue/W
 *   **資料隔離**：任務內容、交付物、訊息、帳本、稽核紀錄均需最小揭露
 ### 7.5 系統擴展路線圖 (Scalability Roadmap)
 *   *備註：本段成本與價格僅供量級參考 (Order of Magnitude)，實際費用以當期雲端報價與使用量為準。*
-*   **階段零：原型演示 (Free Demo) ——「學生專題級」**
-    *   **白話說明**：就跟做大學畢業專題一樣，用免費的資源架設，能跑、能展示給投資人看就好。
-    *   **架構**：GitHub Pages (前端) + Render Free Tier (後端) + Supabase Free (資料庫) + **Upstash Redis Free (雲端快取)**。
-    *   **預算**：**$0 TWD (完全免費)**。
-*   **階段一：初期營運 (MVP) ——「學校/社團級」 (約 3,000 人)**
-    *   **白話說明**：這就是您提到的「學校上線」規模。租一台穩定的小主機 (類似阿里雲/AWS 輕量應用服務器)，一台機器包辦所有工作。
-    *   **架構**：單體主機 (All-in-One VPS)。將 Frontend, Backend, Database, Redis 全部裝在同一台 Linux 裡。
-    *   **硬體要求**：**千萬別租最便宜的 (t2.micro/1GB RAM)**，會因為記憶體不足當機。最少要 **2GB RAM (如 AWS Lightsail $10/mo)** 才能把四個房客（FE/BE/DB/Redis）塞進同一個房間。
+*   **階段零：概念驗證 (Proof of Concept, PoC)**
+    *   **目標**：快速驗證核心流程與投資人演示 (Pitch Demo)。
+    *   **架構**：GitHub Pages (Frontend) + Render Free Tier (Backend) + Supabase Free (Database) + **Upstash Redis Free**。
+    *   **預算**：**$0 TWD (Bootstrap)**。
+*   **階段一：最小可行性產品 (MVP) —— 初期營運**
+    *   **目標**：支援 0 ~ 3,000 用戶之穩定營運。
+    *   **架構**：單體主機 (All-in-One VPS)。將 Frontend, Backend, Database, Redis 整合部署。
+    *   **規格要求**：建議配置至少 **2GB RAM** (如 AWS Lightsail / DigitalOcean Droplet) 以確保服務穩定性。
     *   **預算**：約 **$10 - $20 USD / 月** (300~600 TWD)。
-*   **階段二：正式擴張 (Growth) ——「中型電商級」 (10萬+ 人)**
-    *   **白話說明**：生意變好了，單機風險太高（怕硬碟壞掉），要把雞蛋分開放。
-    *   **架構**：三層式架構 (3-Tier)。資料庫搬去專門的豪宅 (RDS)，網頁伺服器多租幾台 (EC2) 輪流服務。
-    *   **採購清單**：
-        *   **負載平衡 (AWS ALB)**：$20/月 - 負責把客人分流給不同的伺服器。
-        *   **應用伺服器 (2x t3.medium)**：$60/月 - 兩台伺服器，若一台當機，另一台自動接手。
-        *   **託管資料庫 (AWS RDS PostgreSQL)**：$50/月 - 亞馬遜幫你備份，不會掉資料。
-        *   **託管快取 (AWS ElastiCache)**：$40/月 - 極速存取。
-    *   **預算**：約 **$300 - $800 USD / 月** (約 1~2.5 萬台幣)。
-*   **階段三：百億獨角獸 (Unicorn) ——「蝦皮/淘寶級」 (千萬人)**
-    *   **白話說明**：這時就像管理一個巨型工廠，單一資料庫已經塞不下上億筆訂單。
-    *   **架構**：微服務 (Microservices) + Kubernetes (EKS)。
-    *   **採購清單**：
-        *   **容器管理 (AWS EKS)**：$72/月 (管理費) + 數十台運算節點 (Worker Nodes)。
-        *   **極限資料庫 (AWS Aurora)**：$500+/月 - 自動擴展容量。
-        *   **訊息隊列 (AWS MSK/Kafka)**：$200+/月 - 處理雙11那種瞬間暴利流量。
-    *   **預算**：**$5,000 USD 起跳，上無封頂** (15萬台幣以上/月)。
-    *   *註：通常這階段公司已有專職 DevOps 團隊在管錢。*
+*   **階段二：市場擴張期 (Growth Phase) —— 用戶數 10萬+**
+    *   **目標**：高可用性 (HA) 與資料安全性，消除單點故障 (SPOF)。
+    *   **架構**：三層式架構 (3-Tier Architecture)。分離 Web Server, Application Server, Database。
+    *   **架構規格**：
+        *   **負載平衡 (Load Balancer)**：AWS ALB / Cloudflare。
+        *   **應用叢集 (App Cluster)**：至少 2 台 App Server 實現備援 (Failover)。
+        *   **託管資料庫 (Managed DB)**：AWS RDS PostgreSQL (自動備份/Multi-AZ)。
+        *   **託管快取 (Managed Cache)**：AWS ElastiCache for Redis。
+    *   **預算**：約 **$300 - $800 USD / 月**。
+*   **階段三：大規模營運期 (Hyperscale / Unicorn) —— 用戶數 1,000萬+**
+    *   **目標**：極端併發處理與微服務治理。
+    *   **架構**：微服務 (Microservices) + Kubernetes (K8s/EKS)。
+    *   **關鍵技術**：
+        *   **容器編排**：AWS EKS (Elastic Kubernetes Service)。
+        *   **分散式資料庫**：AWS Aurora Serverless / CockroachDB。
+        *   **事件驅動架構 (EDA)**：Kafka / AWS MSK 處理並行流量峰值。
+    *   **預算**：**$5,000 USD 起跳** (視流量動態調整)。
 
 ### 7.6 AI 成本控制與防禦 (AI Cost & Security Defense)
 *   **Token 經濟模型**：
@@ -255,11 +256,11 @@ Node.js；PostgreSQL；Redis（搶單鎖、排行榜快取、節流）；Queue/W
     *   **Rate Limiting**：每人每日 AI 對話上限 50 次。
     *   **Caching**：相同問題（如「如何接單」）直接回傳快取，不打 LLM。
     *   **熔斷機制 (Circuit Breaker)**：當 AI 總花費達到日預算上限（如 $100），自動降級為傳統表單模式，停用 AI 對話。
-    *   **分級模型**：簡單分類用 gpt-4o-mini (極便宜)，複雜爭議才用 gpt-4o。
+    *   **分級模型**：簡單分類用 gpt-4o-mini (極具成本效益)，複雜爭議才用 gpt-4o。
 
 ## 8. 商業模式與營運規則 (Operational Rules)
-*   **貨幣單位**：**GP (Guild Point)**，1 GP 以 1 TWD 作為**定價參考 (Pricing Reference)**，非儲值貨幣。
-    *   *定義：GP 為平台內服務點數，用於扣抵服務，V2 階段前不保證可兌回法幣。*
+*   **貨幣單位**：**GP (Guild Point)**，1 GP 以 1 TWD 作為**定價參考 (Pricing Reference)**。
+    *   *定義：在 MVP 驗證階段，GP 定位為平台封閉生態系之公測點數 (Pilot Program Points)。*
 *   **取消政策 (MVP)**：
     *   `Accepted` 前：雙方皆可無痛取消。
     *   `Accepted` 後 **委託人取消**：扣除 10%（由 Escrow 支付，全額補償給傭兵），餘額退回委託人。
@@ -271,7 +272,7 @@ Node.js；PostgreSQL；Redis（搶單鎖、排行榜快取、節流）；Queue/W
         *   **防刷機制**：不靠手續費門檻，改採 **「頻率限制 + 評價權重衰減」** 及 **「實名錨點」** 作為主要防禦。
         *   **保護基金**：由天使輪資金撥備「善意補助金 (Ex-gratia Payment)」。
     *   **成熟期 (Mature Phase)**：
-        *   **策略**：接真金流後抽取 5-10% 媒合費 + 1% 保護基金。
+        *   **策略**：接通外部金流 (Fiat Payment) 後抽取 5-10% 媒合費 + 1% 保護基金。
         *   **防刷機制**：手續費本身即為刷分成本壁壘。
 *   **資金流轉 (Fund Flow - MVP)**：
     *   **點數定義**：GP 為「平台服務點數」，主要用於平台內消費與折抵。
@@ -327,11 +328,11 @@ Node.js；PostgreSQL；Redis（搶單鎖、排行榜快取、節流）；Queue/W
 
 ### 12.1 啟動資本與公司設立 (Startup Capital)
 *   **公司設立**：**必須成立公司 (LLC/Ltd.)** 以切割股東個人無限責任（防火牆）。
-*   **初期預算 (Pre-seed)**：建議準備 **200萬 - 300萬 TWD** (約 6-12 個月跑道)。
-    *   **主機/SaaS**：3-5 萬/月 (初期便宜，後期隨營收成長)。
-    *   **AI Token**：預設 1 萬/月 (熔斷控制)。
+*   **初期資金需求 (Pre-seed Funding Requirement)**：建議準備 **200萬 - 300萬 TWD** (約 6-12 個月 Runway)。
+    *   **主機/SaaS**：3-5 萬/月 (初期優化成本，保留彈性)。
+    *   **AI Token**：預設 1 萬/月 (配置熔斷控制)。
     *   **法務/會計**：10 萬 (一次性設立與合約審閱)。
-    *   **人事**：創辦人初期不支薪或低薪，預留 1-2 位營運人員薪資。
+    *   **核心團隊**：創辦人採股權激勵 (Equity-based) 模式，預留營運人員薪資空間。
 
 ### 12.2 收支預估 (P&L Forecast)
 *   **收入 (Revenue)**：
@@ -354,4 +355,4 @@ Project Guild 不是跑腿換皮，而是一個具備 **交易正確性（Ledger
 > **注意 / 風險（成熟度必備）**
 > *   L2 到府不可能 0 風險 → 只能用「白名單 + 強制流程 + 證據保全」把風險變可控
 > *   個人開發不宜自存證件資料 → 優先第三方驗證結果或 Trust Score 解鎖
-> *   真金流法遵成本高 → **MVP 用點數托管最聰明**
+> *   法幣金流法遵成本高 → **MVP 用點數托管最聰明**
