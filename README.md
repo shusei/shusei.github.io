@@ -1,83 +1,99 @@
-# Moonlight Savior (月光救星) 🌙
+# Project Guild (異世界傭兵公會連線網) 🛡️
 
-**AI 驅動的個人財務守護者**
+**"Where Real-Life Chores Meet RPG Quests."**
 
-Moonlight Savior 是一個現代化的全端記帳系統，結合了 **Google Gemini AI** 的自然語言處理能力、**Redis** 的高併發佇列處理，以及 **Next.js** 的極速前端體驗。旨在幫助使用者輕鬆管理財務，擺脫「月光族」的困擾。
+Project Guild 是一個以「異世界公會」為主題的任務媒合平台。我們將日常瑣事（如跑腿、打掃）包裝成 RPG 委託任務，並透過嚴格的 **State Machine (狀態機)** 與 **Double-Entry Ledger (複式簿記)** 技術，打造一個既好玩又安全的高信任度平台。
 
-## 🏗️ 系統架構
+> ⚠️ **Demo Phase**: 目前專案處於展示階段 (Backend Engineering Showcase)。所有資料均為測試用途，不涉及真實金流。
 
-本專案採用 **前後端分離 (Monorepo)** 架構：
+---
 
-- **Frontend (`/frontend`)**:
-    - **框架**: Next.js 14 (App Router)
-    - **樣式**: Tailwind CSS v3 + Shadcn/UI
-    - **功能**: 儀表板、交易列表、智慧匯入精靈
-- **Backend (`/backend`)**:
-    - **核心**: Node.js + Express + TypeScript
-    - **資料庫**: PostgreSQL (Supabase)
-    - **AI 引擎**: Google Gemini 2.0 Flash
-    - **佇列**: Redis (Upstash) + BullMQ (非同步匯入)
+## 🌟 核心特色 (Key Features)
+
+### 1. 嚴謹的後端工程 (Backend Engineering)
+- **Finite State Machine (FSM)**: 任務狀態流轉嚴格受控 (`posted` → `accepted` → `in_progress` → `approved` → `paid`)，杜絕邏輯漏洞。
+- **Atomic Concurrency Control**: 使用 Database Transaction 與 Atomic Update 確保「萬人搶單」時的資料一致性。
+- **Double-Entry Ledger**: 內建會計級帳本系統，每一筆 GP (Guild Point) 的流動都有據可查 (`escrow_deposit`, `escrow_release`)。
+
+### 2. 沉浸式 RPG 體驗
+- **四大職業**: 討伐 (Slay)、採集 (Gather)、護送 (Escort)、解謎 (Puzzle)。
+- **階級制度**: 從 F 級新手到 S 級傳說，透過完成委託累積 Trust Score 晉升。
+- **公會大廳**: 暗色系羊皮紙風格 UI，帶給使用者身歷其境的冒險感。
+
+### 3. 安全與風控 (Safety & Trust)
+- **Escrow 托管支付**: 委託金先由公會托管，驗收通過後才放款，保障雙方權益。
+- **風險分級 (L0/L1/L2)**: 針對到府服務 (L2) 實施更嚴格的審核與權限控管。
+
+---
+
+## 🏗️ 技術堆疊 (Tech Stack)
+
+本專案採用現代化 **Monorepo** 架構，專注於高效能與開發體驗：
+
+| Layer | Technology | Status |
+| :--- | :--- | :--- |
+| **Frontend** | **Next.js 14** (App Router), Tailwind CSS, Lucide Icons | 🟢 Static Export Mode |
+| **Backend** | **Node.js + Express** + TensorFlow/Gemini Integration | 🟢 RESTful API |
+| **Database** | **PostgreSQL** (Supabase) | 🟢 Migration Managed |
+| **Language** | **TypeScript** (Strict Mode) | 🟢 Shared Types |
+| **DevOps** | GitHub Pages (Frontend) + Render (Backend) | 🟢 CI/Ready |
+
+---
 
 ## 🚀 快速開始 (Quick Start)
 
-想要在本地端跑起來？請跟著以下步驟：
-
 ### 1. 環境準備
-確保您的電腦已安裝：
-- [Node.js](https://nodejs.org/) (v20+)
-- [Git](https://git-scm.com/)
+- Node.js v20+
+- Git
 
 ### 2. 下載專案
 ```bash
-git clone https://github.com/shusei/shusei.github.io.git moonlight-savior
-cd moonlight-savior
+git clone https://github.com/shusei/shusei.github.io.git project-guild
+cd project-guild
 ```
 
-### 3. 啟動後端 (Backend)
-後端負責處理資料、AI 解析與資料庫溝通。
+### 3. 啟動後端 (The Guild Registry)
+後端負責處理公會核心業務邏輯。
 
 ```bash
 cd backend
 npm install
-# 請確保 backend/.env 已經設定好 (參考 backend/README.md)
+# 連線至 Demo 資料庫 (或參考 .env.example 設定本地庫)
 npm run dev
 ```
-> 後端將運行於 `http://localhost:3000`
+> 後端將運行於 `http://localhost:3002/api`
 
-### 4. 啟動前端 (Frontend)
-前端提供漂亮的操作介面。
+### 4. 啟動前端 (The Guild Hall)
+前端提供冒險者互動介面。
 
-開啟一個新的終端機視窗 (Terminal)：
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-> 前端將運行於 `http://localhost:3001` (Next.js 會自動避開 3000 port)
+> 前端將運行於 `http://localhost:3000`
 
-### 5. 開始使用！
-打開瀏覽器前往 **`http://localhost:3001`**，您將看到 Moonlight Savior 的儀表板。
+---
 
-## ✨ 主要功能
-
-1.  **AI 智慧記帳**: 在首頁輸入「晚餐吃拉麵 250 元」，AI 自動幫您分類並記錄。
-2.  **CSV 高速匯入**: 支援銀行對帳單匯入，每分鐘可處理數千筆交易。
-3.  **自動週期帳務**: 設定一次薪水或貸款，系統每月自動記帳，不再忘記。
-4.  **全站繁體中文**: 親切的在地化介面。
-
-## 📂 目錄結構
+## 📂 目錄結構 (Directory Structure)
 
 ```
-moonlight-savior/
-├── backend/          # 後端 API 原始碼
-│   ├── src/
-│   ├── Dockerfile    # 後端容器化設定
-│   └── render.yaml   # Render 部署設定
-├── frontend/         # 前端 Next.js 原始碼
-│   ├── src/
-│   └── components.json
-└── README.md         # 專案總說明 (本檔案)
+project-guild/
+├── backend/                  # 後端核心 (The Registry)
+│   ├── src/controllers/      # 業務邏輯 (Quest/User Logic)
+│   ├── src/routes/           # API 路由
+│   ├── supabase/migrations/  # 資料庫定義 (SQL)
+│   └── scripts/              # 維運腳本 (Seed/Migrate)
+├── frontend/                 # 前端介面 (The Guild Hall)
+│   ├── src/app/              # Next.js Pages (App Router)
+│   └── public/               # 靜態資源
+└── docs/                     # 專案文檔
+    └── project_proposal.md   # 詳細企畫書 (Recommended Read)
 ```
 
 ---
-Made with ❤️ by Y2389
+
+## 📜 授權與聲明
+*   **License**: MIT
+*   **Developer**: Shusei (Backend Engineer)
+*   **Contact**: shengjyun.lin@gmail.com
