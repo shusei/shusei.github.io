@@ -1,5 +1,5 @@
 {
-  "name": "moonlight-savior",
+  "name": "project-guild-backend",
   "version": "1.0.0",
   "description": "AI Financial Guardian Backend",
   "main": "dist/server.js",
