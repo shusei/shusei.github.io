@@ -30,3 +30,11 @@ backend/uploads/
 
 # IDE
 .vscode/
+
+# Production build artifacts (Root - for manual deploy prevention)
+/index.html
+/404.html
+/_next/
+/*.svg
+/*.txt
+/favicon.ico
