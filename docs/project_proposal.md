@@ -2,8 +2,10 @@
 
 **英文名**：Real-life Mercenary Guild Network
 **專案代號**：Project Guild
-**提案日期**：2026/02/02
-**開發者**：公子姐
+**開發者**：Shusei
+
+> **Public Portfolio Version**: This document serves as a technical showcase. Specific operational parameters, financial details, and proprietary business strategies have been generalized or omitted for confidentiality.
+
 
 ## 0. 一頁式摘要（Executive Summary）
 
@@ -17,8 +19,6 @@ Project Guild 是一個以「異世界傭兵公會」為 UX 主題的任務媒�
 *   **Outbox + Worker 非同步事件**（可靠通知/排行/AI）
 *   **風控引擎 Risk Scoring + 審核池**（moderation pipeline）
 *   **可觀測性 Observability + 基本 SLO 指標**（production readiness）
-*   **權限與資料隔離 RBAC/RLS/ABAC**（security & privacy by design）
-
 *   **權限與資料隔離 RBAC/RLS/ABAC**（security & privacy by design）
 
 *   **專案核心價值 (Core Value Proposition)**：本平台致力於打造具備 **「金融級交易正確性」** 與 **「企業級風控」** 的媒合基礎建設，優先驗證高併發架構與資安合規性基礎。
@@ -142,7 +142,7 @@ Rank、完成數、準時率、取消率、評價、稱號；Trust Score 用於�
     *   **Level 2 驗證 (Advanced)**：**多選一**，降低門檻：
         *   (A) 信用卡 3D 驗證。
         *   (B) 綁定實名制電子支付帳戶 (LINE Pay/JKOPay)。
-        *   (C) 累積 Trust Score > 80 分且完成 5 筆 L1 任務。
+        *   (C) 信譽積分驗證 (Trust Score-based verification)：達到特定積分門檻並完成指定數量的低風險任務。
     *   *平台聲明：不儲存信用卡號或帳戶資訊，僅保存第三方回傳之 Verification Token/Result。*
 
 ### 6.2 L2 強制安全流程（平台預設規則）
@@ -201,20 +201,22 @@ Node.js；PostgreSQL；Redis（搶單鎖、排行榜快取、節流）；Queue/W
 
 **(5) 風控引擎 Risk Score + 審核池 Moderation Queue**
 *   發單/聊天/行為事件產生 risk score 與 risk event。
-*   **高風險訊號 (Signals)**：
-    1.  任務描述含「密封包裹/不許打開」。
-    2.  要求進入私人房間或關門獨處。
-    3.  新帳號發布高額任務 + 指定單一特定傭兵。
-    4.  聊天中要求私下轉帳或交換私人聯絡方式。
-    5.  L2 任務在短時間內頻繁取消或更改地點。
+*   **高風險訊號偵測 (Risk Signals - Examples)**：
+    1.  **關鍵字命中**：任務描述包含特定的高風險違禁詞彙。
+    2.  **空間風險**：偵測潛在的私密空間進入要求。
+    3.  **異常交易模式**：新帳號高額發單、指定特定受款人等疑似共謀行為。
+    4.  **場外引導**：嘗試繞過平台進行私下交易或聯絡。
+    5.  **頻率異常**：短時間內的頻繁取消或變更。
 *   高風險：進審核池、限制曝光（僅高信任傭兵可見）、或直接阻擋
 *   管理台可回放事件與處置紀錄（可稽核）
 
 **(6) 可觀測性 Observability + 基本 SLO**
 *   structured logging（帶 trace_id/task_id/user_id）
 *   metrics：接單延遲、驗收延遲、放款延遲、爭議率、風控命中率
-*   metrics：接單延遲、驗收延遲、放款延遲、爭議率、風控命中率
-*   **SLO 目標**：放款延遲 P95 < 30s (Worker Async)；帳本異常 = 0；審核池堆積 P95 < 10min。
+*   **SLO 目標 (Service Level Objectives)**：
+    *   **放款延遲**：數十秒級 P95 目標 (Worker Async Architecture)。
+    *   **帳本正確性**：100% 準確 (Ledger Anomaly = 0)。
+    *   **審核響應**：設定具體的 P95 處理時限目標，確保使用者體驗。
 
 ### 7.4 安全與權限（RBAC / RLS / ABAC）
 *   **RBAC**：委託人/傭兵/管理員權限切分
@@ -225,12 +227,12 @@ Node.js；PostgreSQL；Redis（搶單鎖、排行榜快取、節流）；Queue/W
 *   **階段零：概念驗證 (Proof of Concept, PoC)**
     *   **目標**：快速驗證核心流程與投資人演示 (Pitch Demo)。
     *   **架構**：GitHub Pages (Frontend) + Render Free Tier (Backend) + Supabase Free (Database) + **Upstash Redis Free**。
-    *   **預算**：**$0 TWD (Bootstrap)**。
+    *   **預算結構**：極低成本 (Free Tier / Bootstrap)。
 *   **階段一：最小可行性產品 (MVP) —— 初期營運**
     *   **目標**：支援 0 ~ 3,000 用戶之穩定營運。
     *   **架構**：單體主機 (All-in-One VPS)。將 Frontend, Backend, Database, Redis 整合部署。
-    *   **規格要求**：建議配置至少 **2GB RAM** (如 AWS Lightsail / DigitalOcean Droplet) 以確保服務穩定性。
-    *   **預算**：約 **$10 - $20 USD / 月** (300~600 TWD)。
+    *   **規格要求**：建議配置基礎 VPS (如 AWS Lightsail / DigitalOcean Droplet) 以確保服務穩定性。
+    *   **預算結構**：固定成本 (VPS) 為主。
 *   **階段二：市場擴張期 (Growth Phase) —— 用戶數 10萬+**
     *   **目標**：高可用性 (HA) 與資料安全性，消除單點故障 (SPOF)。
     *   **架構**：三層式架構 (3-Tier Architecture)。分離 Web Server, Application Server, Database。
@@ -239,7 +241,7 @@ Node.js；PostgreSQL；Redis（搶單鎖、排行榜快取、節流）；Queue/W
         *   **應用叢集 (App Cluster)**：至少 2 台 App Server 實現備援 (Failover)。
         *   **託管資料庫 (Managed DB)**：AWS RDS PostgreSQL (自動備份/Multi-AZ)。
         *   **託管快取 (Managed Cache)**：AWS ElastiCache for Redis。
-    *   **預算**：約 **$300 - $800 USD / 月**。
+    *   **預算結構**：中型成本，包含託管服務費用 (Managed Services)。
 *   **階段三：大規模營運期 (Hyperscale / Unicorn) —— 用戶數 1,000萬+**
     *   **目標**：極端併發處理與微服務治理。
     *   **架構**：微服務 (Microservices) + Kubernetes (K8s/EKS)。
@@ -247,7 +249,7 @@ Node.js；PostgreSQL；Redis（搶單鎖、排行榜快取、節流）；Queue/W
         *   **容器編排**：AWS EKS (Elastic Kubernetes Service)。
         *   **分散式資料庫**：AWS Aurora Serverless / CockroachDB。
         *   **事件驅動架構 (EDA)**：Kafka / AWS MSK 處理並行流量峰值。
-    *   **預算**：**$5,000 USD 起跳** (視流量動態調整)。
+    *   **預算結構**：企業級預算，包含專職 DevOps 人力與高可用性基礎設施成本。
 
 ### 7.6 AI 成本控制與防禦 (AI Cost & Security Defense)
 *   **Token 經濟模型**：
@@ -261,23 +263,14 @@ Node.js；PostgreSQL；Redis（搶單鎖、排行榜快取、節流）；Queue/W
 ## 8. 商業模式與營運規則 (Operational Rules)
 *   **貨幣單位**：**GP (Guild Point)**，1 GP 以 1 TWD 作為**定價參考 (Pricing Reference)**。
     *   *定義：在 MVP 驗證階段，GP 定位為平台封閉生態系之公測點數 (Pilot Program Points)。*
-*   **取消政策 (MVP)**：
-    *   `Accepted` 前：雙方皆可無痛取消。
-    *   `Accepted` 後 **委託人取消**：扣除 10%（由 Escrow 支付，全額補償給傭兵），餘額退回委託人。
-    *   `Accepted` 後 **傭兵取消**：Escrow 全額退回委託人；傭兵記 **取消率 + 冷卻時間 + Trust Score 扣分**（無金錢損失但影響接單）。
-    *   **例外豁免 (Exception Framework)**：若遇「任務內容與描述重大不符」、「現場危險」或「雙方合意取消」，可透過申訴流程免除處罰（**執行 Ledger Reversal 沖回**）。系統依 Log 優先自動判責。
+*   **取消政策 (Cancellation Policy)**：
+    *   建立完善的 Status-based 取消流程，針對 `Accepted` 前後的取消行為制定了相應的補償與處罰機制 (Penalty Mechanism)。
+    *   **例外豁免 (Exception Framework)**：支援「Ledger Reversal」沖帳機制，以處理合意取消或特殊爭議場景。
 *   **商業模式 (Business Model)**：
-    *   **推廣期 (Promotion Phase)**：
-        *   **策略**：免媒合手續費，以獲取用戶增長。
-        *   **防刷機制**：不靠手續費門檻，改採 **「頻率限制 + 評價權重衰減」** 及 **「實名錨點」** 作為主要防禦。
-        *   **保護基金**：由天使輪資金撥備「善意補助金 (Ex-gratia Payment)」。
-    *   **成熟期 (Mature Phase)**：
-        *   **策略**：接通外部金流 (Fiat Payment) 後抽取 5-10% 媒合費 + 1% 保護基金。
-        *   **防刷機制**：手續費本身即為刷分成本壁壘。
-*   **資金流轉 (Fund Flow - MVP)**：
-    *   **點數定義**：GP 為「平台服務點數」，主要用於平台內消費與折抵。
-    *   **提領服務 (Withdrawal)**：(V2 規劃) 將串接合規金流合作夥伴 (PSP) 處理法幣結算與申報，平台僅提供交易帳本稽核 (T+7 結算)。
-*   **合規輔助 (Compliance)**：平台每年提供年度收入報表 (Earnings Summary)，協助用戶自行申報所得稅。
+    *   採用「免費增長 (Freemium Growth)」策略驗證需求，成熟期轉向「交易抽成 (Commission-based)」模式。
+    *   建立防刷機制 (Anti-Gaming) 與保護基金 (Safety Fund) 概念，確保平台生態健康。
+*   **營運合規 (Compliance)**：
+    *   平台定位為資訊媒合，提供年度報表協助用戶稅務申報。
 
 ## 9. 在台灣落地的可行性（Feasibility, Portfolio Perspective）
 *   市場痛點存在，但信任不足
@@ -324,29 +317,19 @@ Node.js；PostgreSQL；Redis（搶單鎖、排行榜快取、節流）；Queue/W
     *   **原創世界觀**：使用通用奇幻術語（公會、S 級、委託），嚴格禁止使用受商標保護的特定名詞。
     *   **美術檢核**：UI 素材與印章設計需確保原創或使用商用授權素材，避免直接挪用動漫圖示。
 
-## 12. 財務規畫與公司治理 (Financial & Business Roadmap)
+## 12. 未來技術路線圖 (Future Technical Roadmap)
 
-### 12.1 啟動資本與公司設立 (Startup Capital)
-*   **公司設立**：**必須成立公司 (LLC/Ltd.)** 以切割股東個人無限責任（防火牆）。
-*   **初期資金需求 (Pre-seed Funding Requirement)**：建議準備 **200萬 - 300萬 TWD** (約 6-12 個月 Runway)。
-    *   **主機/SaaS**：3-5 萬/月 (初期優化成本，保留彈性)。
-    *   **AI Token**：預設 1 萬/月 (配置熔斷控制)。
-    *   **法務/會計**：10 萬 (一次性設立與合約審閱)。
-    *   **核心團隊**：創辦人採股權激勵 (Equity-based) 模式，預留營運人員薪資空間。
+### 12.1 架構演進 (Architecture Evolution)
+*   **Phase 1 (Current)**: Monolith Architecture (All-in-One). 適合 MVP 驗證與快速迭代。
+*   **Phase 2 (Growth)**: 讀寫分離 (Read/Write Splitting) 與 快取層 (Caching Layer) 導入。
+*   **Phase 3 (Scale)**: 微服務化 (Microservices) 與 容器編排 (K8s/EKS)，因應高流量擴展需求。
 
-### 12.2 收支預估 (P&L Forecast)
-*   **收入 (Revenue)**：
-    *   **媒合手續費**：成交金額的 5-10%。
-    *   **加值服務**：急件置頂費、商家認證費。
-*   **支出 (Expense)**：
-    *   **變動成本 (COGS)**：保護基金撥備 (1%)、金流手續費 (2-3%)、AI Token (0.5%)。
-    *   **固定成本 (Opex)**：薪資、伺服器、辦公室。
+### 12.2 進階功能規劃 (Advanced Features)
+*   **AI Agent 升級**：從單純的分類與引導，升級為能主動協助排解爭議的 AI 仲裁助手。
+*   **Web3 整合 (Experimental)**：探索整合區塊鏈作為「公開不可竄改之信譽憑證 (SBT)」的可能性。
+*   **隱私運算**：引入 Zero-Knowledge Proof (ZKP) 技術，在不揭露用戶隱私的前提下完成資格驗證。
 
-### 12.3 停損機制 (Exit Strategy)
-*   **關鍵指標 (KPI)**：
-    *   **PMF 驗證期 (0-6 個月)**：若無法達到「月活躍任務 100 單」且「自然留存率 > 20%」，則視為需求不存在。
-*   **財務停損點**：
-    *   當**剩餘現金 < 3 個月營運成本** 且 **MoM (月成長率) < 5%** 時，啟動清算流程，退還用戶點數，優雅退場。
+> *Note: Detailed financial forecasts and operational metrics are omitted for confidentiality in this public portfolio version.*
 
 ## 13. 結語（Conclusion）
 Project Guild 不是跑腿換皮，而是一個具備 **交易正確性（Ledger/冪等）、流程編排（狀態機）、可靠事件（Outbox/Worker）、風控審核（Risk/Moderation）、可觀測性（SLO）、權限隔離（RBAC/ABAC）** 的公會式任務平台。
