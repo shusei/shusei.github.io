@@ -2,27 +2,27 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Receipt, UploadCloud, PieChart } from "lucide-react";
+import { LayoutDashboard, ScrollText, UserCircle, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const routes = [
     {
-        label: "儀表板",
+        label: "公會大廳",
         icon: LayoutDashboard,
         href: "/",
         color: "text-sky-500",
     },
     {
-        label: "交易紀錄",
-        icon: Receipt,
-        href: "/transactions",
-        color: "text-violet-500",
+        label: "任務公告欄",
+        icon: ScrollText,
+        href: "/quests",
+        color: "text-amber-500",
     },
     {
-        label: "智慧匯入",
-        icon: UploadCloud,
-        href: "/import",
-        color: "text-pink-700",
+        label: "冒險者執照",
+        icon: UserCircle,
+        href: "/profile",
+        color: "text-emerald-500",
     },
 ];
 
@@ -34,10 +34,10 @@ export const Sidebar = () => {
             <div className="px-3 py-2 flex-1">
                 <Link href="/" className="flex items-center pl-3 mb-14">
                     <div className="relative w-8 h-8 mr-4">
-                        <PieChart className="w-8 h-8 text-white" />
+                        <Shield className="w-8 h-8 text-amber-500" />
                     </div>
-                    <h1 className="text-2xl font-bold">
-                        Moonlight
+                    <h1 className="text-2xl font-bold text-amber-500">
+                        Project Guild
                     </h1>
                 </Link>
                 <div className="space-y-1">

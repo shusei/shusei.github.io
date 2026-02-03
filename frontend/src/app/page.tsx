@@ -1,9 +1,28 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { fetchQuests, Quest } from '../lib/api';
+import { QuestCard } from '../components/QuestCard';
 
 export default function GuildHall() {
+  const [quests, setQuests] = useState<Quest[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadQuests() {
+      try {
+        const data = await fetchQuests();
+        setQuests(data);
+      } catch (error) {
+        console.error('Failed to load quests', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadQuests();
+  }, []);
+
   return (
     <div className="min-h-screen bg-stone-900 text-stone-100 font-sans selection:bg-amber-900 selection:text-amber-100">
       {/* Header / Navigation */}
@@ -43,14 +62,50 @@ export default function GuildHall() {
               這是你的公會，你的冒險，你的傳說。
             </p>
             <div className="flex justify-center gap-4 pt-4">
-              <Link href="/quests" className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-4 rounded-lg text-lg font-bold transition-all transform hover:scale-105 shadow-xl shadow-amber-900/30 flex items-center">
+              <a href="#quest-board" className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-4 rounded-lg text-lg font-bold transition-all transform hover:scale-105 shadow-xl shadow-amber-900/30 flex items-center">
                 <span>⚔️ 前往任務公告欄</span>
-              </Link>
+              </a>
               <button className="bg-stone-800 hover:bg-stone-700 text-stone-200 px-8 py-4 rounded-lg text-lg font-bold transition-all border border-stone-700">
                 發布委託
               </button>
             </div>
           </div>
+        </section>
+
+        {/* Quest Board Section (Dynamic) */}
+        <section id="quest-board" className="space-y-8">
+          <div className="flex items-center justify-between">
+            <h2 className="text-3xl font-bold text-stone-100 flex items-center gap-2">
+              <span className="text-amber-500">📋</span> 任務公告欄 (Quest Board)
+            </h2>
+            <span className="text-stone-500 text-sm">Live Feed • {quests.length} active quests</span>
+          </div>
+
+          {loading ? (
+            <div className="text-center py-20 text-stone-500">
+              <p className="animate-pulse">正在讀取公會委託書...</p>
+            </div>
+          ) : quests.length === 0 ? (
+            <div className="text-center py-20 bg-stone-950 rounded-xl border border-stone-800 border-dashed">
+              <p className="text-stone-500 text-lg">目前沒有委託。</p>
+              <p className="text-stone-600 text-sm mt-2">快去發布第一個任務吧！</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {quests.map((quest) => (
+                <QuestCard
+                  key={quest.id}
+                  quest={quest}
+                  // Using a valid UUID from the DB (e.g., the creator's ID for demo purposes)
+                  adventurerId="d220ee37-62ad-4360-a61e-964ee40b92bf"
+                  onQuestAccepted={(id: string) => {
+                    // Update local state to reflect change immediately
+                    setQuests(prev => prev.map(q => q.id === id ? { ...q, status: 'accepted' as const } : q));
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Features Grid */}
@@ -87,10 +142,10 @@ export default function GuildHall() {
 
       <footer className="border-t border-stone-800 bg-stone-950 mt-20 py-12">
         <div className="container mx-auto px-4 text-center text-stone-500">
-          <p>© 2026 Project Guild / Moonlight Savior. All rights reserved.</p>
+          <p>© 2026 Project Guild. All rights reserved.</p>
           <p className="text-xs mt-2 opacity-50">Backend Engineering Showcase Demo</p>
         </div>
       </footer>
-    </div>
+    </div >
   );
 }
