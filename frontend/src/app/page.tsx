@@ -62,12 +62,12 @@ export default function GuildHall() {
               這是你的公會，你的冒險，你的傳說。
             </p>
             <div className="flex justify-center gap-4 pt-4">
-              <a href="#quest-board" className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-4 rounded-lg text-lg font-bold transition-all transform hover:scale-105 shadow-xl shadow-amber-900/30 flex items-center">
+              <Link href="#quest-board" className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-4 rounded-lg text-lg font-bold transition-all transform hover:scale-105 shadow-xl shadow-amber-900/30 flex items-center">
                 <span>⚔️ 前往任務公告欄</span>
-              </a>
-              <button className="bg-stone-800 hover:bg-stone-700 text-stone-200 px-8 py-4 rounded-lg text-lg font-bold transition-all border border-stone-700">
+              </Link>
+              <Link href="/post-quest" className="bg-stone-800 hover:bg-stone-700 text-stone-200 px-8 py-4 rounded-lg text-lg font-bold transition-all border border-stone-700">
                 發布委託
-              </button>
+              </Link>
             </div>
           </div>
         </section>
