@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: moonlight-backend
+    name: project-guild-backend
     env: node
     plan: free
     buildCommand: npm install && npm run build

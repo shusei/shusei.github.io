@@ -68,7 +68,7 @@ const runVerification = async () => {
         console.log('Waiting for services to initialize...');
 
         // 3. Verify Backend
-        const backendUp = await checkHealth('Backend', `http://localhost:${BACKEND_PORT}/api/transactions?user_id=test`);
+        const backendUp = await checkHealth('Backend', `http://localhost:${BACKEND_PORT}/api/quests`);
 
         // 4. Verify Frontend
         const frontendUp = await checkHealth('Frontend', `http://localhost:${FRONTEND_PORT}`);
