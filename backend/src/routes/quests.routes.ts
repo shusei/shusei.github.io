@@ -12,4 +12,7 @@ router.post('/', QuestController.createQuest);
 // POST /api/quests/:id/accept - Accept a quest
 router.post('/:id/accept', QuestController.acceptQuest);
 
+// POST /api/quests/receptionist/chat - Chat with AI Catgirl
+router.post('/receptionist/chat', QuestController.chatWithReceptionist);
+
 export default router;
