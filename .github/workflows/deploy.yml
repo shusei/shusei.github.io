@@ -5,8 +5,10 @@
 name: Deploy Next.js site to Pages
 
 on:
-  # Runs on pushes targeting the default branch
-  push:
+  # Trigger deployment ONLY after CI Pipeline succeeds on main
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types: ["completed"]
     branches: ["main"]
 
   # Allows you to run this workflow manually from the Actions tab
@@ -19,7 +21,7 @@ permissions:
   id-token: write
 
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+# However, do NOT cancel in-progress runs as we want to allow these current deployments to complete.
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -28,6 +30,7 @@ jobs:
   # Build job
   build:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     defaults:
       run:
         working-directory: ./frontend
@@ -95,3 +98,20 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  # Backend Deployment job (Render)
+  deploy-backend:
+    name: Trigger Render Backend Deploy
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hit Render Deploy Hook
+        env:
+          DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$DEPLOY_HOOK" ]; then
+            echo "Warning: RENDER_DEPLOY_HOOK is not set in GitHub Secrets. Skipping backend deployment."
+          else
+            curl -s -X GET "$DEPLOY_HOOK"
+            echo "Successfully triggered Render deployment."
+          fi

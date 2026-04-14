@@ -1,0 +1,7 @@
+# 預設擁有者 (Project Lead) - 所有 PR 預設需要此人審查
+*       @shusei
+
+# 領域負責人 (Domain Leads) - 特定目錄變更時，自動指派審查
+/backend/  @shusei
+/frontend/ @shusei
+/.github/  @shusei
